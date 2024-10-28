@@ -1,0 +1,49 @@
+server:
+  port: 7777
+
+logging:
+  level:
+    org:
+      springframework:
+        amqp: ERROR
+spring:
+  application:
+    name: webprotege-gwt-api-gateway
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    publisher-confirm-type: correlated
+    publisher-returns: true
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+
+
+webprotege:
+  rabbitmq:
+    requestqueue: webprotege-gwt-api-gateway-queue
+    responsequeue: webprotege-gwt-api-gateway-response-queue
+    eventsqueue: webprotege-gwt-api-gateway-event-queue
+    timeout: 120000
+    event-subscribe: true
+  allowedOrigin: webprotege-local.edu
+  minio:
+    accessKey: webprotege
+    endPoint: http://webprotege-local.edu:9000
+    secretKey: webprotege
+    bucketName: webprotege-uploads
+
+
+spring.security.oauth2:
+  client:
+    registration.keycloak:
+      client-id: webprotege
+      authorization-grant-type: authorization_code
+      scope: openid
+    provider.keycloak:
+      issuer-uri: http://webprotege-local.edu/auth/realms/webprotege
+      user-name-attribute: preferred_username
+  resourceserver.jwt.issuer-uri: http://webprotege-local.edu/auth/realms/webprotege
