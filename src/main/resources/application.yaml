@@ -1,5 +1,5 @@
 server:
-  port: 8886
+  port: 7779
 
 logging:
   level:
@@ -11,7 +11,7 @@ spring:
   application:
     name: icatx-api-gateway
   rabbitmq:
-    host: rabbitmq
+    host: localhost
     port: 5672
     username: guest
     password: guest
@@ -26,7 +26,6 @@ webprotege:
     responsequeue: icatx-api-gateway-response-queue
     eventsqueue: icatx-api-gateway-event-queue
     timeout: 120000
-    event-subscribe: true
   allowedOrigin: webprotege-local.edu
 
 
