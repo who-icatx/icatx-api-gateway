@@ -43,7 +43,7 @@
 						},
 						{
 							"key": "client_secret",
-							"value": "9960645c-9894-4d25-84d7-4af58838944b",
+							"value": "{{ICAT_APP_SECRET}}",
 							"type": "text"
 						}
 					]
@@ -96,6 +96,12 @@
 				}
 			},
 			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "ICAT_APP_SECRET",
+			"value": "9960645c-9894-4d25-84d7-4af58838944b"
 		}
 	]
 }
