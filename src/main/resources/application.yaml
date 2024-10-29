@@ -1,5 +1,6 @@
 server:
   port: 7779
+  servlet.context-path: /icat/
 
 logging:
   level:
@@ -18,7 +19,12 @@ spring:
     publisher-confirm-type: correlated
     publisher-returns: true
 
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://webprotege-local.edu/auth/webprotege # The issuer URL of your Keycloak realm
+          jwk-set-uri: http://webprotege-local.edu/auth/realms/webprotege/protocol/openid-connect/certs # Optional, but speeds up token validation
 
 webprotege:
   rabbitmq:
