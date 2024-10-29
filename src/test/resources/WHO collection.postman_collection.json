@@ -1,0 +1,101 @@
+{
+	"info": {
+		"_postman_id": "ff443299-6f1e-4f27-aec2-d79e3ea24315",
+		"name": "WHO collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "666575"
+	},
+	"item": [
+		{
+			"name": "get-keycloak-token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json();\r",
+							"let jwt = response[\"access_token\"];\r",
+							"pm.globals.set(\"JWT-TOKEN\", jwt);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "icatx_application",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "9960645c-9894-4d25-84d7-4af58838944b",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://webprotege-local.edu/auth/realms/webprotege/protocol/openid-connect/token",
+					"protocol": "http",
+					"host": [
+						"webprotege-local",
+						"edu"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"webprotege",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "basic-get-entity",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7779/icat/entity",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"entity"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
