@@ -1,0 +1,30 @@
+{
+  "entityIri": "http://id.who.int/icd/entity/257068234",
+  "linearizationSpecification": {
+    "whoficEntityIri": "http://id.who.int/icd/entity/257068234",
+    "linearizationResiduals": {
+      "suppressOtherSpecifiedResiduals": "false",
+      "suppressUnspecifiedResiduals": "true",
+      "otherSpecifiedResidualTitle": "This is a parent title",
+      "unspecifiedResidualTitle": ""
+    },
+    "linearizationSpecifications": [
+      {
+        "isAuxiliaryAxisChild": "unknown",
+        "isGrouping": "false",
+        "isIncludedInLinearization": "true",
+        "linearizationParent": "http://id.who.int/icd/entity/135352227",
+        "linearizationView": "http://id.who.int/icd/release/11/mms",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "unknown",
+        "isGrouping": "false",
+        "isIncludedInLinearization": "unknown",
+        "linearizationParent": null,
+        "linearizationView": "http://id.who.int/icd/release/11/der",
+        "codingNote": "this is a coding note"
+      }
+    ]
+  }
+}
