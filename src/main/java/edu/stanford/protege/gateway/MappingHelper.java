@@ -7,9 +7,13 @@ import java.util.Objects;
 public class MappingHelper {
 
     public static Date getClosestToTodayDate(List<Date> dates) {
-        if(dates != null && !dates.isEmpty()) {
-            return dates.stream().filter(Objects::nonNull)
-                    .sorted().toList().get(0);
+        if(dates != null) {
+             List<Date> sortedDates = dates.stream()
+                     .filter(Objects::nonNull)
+                    .sorted().toList();
+             if(!sortedDates.isEmpty()){
+                 return sortedDates.get(0);
+             }
         }
 
         return null;

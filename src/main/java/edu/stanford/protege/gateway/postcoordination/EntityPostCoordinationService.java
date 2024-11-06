@@ -64,12 +64,10 @@ public class EntityPostCoordinationService {
                     getClosestToTodayDate(Arrays.asList(customScaleValueResponse.lastRevisionDate(), postCoordinationResponse.lastRevisionDate())),
                     CustomScalesMapper.mapFromResponse(customScaleValueResponse));
 
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             LOGGER.error("Error fetching postcoordination data ", e);
+            throw new RuntimeException("Error fetching the postcoordination", e);
         }
-
-        return null;
-
     }
 
 }

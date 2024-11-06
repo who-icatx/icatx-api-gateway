@@ -5,6 +5,7 @@ import edu.stanford.protege.gateway.dto.BaseIndexTerm;
 import edu.stanford.protege.gateway.dto.EntityLanguageTerms;
 import edu.stanford.protege.gateway.dto.LanguageTerm;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,14 +13,44 @@ public class EntityFormToDtoMapper {
 
 
     public static EntityLanguageTerms mapFormToTerms(EntityForm entityForm) {
-        LanguageTerm label = new LanguageTerm(entityForm.label().value(), entityForm.label().id());
-        LanguageTerm fullySpecifiedName = new LanguageTerm(entityForm.fullySpecifiedName().value(), entityForm.fullySpecifiedName().id());
-        LanguageTerm definition = new LanguageTerm(entityForm.definition().value(), entityForm.definition().id());
-        LanguageTerm longDefinition = new LanguageTerm(entityForm.longDefinition().value(), entityForm.longDefinition().id());
-        List<BaseIndexTerm> baseIndexTerms = mapBaseIndexTerms(entityForm.baseIndexTerms());
-        List<String> subclassBaseInclusions = extractSubclassBaseInclusions(entityForm.subclassBaseInclusions());
-        List<BaseExclusionTerm> baseExclusionTerms = mapBaseExclusionTerms(entityForm.baseExclusionTerms());
-        boolean isObsolete = getBooleanOutOfStringArray(entityForm.isObsolete());
+        LanguageTerm label = null;
+        LanguageTerm fullySpecifiedName = null;
+        LanguageTerm definition = null;
+        LanguageTerm longDefinition = null;
+
+        List<BaseIndexTerm> baseIndexTerms = new ArrayList<>();
+        List<String> subclassBaseInclusions = new ArrayList<>();
+        List<BaseExclusionTerm> baseExclusionTerms = new ArrayList<>();
+        boolean isObsolete = false;
+
+        if(entityForm != null) {
+            if(entityForm.label() != null) {
+                label = new LanguageTerm(entityForm.label().value(), entityForm.label().id());
+            }
+            if(entityForm.fullySpecifiedName() != null) {
+                fullySpecifiedName = new LanguageTerm(entityForm.fullySpecifiedName().value(), entityForm.fullySpecifiedName().id());
+            }
+            if(entityForm.definition() != null) {
+                definition = new LanguageTerm(entityForm.definition().value(), entityForm.definition().id());
+            }
+            if(entityForm.longDefinition() != null) {
+                longDefinition = new LanguageTerm(entityForm.longDefinition().value(), entityForm.longDefinition().id());
+            }
+
+            if(entityForm.baseIndexTerms() != null) {
+                baseIndexTerms = mapBaseIndexTerms(entityForm.baseIndexTerms());
+            }
+            if(entityForm.subclassBaseInclusions() != null) {
+                subclassBaseInclusions = extractSubclassBaseInclusions(entityForm.subclassBaseInclusions());
+            }
+            if(entityForm.baseExclusionTerms() != null) {
+                baseExclusionTerms = mapBaseExclusionTerms(entityForm.baseExclusionTerms());
+            }
+            isObsolete = getBooleanOutOfStringArray(entityForm.isObsolete());
+
+        }
+
+
 
         return new EntityLanguageTerms(label,
                 definition,

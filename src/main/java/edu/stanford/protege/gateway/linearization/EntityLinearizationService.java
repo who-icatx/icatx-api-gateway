@@ -38,13 +38,13 @@ public class EntityLinearizationService {
 
             return mapFromResponse(response.linearizationSpecification(), response.lastRevisionDate());
 
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             LOGGER.error("Error fetching linearization of entity " + entityIri);
             throw new RuntimeException(e);
         }
     }
 
-    public List<LinearizationDefinition> getDefinitionList(){
+    public List<LinearizationDefinition> getDefinitionList() {
         try {
             return definitionExecutor.execute(new LinearizationDefinitionRequest(), SecurityContextHelper.getExecutionContext()).get().definitionList();
         } catch (InterruptedException | ExecutionException e) {
@@ -57,7 +57,7 @@ public class EntityLinearizationService {
     private EntityLinearizationWrapperDto mapFromResponse(WhoficEntityLinearizationSpecification whoficSpecification, Date latsRevisionDate) {
         List<EntityLinearization> linearizations = whoficSpecification.linearizationSpecifications()
                 .stream().map(this::mapFromSpecification).toList();
-        if(whoficSpecification.linearizationResiduals() != null) {
+        if (whoficSpecification.linearizationResiduals() != null) {
             return new EntityLinearizationWrapperDto(whoficSpecification.linearizationResiduals().getSuppressOtherSpecifiedResiduals(),
                     whoficSpecification.linearizationResiduals().getSuppressUnspecifiedResiduals(),
                     latsRevisionDate,
@@ -65,11 +65,16 @@ public class EntityLinearizationService {
                     new LinearizationTitle(whoficSpecification.linearizationResiduals().getOtherSpecifiedResidualTitle()),
                     linearizations);
         }
-        return null;
+        return new EntityLinearizationWrapperDto(null,
+                null,
+                latsRevisionDate,
+                null,
+                null,
+                linearizations);
     }
 
     private EntityLinearization mapFromSpecification(LinearizationSpecification specification) {
-        return new EntityLinearization(specification.getIsAuxiliaryAxisChild() ,
+        return new EntityLinearization(specification.getIsAuxiliaryAxisChild(),
                 specification.getIsGrouping(),
                 specification.getIsIncludedInLinearization(),
                 specification.getLinearizationParent() == null ? "" : specification.getLinearizationParent().toString(),
