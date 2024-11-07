@@ -21,7 +21,6 @@ public class EntityController {
 
     @GetMapping()
     public ResponseEntity<OWLEntityDto> getEntity(@RequestParam String entityIri){
-//        String decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8);
         OWLEntityDto dto = owlEntityService.getEntityInfo(entityIri);
         HttpHeaders httpHeaders = new HttpHeaders();
         String etag = "";
