@@ -12,7 +12,7 @@ public class SpecificationMapper {
 
     public static List<EntityPostCoordinationSpecificationDto> mapFromResponse(GetEntityPostCoordinationResponse response, List<LinearizationDefinition> definitions) {
         List<EntityPostCoordinationSpecificationDto> resp = new ArrayList<>();
-        for(PostCoordinationSpecification specification : response.postCoordinationSpecification().postcoordinationSpecifications()) {
+        for (PostCoordinationSpecification specification : response.postCoordinationSpecification().postcoordinationSpecifications()) {
             LinearizationDefinition definition = gedDefinitionByView(specification.getLinearizationView(), definitions);
             EntityPostCoordinationSpecificationDto dto = new EntityPostCoordinationSpecificationDto(definition.getId(),
                     new ArrayList<>(),
@@ -21,12 +21,19 @@ public class SpecificationMapper {
                     new ArrayList<>(),
                     new ArrayList<>(),
                     new ArrayList<>());
-            if(isMainAxis(definition)) {
+            if (isMainAxis(definition)) {
                 mapAsPrimary(specification, dto);
-            } else  {
+            } else {
                 mapAsTelescopic(specification, dto);
             }
-            resp.add(dto);
+            if (!dto.requiredAxes().isEmpty() ||
+                    !dto.allowedAxes().isEmpty() ||
+                    !dto.notAllowedAxes().isEmpty() ||
+                    !dto.overwrittenNotAllowedAxes().isEmpty() ||
+                    !dto.overwrittenAllowedAxes().isEmpty() ||
+                    !dto.overwrittenRequiredAxes().isEmpty()) {
+                resp.add(dto);
+            }
         }
 
         return resp;

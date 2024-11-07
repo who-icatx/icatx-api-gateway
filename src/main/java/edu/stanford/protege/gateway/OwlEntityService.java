@@ -39,6 +39,7 @@ public class OwlEntityService {
     public OWLEntityDto getEntityInfo(String entityIri) {
         EntityLinearizationWrapperDto linearizationDto = entityLinearizationService.getEntityLinearizationDto(entityIri, this.existingProjectId);
         EntityPostCoordinationWrapperDto postcoordinationDto = entityPostCoordinationService.getEntityPostCoordination(entityIri, this.existingProjectId);
+
         Date lastChangeDate = MappingHelper.getClosestToTodayDate(Arrays.asList(linearizationDto.lastRevisionDate(), postcoordinationDto.lastRevisionDate()));
         return new OWLEntityDto(entityIri,
                 entityOntologyService.getEntityLanguageTerms(entityIri, this.existingProjectId, this.formId),

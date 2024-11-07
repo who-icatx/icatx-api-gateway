@@ -1,12 +1,11 @@
 package edu.stanford.protege.gateway.ontology;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.gateway.SecurityContextHelper;
-import edu.stanford.protege.gateway.dto.EntityLanguageTerms;
-import edu.stanford.protege.gateway.dto.EntityLogicalConditionsWrapper;
-import edu.stanford.protege.gateway.dto.EntityLogicalDefinition;
-import edu.stanford.protege.gateway.dto.LogicalConditionRelationship;
+import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
+import edu.stanford.protege.gateway.ontology.commands.OntologicalLogicalConditions;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.frame.PropertyClassValue;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
@@ -55,12 +54,13 @@ public class EntityOntologyService {
             GetLogicalDefinitionsResponse response = logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), SecurityContextHelper.getExecutionContext())
                     .get();
 
-            return new EntityLogicalConditionsWrapper(getLogicalDefinitions(response.logicalDefinitions()),
-                    extractRelationshipsFromPropertyClassValue(response.necessaryConditions()));
+            return new EntityLogicalConditionsWrapper(new LogicalConditions(getLogicalDefinitions(response.logicalDefinitions()),
+                    extractRelationshipsFromPropertyClassValue(response.necessaryConditions())),
+                    new LogicalConditionsFunctionalOwl("OWLFunctionalSyntax", response.functionalAxioms()));
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error while fetching logical definition ", e);
         }
-        return null;
+        return new EntityLogicalConditionsWrapper(new LogicalConditions(new ArrayList<>(), new ArrayList<>()), new LogicalConditionsFunctionalOwl("", new ArrayList<>()));
     }
 
     public EntityLanguageTerms getEntityLanguageTerms(String entityIri, String projectId, String formId) {
@@ -68,12 +68,11 @@ public class EntityOntologyService {
             GetEntityFormAsJsonResponse formResponse = formDataExecutor.execute(new GetEntityFormAsJsonRequest(ProjectId.valueOf(projectId), entityIri, formId), SecurityContextHelper.getExecutionContext())
                     .get();
 
-
             return EntityFormToDtoMapper.mapFormToTerms(formResponse.form());
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             LOGGER.error("Error while fetching logical definition ", e);
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     private List<EntityLogicalDefinition> getLogicalDefinitions(List<LogicalDefinition> logicalDefinitions) {

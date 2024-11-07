@@ -5,7 +5,7 @@ import edu.stanford.protege.webprotege.frame.PropertyClassValue;
 
 import java.util.List;
 
-public record LogicalConditions (
+public record OntologicalLogicalConditions(
     @JsonProperty("logicalDefinitions") List<LogicalDefinition> logicalDefinitions,
     @JsonProperty("necessaryConditions") List<PropertyClassValue> necessaryConditions
     ){

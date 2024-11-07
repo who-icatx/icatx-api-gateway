@@ -12,5 +12,6 @@ import java.util.List;
 public record GetLogicalDefinitionsResponse(List<LogicalDefinition> logicalDefinitions,
                                             @JsonProperty("lastRevisionDate")
                                             Date lastRevisionDate,
-                                            List<PropertyClassValue> necessaryConditions) implements Response {
+                                            List<PropertyClassValue> necessaryConditions,
+                                            List<String> functionalAxioms) implements Response {
 }
