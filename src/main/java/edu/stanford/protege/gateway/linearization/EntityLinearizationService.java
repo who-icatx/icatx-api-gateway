@@ -31,6 +31,15 @@ public class EntityLinearizationService {
     }
 
 
+    public List<LinearizationDefinition> getLinearizationDefinitions() {
+        try {
+            return definitionExecutor.execute(new LinearizationDefinitionRequest(), SecurityContextHelper.getExecutionContext()).get().definitionList();
+        }catch (Exception e) {
+            LOGGER.error("Error fetching linearization definitions");
+            throw new RuntimeException(e);
+        }
+    }
+
     public EntityLinearizationWrapperDto getEntityLinearizationDto(String entityIri, String projectId) {
         try {
             GetEntityLinearizationsResponse response = entityLinearizationCommand.execute(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
