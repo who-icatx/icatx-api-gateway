@@ -65,8 +65,14 @@ public class EntityFormToDtoMapper {
 
     private static List<BaseIndexTerm> mapBaseIndexTerms(List<EntityForm.EntityFormBaseIndexTerm> formBaseIndexTerms) {
         return formBaseIndexTerms.stream().map(formBaseIndexTerm -> {
-            String indexType = formBaseIndexTerm.indexType().id().toLowerCase().contains("synonym") ? "Synonym" : "Narrower";
-            return new BaseIndexTerm(formBaseIndexTerm.label(), indexType, getBooleanOutOfStringArray(formBaseIndexTerm.isInclusion()), formBaseIndexTerm.indexType().id());
+            String indexType = "";
+            String indexTypeId = "";
+            if(formBaseIndexTerm.indexType() != null) {
+                indexType = formBaseIndexTerm.indexType().id().toLowerCase().contains("synonym") ? "Synonym" : "Narrower";
+                indexTypeId = formBaseIndexTerm.indexType().id();
+            }
+
+            return new BaseIndexTerm(formBaseIndexTerm.label(), indexType, getBooleanOutOfStringArray(formBaseIndexTerm.isInclusion()), indexTypeId);
         }).collect(Collectors.toList());
     }
 
@@ -75,9 +81,13 @@ public class EntityFormToDtoMapper {
     }
 
     private static List<BaseExclusionTerm> mapBaseExclusionTerms(List<EntityForm.EntityFormBaseExclusionTerm> baseExclusionTerms) {
-        return baseExclusionTerms.stream().map(baseExclusionTerm ->
-                        new BaseExclusionTerm(baseExclusionTerm.label(), baseExclusionTerm.foundationReference().id(), ""))
-                .collect(Collectors.toList());
+        return baseExclusionTerms.stream().map((EntityForm.EntityFormBaseExclusionTerm baseExclusionTerm) -> {
+            String id = "";
+            if(baseExclusionTerm.foundationReference() != null){
+                id =  baseExclusionTerm.foundationReference().id();
+            }
+            return new BaseExclusionTerm(baseExclusionTerm.label(),id, "");
+        }).collect(Collectors.toList());
     }
 
     private static boolean getBooleanOutOfStringArray(List<String> stringArray) {

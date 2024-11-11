@@ -2,17 +2,17 @@ package edu.stanford.protege.gateway.postcoordination;
 
 
 import edu.stanford.protege.gateway.SecurityContextHelper;
+import edu.stanford.protege.gateway.dto.EntityPostCoordinationCustomScalesDto;
+import edu.stanford.protege.gateway.dto.EntityPostCoordinationSpecificationDto;
 import edu.stanford.protege.gateway.dto.EntityPostCoordinationWrapperDto;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
-import edu.stanford.protege.gateway.postcoordination.commands.GetEntityCustomScaleValueResponse;
-import edu.stanford.protege.gateway.postcoordination.commands.GetEntityCustomScaleValuesRequest;
-import edu.stanford.protege.gateway.postcoordination.commands.GetEntityPostCoordinationRequest;
-import edu.stanford.protege.gateway.postcoordination.commands.GetEntityPostCoordinationResponse;
+import edu.stanford.protege.gateway.postcoordination.commands.*;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import edu.stanford.protege.webprotege.ipc.ExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -42,32 +42,29 @@ public class EntityPostCoordinationService {
     }
 
 
-    public EntityPostCoordinationWrapperDto getEntityPostCoordination(String entityIri , String prjId) {
-        ProjectId projectId = ProjectId.valueOf(prjId);
+    @Async
+    public CompletableFuture<List<EntityPostCoordinationSpecificationDto>> getPostCoordinationSpecifications(String entityIri, String projectIdString) {
+        ProjectId projectId = ProjectId.valueOf(projectIdString);
         ExecutionContext executionContext = SecurityContextHelper.getExecutionContext();
-
-        CompletableFuture<GetEntityCustomScaleValueResponse> future1 =
-                customScaleExecutor.execute(new GetEntityCustomScaleValuesRequest(entityIri, projectId), executionContext);
-
-        CompletableFuture<GetEntityPostCoordinationResponse> future2 =
-                specificationExecutor.execute(new GetEntityPostCoordinationRequest(entityIri, projectId), executionContext);
-
-        CompletableFuture<Void> completableFuture = CompletableFuture.allOf(future1, future2);
-        completableFuture.join();
-
-
-        try {
-            GetEntityCustomScaleValueResponse customScaleValueResponse = future1.get();
-            GetEntityPostCoordinationResponse  postCoordinationResponse = future2.get();
-
-            return new EntityPostCoordinationWrapperDto(SpecificationMapper.mapFromResponse(postCoordinationResponse, linearizationService.getDefinitionList()),
-                    getClosestToTodayDate(Arrays.asList(customScaleValueResponse.lastRevisionDate(), postCoordinationResponse.lastRevisionDate())),
-                    CustomScalesMapper.mapFromResponse(customScaleValueResponse));
-
-        } catch (Exception e) {
-            LOGGER.error("Error fetching postcoordination data ", e);
-            throw new RuntimeException("Error fetching the postcoordination", e);
-        }
+        return  specificationExecutor.execute(new GetEntityPostCoordinationRequest(entityIri, projectId), executionContext)
+                .thenApply(postCoordinationResponse -> {
+                    try {
+                        return SpecificationMapper.mapFromResponse(postCoordinationResponse, linearizationService.getDefinitionList(executionContext)
+                        );
+                    } catch (Exception e) {
+                        LOGGER.error("Error fetching definition list " , e);
+                        throw new RuntimeException(e);
+                    }
+                });
     }
+
+    public CompletableFuture<List<EntityPostCoordinationCustomScalesDto>> getEntityCustomScales(String entityIri, String projectIdString) {
+        ProjectId projectId = ProjectId.valueOf(projectIdString);
+        ExecutionContext executionContext = SecurityContextHelper.getExecutionContext();
+        return  customScaleExecutor.execute(new GetEntityCustomScaleValuesRequest(entityIri, projectId), executionContext)
+                .thenApply(CustomScalesMapper::mapFromResponse
+                );
+    }
+
 
 }

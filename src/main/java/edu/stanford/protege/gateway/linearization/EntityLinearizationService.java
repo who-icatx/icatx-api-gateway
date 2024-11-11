@@ -8,12 +8,15 @@ import edu.stanford.protege.gateway.dto.LinearizationTitle;
 import edu.stanford.protege.gateway.linearization.commands.*;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
+import edu.stanford.protege.webprotege.ipc.ExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -31,26 +34,29 @@ public class EntityLinearizationService {
     }
 
 
-    public EntityLinearizationWrapperDto getEntityLinearizationDto(String entityIri, String projectId) {
+    public List<LinearizationDefinition> getLinearizationDefinitions() {
         try {
-            GetEntityLinearizationsResponse response = entityLinearizationCommand.execute(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
-                    .get();
+            return definitionExecutor.execute(new LinearizationDefinitionRequest(), SecurityContextHelper.getExecutionContext()).get().definitionList();
+        } catch (Exception e) {
+            LOGGER.error("Error fetching linearization definitions");
+            throw new RuntimeException(e);
+        }
+    }
 
-            return mapFromResponse(response.linearizationSpecification(), response.lastRevisionDate());
-
+    public CompletableFuture<EntityLinearizationWrapperDto> getEntityLinearizationDto(String entityIri, String projectId) {
+        try {
+            return entityLinearizationCommand.execute(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
+                    .thenApply(response -> mapFromResponse(response.linearizationSpecification(), response.lastRevisionDate()));
         } catch (Exception e) {
             LOGGER.error("Error fetching linearization of entity " + entityIri);
             throw new RuntimeException(e);
         }
     }
 
-    public List<LinearizationDefinition> getDefinitionList() {
-        try {
-            return definitionExecutor.execute(new LinearizationDefinitionRequest(), SecurityContextHelper.getExecutionContext()).get().definitionList();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("Unrecoverable error while fetching definitions");
-            throw new RuntimeException(e);
-        }
+
+
+    public List<LinearizationDefinition> getDefinitionList(ExecutionContext executionContext) throws ExecutionException, InterruptedException {
+        return definitionExecutor.execute(new LinearizationDefinitionRequest(), executionContext).thenApply(LinearizationDefinitionResponse::definitionList).get();
     }
 
 

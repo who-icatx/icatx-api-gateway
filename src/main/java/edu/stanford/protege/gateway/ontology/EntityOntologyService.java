@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -38,41 +39,29 @@ public class EntityOntologyService {
     }
 
 
-    public List<String> getEntityParents(String entityIri, String projectId) {
-        try {
-            return ancestorsExecutor.execute(new GetClassAncestorsRequest(IRI.create(entityIri), ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
-                    .get().getAncestorClassHierarchy().getChildren().stream().map(child -> child.getNode().getEntity().getIRI().toString())
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            LOGGER.error("Error while fetching ancestors ", e);
-        }
-        return new ArrayList<>();
+    public CompletableFuture<List<String>> getEntityParents(String entityIri, String projectId) {
+
+        return ancestorsExecutor.execute(new GetClassAncestorsRequest(IRI.create(entityIri), ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
+                .thenApply(response ->
+                        response.getAncestorClassHierarchy().getChildren().stream().map(child -> child.getNode().getEntity().getIRI().toString())
+                                .collect(Collectors.toList()));
+
     }
 
-    public EntityLogicalConditionsWrapper getEntityLogicalConditions(String entityIri, String projectId) {
-        try {
-            GetLogicalDefinitionsResponse response = logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), SecurityContextHelper.getExecutionContext())
-                    .get();
+    public CompletableFuture<EntityLogicalConditionsWrapper> getEntityLogicalConditions(String entityIri, String projectId) {
+        return logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), SecurityContextHelper.getExecutionContext())
+                .thenApply(response ->
+                        new EntityLogicalConditionsWrapper(new LogicalConditions(getLogicalDefinitions(response.logicalDefinitions()),
+                                extractRelationshipsFromPropertyClassValue(response.necessaryConditions())),
+                                new LogicalConditionsFunctionalOwl("OWLFunctionalSyntax", response.functionalAxioms()))
+                );
 
-            return new EntityLogicalConditionsWrapper(new LogicalConditions(getLogicalDefinitions(response.logicalDefinitions()),
-                    extractRelationshipsFromPropertyClassValue(response.necessaryConditions())),
-                    new LogicalConditionsFunctionalOwl("OWLFunctionalSyntax", response.functionalAxioms()));
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("Error while fetching logical definition ", e);
-        }
-        return new EntityLogicalConditionsWrapper(new LogicalConditions(new ArrayList<>(), new ArrayList<>()), new LogicalConditionsFunctionalOwl("", new ArrayList<>()));
     }
 
-    public EntityLanguageTerms getEntityLanguageTerms(String entityIri, String projectId, String formId) {
-        try {
-            GetEntityFormAsJsonResponse formResponse = formDataExecutor.execute(new GetEntityFormAsJsonRequest(ProjectId.valueOf(projectId), entityIri, formId), SecurityContextHelper.getExecutionContext())
-                    .get();
+    public CompletableFuture<EntityLanguageTerms> getEntityLanguageTerms(String entityIri, String projectId, String formId) {
+        return formDataExecutor.execute(new GetEntityFormAsJsonRequest(ProjectId.valueOf(projectId), entityIri, formId), SecurityContextHelper.getExecutionContext())
+                .thenApply(formResponse -> EntityFormToDtoMapper.mapFormToTerms(formResponse.form()));
 
-            return EntityFormToDtoMapper.mapFormToTerms(formResponse.form());
-        } catch (Exception e) {
-            LOGGER.error("Error while fetching logical definition ", e);
-            throw new RuntimeException(e);
-        }
     }
 
     private List<EntityLogicalDefinition> getLogicalDefinitions(List<LogicalDefinition> logicalDefinitions) {
@@ -87,7 +76,7 @@ public class EntityOntologyService {
         Map<String, List<String>> axisFillerMap = new HashMap<>();
         for (PropertyClassValue propertyClassValue : values) {
             List<String> existingFillers = axisFillerMap.get(propertyClassValue.getProperty().getEntity().getIRI().toString());
-            if(existingFillers == null) {
+            if (existingFillers == null) {
                 existingFillers = new ArrayList<>();
             }
             existingFillers.add(propertyClassValue.getValue().getEntity().getIRI().toString());

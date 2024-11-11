@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -57,8 +58,8 @@ public class EntityLinearizationServiceTest {
 
 
     @Test
-    public void GIVEN_entity_WHEN_fetchLinearization_THEN_responseIsCorrectlyMapped(){
-        EntityLinearizationWrapperDto dto = service.getEntityLinearizationDto(entityIri, projectId);
+    public void GIVEN_entity_WHEN_fetchLinearization_THEN_responseIsCorrectlyMapped() throws ExecutionException, InterruptedException {
+        EntityLinearizationWrapperDto dto = service.getEntityLinearizationDto(entityIri, projectId).get();
         assertNotNull(dto);
         assertEquals("true", dto.suppressUnspecifiedResiduals());
         assertEquals("false", dto.suppressOtherSpecifiedResiduals());
