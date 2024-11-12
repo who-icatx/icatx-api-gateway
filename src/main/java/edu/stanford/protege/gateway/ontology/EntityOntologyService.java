@@ -1,11 +1,9 @@
 package edu.stanford.protege.gateway.ontology;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
-import edu.stanford.protege.gateway.ontology.commands.OntologicalLogicalConditions;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.frame.PropertyClassValue;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
@@ -50,7 +48,7 @@ public class EntityOntologyService {
     public CompletableFuture<EntityLogicalConditionsWrapper> getEntityLogicalConditions(String entityIri, String projectId) {
         return logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), SecurityContextHelper.getExecutionContext())
                 .thenApply(response ->
-                        new EntityLogicalConditionsWrapper(new LogicalConditions(getLogicalDefinitions(response.logicalDefinitions()),
+                        new EntityLogicalConditionsWrapper(new LogicalConditions(mapToEntityLogicalDefinition(response.logicalDefinitions()),
                                 extractRelationshipsFromPropertyClassValue(response.necessaryConditions())),
                                 new LogicalConditionsFunctionalOwl("OWLFunctionalSyntax", response.functionalAxioms()))
                 );
@@ -63,7 +61,7 @@ public class EntityOntologyService {
 
     }
 
-    private List<EntityLogicalDefinition> getLogicalDefinitions(List<LogicalDefinition> logicalDefinitions) {
+    private List<EntityLogicalDefinition> mapToEntityLogicalDefinition(List<LogicalDefinition> logicalDefinitions) {
         return logicalDefinitions.stream().map(definition -> {
             List<LogicalConditionRelationship> relationships = extractRelationshipsFromPropertyClassValue(definition.axis2filler());
             return new EntityLogicalDefinition(definition.logicalDefinitionParent().getEntity().getIRI().toString(), relationships);
