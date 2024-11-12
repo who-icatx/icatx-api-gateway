@@ -25,10 +25,7 @@ public class OwlEntityService {
 
     private final EntityOntologyService entityOntologyService;
 
-
-    @Value("${icatx.projectId}")
-    private String existingProjectId;
-
+    
     @Value("${icatx.formId}")
     private String formId;
 
@@ -40,13 +37,13 @@ public class OwlEntityService {
     }
 
 
-    public OWLEntityDto getEntityInfo(String entityIri) {
-        CompletableFuture<EntityLinearizationWrapperDto> linearizationDto = entityLinearizationService.getEntityLinearizationDto(entityIri, this.existingProjectId);
-        CompletableFuture<List<EntityPostCoordinationSpecificationDto>> specList = entityPostCoordinationService.getPostCoordinationSpecifications(entityIri, this.existingProjectId);
-        CompletableFuture<List<EntityPostCoordinationCustomScalesDto>> customScalesDtos = entityPostCoordinationService.getEntityCustomScales(entityIri, this.existingProjectId);
-        CompletableFuture<EntityLanguageTerms> entityLanguageTerms = entityOntologyService.getEntityLanguageTerms(entityIri, this.existingProjectId, this.formId);
-        CompletableFuture<EntityLogicalConditionsWrapper> logicalConditions = entityOntologyService.getEntityLogicalConditions(entityIri, this.existingProjectId);
-        CompletableFuture<List<String>> parents = entityOntologyService.getEntityParents(entityIri, this.existingProjectId);
+    public OWLEntityDto getEntityInfo(String entityIri, String projectId) {
+        CompletableFuture<EntityLinearizationWrapperDto> linearizationDto = entityLinearizationService.getEntityLinearizationDto(entityIri, projectId);
+        CompletableFuture<List<EntityPostCoordinationSpecificationDto>> specList = entityPostCoordinationService.getPostCoordinationSpecifications(entityIri, projectId);
+        CompletableFuture<List<EntityPostCoordinationCustomScalesDto>> customScalesDtos = entityPostCoordinationService.getEntityCustomScales(entityIri, projectId);
+        CompletableFuture<EntityLanguageTerms> entityLanguageTerms = entityOntologyService.getEntityLanguageTerms(entityIri, projectId, this.formId);
+        CompletableFuture<EntityLogicalConditionsWrapper> logicalConditions = entityOntologyService.getEntityLogicalConditions(entityIri, projectId);
+        CompletableFuture<List<String>> parents = entityOntologyService.getEntityParents(entityIri, projectId);
 
         CompletableFuture<Void> combinedFutures = CompletableFuture.allOf(linearizationDto, specList, customScalesDtos, entityLanguageTerms, logicalConditions, parents);
         combinedFutures.join();
