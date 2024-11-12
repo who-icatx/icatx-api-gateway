@@ -5,6 +5,7 @@ import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.EntityOntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
+import edu.stanford.protege.webprotege.common.ProjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 
 @Service
@@ -64,6 +66,18 @@ public class OwlEntityService {
             LOGGER.error("Error fetching data for entity " + entityIri, e);
             throw new RuntimeException(e);
         }
+    }
 
+    public OWLEntityDto updateEntity(OWLEntityDto owlEntityDto) {
+        try {
+            ProjectId projectId = ProjectId.valueOf(this.existingProjectId);
+            entityLinearizationService.updateEntityLinearization(owlEntityDto, projectId );
+            entityPostCoordinationService.updateEntityPostCoordination(owlEntityDto.postcoordination(), projectId, owlEntityDto.entityIRI());
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        return owlEntityDto;
     }
 }

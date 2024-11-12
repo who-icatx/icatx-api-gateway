@@ -4,10 +4,7 @@ package edu.stanford.protege.gateway.linearization;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.EntityLinearization;
 import edu.stanford.protege.gateway.dto.EntityLinearizationWrapperDto;
-import edu.stanford.protege.gateway.linearization.commands.GetEntityLinearizationsRequest;
-import edu.stanford.protege.gateway.linearization.commands.GetEntityLinearizationsResponse;
-import edu.stanford.protege.gateway.linearization.commands.LinearizationDefinitionRequest;
-import edu.stanford.protege.gateway.linearization.commands.LinearizationDefinitionResponse;
+import edu.stanford.protege.gateway.linearization.commands.*;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +32,8 @@ public class EntityLinearizationServiceTest {
     private CommandExecutor<GetEntityLinearizationsRequest, GetEntityLinearizationsResponse> entityLinearizationCommandMock;
     @Mock
     private CommandExecutor<LinearizationDefinitionRequest, LinearizationDefinitionResponse> definitionExecutor;
+    @Mock
+    private CommandExecutor<SaveEntityLinearizationRequest, SaveEntityLinearizationResponse> saveLinearizationCommand;
 
     private EntityLinearizationService service;
 
@@ -53,7 +52,7 @@ public class EntityLinearizationServiceTest {
         when(entityLinearizationCommandMock.execute(eq(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId))), any()))
                 .thenReturn(CompletableFuture.supplyAsync(() -> response));
 
-        service = new EntityLinearizationService(entityLinearizationCommandMock, definitionExecutor);
+        service = new EntityLinearizationService(entityLinearizationCommandMock, definitionExecutor, saveLinearizationCommand);
     }
 
 

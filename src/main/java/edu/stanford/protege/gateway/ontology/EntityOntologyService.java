@@ -1,17 +1,13 @@
 package edu.stanford.protege.gateway.ontology;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
-import edu.stanford.protege.gateway.ontology.commands.OntologicalLogicalConditions;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.frame.PropertyClassValue;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import org.semanticweb.owlapi.model.IRI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
@@ -20,13 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
 public class EntityOntologyService {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(EntityOntologyService.class);
     private final CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor;
     private final CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor;
 

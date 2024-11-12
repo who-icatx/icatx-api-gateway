@@ -1,7 +1,9 @@
 package edu.stanford.protege.gateway.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 import java.util.List;
 
 public record EntityPostCoordinationCustomScalesDto(List<String> postcoordinationScaleValues,
-                                                    String postcoordinationAxis) {
+                                                    @NotNull String postcoordinationAxis) {
 }

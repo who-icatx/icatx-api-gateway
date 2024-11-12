@@ -4,15 +4,9 @@ package edu.stanford.protege.gateway.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import edu.stanford.protege.gateway.linearization.commands.GetEntityLinearizationsRequest;
-import edu.stanford.protege.gateway.linearization.commands.GetEntityLinearizationsResponse;
-import edu.stanford.protege.gateway.linearization.commands.LinearizationDefinitionRequest;
-import edu.stanford.protege.gateway.linearization.commands.LinearizationDefinitionResponse;
+import edu.stanford.protege.gateway.linearization.commands.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
-import edu.stanford.protege.gateway.postcoordination.commands.GetEntityCustomScaleValueResponse;
-import edu.stanford.protege.gateway.postcoordination.commands.GetEntityCustomScaleValuesRequest;
-import edu.stanford.protege.gateway.postcoordination.commands.GetEntityPostCoordinationRequest;
-import edu.stanford.protege.gateway.postcoordination.commands.GetEntityPostCoordinationResponse;
+import edu.stanford.protege.gateway.postcoordination.commands.*;
 import edu.stanford.protege.webprotege.common.UserId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import edu.stanford.protege.webprotege.ipc.impl.CommandExecutorImpl;
@@ -24,8 +18,6 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.web.firewall.HttpFirewall;
-import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UrlPathHelper;
@@ -51,6 +43,7 @@ public class ApplicationBeans  implements WebMvcConfigurer {
         ObjectMapper objectMapper = new WebProtegeJacksonApplication().objectMapper(new OWLDataFactoryImpl());
         SimpleModule module = new SimpleModule("linearizationModule");
         module.addDeserializer(IRI.class, new IriDeserializer());
+        module.addDeserializer(LinearizationSpecificationStatus.class, new LinearizationSpecificationStatusDeserializer());
         module.addSerializer(IRI.class, new IriSerializer());
         module.addDeserializer(UserId.class, new UserIdDeserializer());
         module.addSerializer(UserId.class, new UserIdSerializer());
@@ -97,4 +90,22 @@ public class ApplicationBeans  implements WebMvcConfigurer {
         return new CommandExecutorImpl<>(GetLogicalDefinitionsResponse.class);
     }
 
+    @Bean
+    CommandExecutor<SaveEntityLinearizationRequest, SaveEntityLinearizationResponse> executorForSaveEntityLinearization(){
+        return new CommandExecutorImpl<>(SaveEntityLinearizationResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<AddEntityCustomScalesRevisionRequest, AddEntityCustomScalesRevisionResponse> executorForSaveEntityCustomScales(){
+        return new CommandExecutorImpl<>(AddEntityCustomScalesRevisionResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<AddEntitySpecificationRevisionRequest, AddEntitySpecificationRevisionResponse> executorForSaveEntityPostCoordinationSpec(){
+        return new CommandExecutorImpl<>(AddEntitySpecificationRevisionResponse.class);
+    }
+    @Bean
+    CommandExecutor<GetTablePostCoordinationAxisRequest, GetTablePostCoordinationAxisResponse> executorForGetPostCoordinationTableConfiguration(){
+        return new CommandExecutorImpl<>(GetTablePostCoordinationAxisResponse.class);
+    }
 }

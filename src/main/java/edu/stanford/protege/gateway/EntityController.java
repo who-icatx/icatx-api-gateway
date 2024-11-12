@@ -33,4 +33,10 @@ public class EntityController {
                 .eTag(etag)
                 .body(dto);
     }
+
+    @PutMapping
+    public ResponseEntity<OWLEntityDto> updateEntity(@RequestBody OWLEntityDto owlEntityDto){
+        owlEntityService.updateEntity(owlEntityDto);
+        return ResponseEntity.ok(owlEntityDto);
+    }
 }
