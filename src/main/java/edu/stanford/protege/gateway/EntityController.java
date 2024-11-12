@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.charset.StandardCharsets;
 
 @RestController
-@RequestMapping("/entity")
+@RequestMapping("/projects")
 public class EntityController {
 
     private final OwlEntityService owlEntityService;
@@ -19,9 +19,9 @@ public class EntityController {
         this.owlEntityService = owlEntityService;
     }
 
-    @GetMapping()
-    public ResponseEntity<OWLEntityDto> getEntity(@RequestParam String entityIri){
-        OWLEntityDto dto = owlEntityService.getEntityInfo(entityIri);
+    @GetMapping(value = "/{projectId}")
+    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable String projectId, @RequestParam String entityIri){
+        OWLEntityDto dto = owlEntityService.getEntityInfo(entityIri, projectId);
         HttpHeaders httpHeaders = new HttpHeaders();
         String etag = "";
         if(dto.lastChangeDate() != null) {
