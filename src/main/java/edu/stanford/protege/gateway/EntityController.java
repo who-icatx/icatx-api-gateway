@@ -2,12 +2,12 @@ package edu.stanford.protege.gateway;
 
 
 import com.google.common.hash.Hashing;
-import edu.stanford.protege.gateway.dto.OWLEntityDto;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import edu.stanford.protege.gateway.dto.*;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @RestController
 @RequestMapping("/projects")
@@ -20,11 +20,11 @@ public class EntityController {
     }
 
     @GetMapping(value = "/{projectId}")
-    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable String projectId, @RequestParam String entityIri){
+    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable String projectId, @RequestParam String entityIri) {
         OWLEntityDto dto = owlEntityService.getEntityInfo(entityIri, projectId);
         HttpHeaders httpHeaders = new HttpHeaders();
         String etag = "";
-        if(dto.lastChangeDate() != null) {
+        if (dto.lastChangeDate() != null) {
             httpHeaders.setLastModified(dto.lastChangeDate().toInstant());
             etag = Hashing.sha256().hashString(dto.lastChangeDate().toString(), StandardCharsets.UTF_8).toString();
         }
@@ -32,5 +32,13 @@ public class EntityController {
                 .headers(httpHeaders)
                 .eTag(etag)
                 .body(dto);
+    }
+
+    @GetMapping(value = "/{projectId}/entityChildren")
+    public ResponseEntity<EntityChildren> getEntityChildren(@PathVariable String projectId, @RequestParam String entityIri) {
+        List<String> children = owlEntityService.getEntityChildren(entityIri, projectId);
+
+        return ResponseEntity.ok()
+                .body(EntityChildren.create(children));
     }
 }

@@ -54,6 +54,12 @@
 
 		<dependency>
 			<groupId>edu.stanford.protege</groupId>
+			<artifactId>webprotege-backend-api</artifactId>
+			<version>2.0.2-WHO</version>
+		</dependency>
+
+		<dependency>
+			<groupId>edu.stanford.protege</groupId>
 			<artifactId>webprotege-jackson</artifactId>
 			<version>0.9.3</version>
 		</dependency>
