@@ -1,7 +1,8 @@
-package edu.stanford.protege.gateway.history;
+package edu.stanford.protege.gateway.controllers;
 
 
 import edu.stanford.protege.gateway.dto.*;
+import edu.stanford.protege.gateway.history.EntityHistoryService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
