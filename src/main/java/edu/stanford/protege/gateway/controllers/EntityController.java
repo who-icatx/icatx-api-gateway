@@ -1,7 +1,8 @@
-package edu.stanford.protege.gateway;
+package edu.stanford.protege.gateway.controllers;
 
 
 import com.google.common.hash.Hashing;
+import edu.stanford.protege.gateway.OwlEntityService;
 import edu.stanford.protege.gateway.dto.OWLEntityDto;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
