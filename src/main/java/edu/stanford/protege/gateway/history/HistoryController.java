@@ -1,7 +1,7 @@
 package edu.stanford.protege.gateway.history;
 
 
-import edu.stanford.protege.gateway.dto.ChangedEntities;
+import edu.stanford.protege.gateway.dto.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,16 +19,24 @@ public class HistoryController {
         this.entityHistoryService = entityHistoryService;
     }
 
-    @GetMapping("/entityChanges")
+    @GetMapping("/changedEntities")
     public ResponseEntity<ChangedEntities> getEntityChanges(@RequestParam("projectId") String projectId,
-                                                     @RequestParam("changedAfter")
-                                                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                     LocalDateTime changedAfter) {
+                                                            @RequestParam("changedAfter")
+                                                            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                                            LocalDateTime changedAfter) {
         var timestamp = Timestamp.valueOf(changedAfter);
         ChangedEntities changedEntities = entityHistoryService.getChangedEntities(projectId, timestamp);
         return ResponseEntity.ok()
                 .body(changedEntities);
 
+    }
+
+    @GetMapping("/entityHistory")
+    public ResponseEntity<EntityHistory> getEntityHistory(@RequestParam("projectId") String projectId,
+                                                          @RequestParam("entityIri") String entityIri) {
+        EntityHistory entityHistory = entityHistoryService.getEntityHistory(projectId, entityIri);
+        return ResponseEntity.ok()
+                .body(entityHistory);
 
     }
 }
