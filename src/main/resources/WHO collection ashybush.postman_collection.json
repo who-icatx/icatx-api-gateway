@@ -1,13 +1,13 @@
 {
 	"info": {
-		"_postman_id": "ff443299-6f1e-4f27-aec2-d79e3ea24315",
-		"name": "WHO collection",
+		"_postman_id": "e84f8c55-4526-4d36-8ea4-a5ca5667c17f",
+		"name": "WHO collection ashybush",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "666575"
 	},
 	"item": [
 		{
-			"name": "get-keycloak-token",
+			"name": "get-keycloak-token-ashybush",
 			"event": [
 				{
 					"listen": "test",
@@ -23,9 +23,6 @@
 				}
 			],
 			"request": {
-				"auth": {
-					"type": "noauth"
-				},
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -38,22 +35,25 @@
 						},
 						{
 							"key": "client_id",
-							"value": "icatx_application",
+							"value": "Icatx_application",
 							"type": "text"
 						},
 						{
 							"key": "client_secret",
-							"value": "{{ICAT_APP_SECRET}}",
+							"value": "f18f2b9f-27d0-4d9f-9a17-b74676717335",
 							"type": "text"
 						}
 					]
 				},
 				"url": {
-					"raw": "http://webprotege-local.edu/auth/realms/webprotege/protocol/openid-connect/token",
-					"protocol": "http",
+					"raw": "https://keycloak.ashybush-2afce3eb.northeurope.azurecontainerapps.io/auth/realms/webprotege/protocol/openid-connect/token",
+					"protocol": "https",
 					"host": [
-						"webprotege-local",
-						"edu"
+						"keycloak",
+						"ashybush-2afce3eb",
+						"northeurope",
+						"azurecontainerapps",
+						"io"
 					],
 					"path": [
 						"auth",
@@ -68,40 +68,49 @@
 			"response": []
 		},
 		{
-			"name": "basic-get-entity",
+			"name": "basic-get-entity-ashybush",
 			"request": {
 				"auth": {
 					"type": "bearer",
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{JWT-TOKEN}}",
+							"value": "{{AZURE-JWT-TOKEN}}",
 							"type": "string"
 						}
 					]
 				},
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
 				"url": {
-					"raw": "http://localhost:7779/icat/entity",
-					"protocol": "http",
+					"raw": "https://icatx-api-gateway.ashybush-2afce3eb.northeurope.azurecontainerapps.io/icat/entity?entityIri=http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F257068234",
+					"protocol": "https",
 					"host": [
-						"localhost"
+						"icatx-api-gateway",
+						"ashybush-2afce3eb",
+						"northeurope",
+						"azurecontainerapps",
+						"io"
 					],
-					"port": "7779",
 					"path": [
 						"icat",
 						"entity"
+					],
+					"query": [
+						{
+							"key": "entityIri",
+							"value": "http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F257068234"
+						}
 					]
 				}
 			},
 			"response": []
-		}
-	],
-	"variable": [
-		{
-			"key": "ICAT_APP_SECRET",
-			"value": "9960645c-9894-4d25-84d7-4af58838944b"
 		}
 	]
 }

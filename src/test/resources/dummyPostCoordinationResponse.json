@@ -1,0 +1,36 @@
+{
+  "entityIri": "http://id.who.int/icd/entity/257068234",
+  "postCoordinationSpecification": {
+    "whoficEntityIri": "http://id.who.int/icd/entity/257068234",
+    "entityType": "ICD",
+    "postcoordinationSpecifications": [
+      {
+        "linearizationView": "http://id.who.int/icd/release/11/ner",
+        "allowedAxes": [    "http://id.who.int/icd/schema/hasSeverity",
+          "http://id.who.int/icd/schema/hasAlternativeSeverity1",
+          "http://id.who.int/icd/schema/hasAlternativeSeverity2"
+        ],
+        "defaultAxes": [
+        ],
+        "notAllowedAxes": [],
+        "requiredAxes": []
+      },
+
+      {
+        "linearizationView": "http://id.who.int/icd/release/11/mms",
+        "allowedAxes": [
+          "http://id.who.int/icd/schema/associatedWith",
+          "http://id.who.int/icd/schema/infectiousAgent",
+          "http://id.who.int/icd/schema/hasSeverity"
+        ],
+        "defaultAxes": [],
+        "notAllowedAxes": [
+          "http://id.who.int/icd/schema/hasAlternativeSeverity1",
+          "http://id.who.int/icd/schema/hasAlternativeSeverity2",
+          "http://id.who.int/icd/schema/hasManifestation"
+        ],
+        "requiredAxes": []
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "whoficCustomScaleValues": {
+    "whoficEntityIri": "http://id.who.int/icd/entity/257068234",
+    "scaleCustomizations": [
+      {
+        "postcoordinationScaleValues": [
+          "http://id.who.int/icd/entity/194483911",
+          "http://id.who.int/icd/entity/802386629",
+          "http://id.who.int/icd/entity/21927667"
+        ],
+        "postcoordinationAxis": "http://id.who.int/icd/schema/infectiousAgent"
+      },
+      {
+        "postcoordinationScaleValues": [
+          "http://id.who.int/icd/entity/1882742628"
+        ],
+        "postcoordinationAxis": "http://id.who.int/icd/schema/associatedWith"
+      }
+    ]
+  }
+}
