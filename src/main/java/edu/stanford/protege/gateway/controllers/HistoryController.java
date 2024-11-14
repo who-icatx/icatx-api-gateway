@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.*;
 
 @RestController
 @RequestMapping("/history")
@@ -21,23 +21,24 @@ public class HistoryController {
     }
 
     @GetMapping("/changedEntities")
-    public ResponseEntity<ChangedEntities> getEntityChanges(@RequestParam("projectId") String projectId,
-                                                            @RequestParam("changedAfter")
+    public ResponseEntity<ChangedEntities> getChangedEntities(@RequestParam("projectId") String projectId,
+                                                              @RequestParam("changedAfter")
                                                             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                            LocalDateTime changedAfter) {
-        var timestamp = Timestamp.valueOf(changedAfter);
+                                                            ZonedDateTime changedAfter) {
+        LocalDateTime utcDateTime = changedAfter.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
+        Timestamp timestamp = Timestamp.valueOf(utcDateTime);
         ChangedEntities changedEntities = entityHistoryService.getChangedEntities(projectId, timestamp);
         return ResponseEntity.ok()
                 .body(changedEntities);
 
     }
 
-    @GetMapping("/entityHistory")
-    public ResponseEntity<EntityHistory> getEntityHistory(@RequestParam("projectId") String projectId,
-                                                          @RequestParam("entityIri") String entityIri) {
-        EntityHistory entityHistory = entityHistoryService.getEntityHistory(projectId, entityIri);
+    @GetMapping("/entityHistorySummary")
+    public ResponseEntity<EntityHistorySummary> getEntityHistorySummary(@RequestParam("projectId") String projectId,
+                                                                        @RequestParam("entityIri") String entityIri) {
+        EntityHistorySummary entityHistorySummary = entityHistoryService.getEntityHistorySummary(projectId, entityIri);
         return ResponseEntity.ok()
-                .body(entityHistory);
+                .body(entityHistorySummary);
 
     }
 }
