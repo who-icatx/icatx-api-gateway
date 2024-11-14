@@ -203,7 +203,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:7779/icat/history/entityChanges?projectId=03a3f282-8671-45bf-901e-362e0e1ac3e2&changedAfter=2024-11-12T19:00:50Z",
+					"raw": "http://localhost:7779/icat/history/changedEntities?projectId=03a3f282-8671-45bf-901e-362e0e1ac3e2&changedAfter=2024-11-12T19:00:50Z",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -212,7 +212,7 @@
 					"path": [
 						"icat",
 						"history",
-						"entityChanges"
+						"changedEntities"
 					],
 					"query": [
 						{
