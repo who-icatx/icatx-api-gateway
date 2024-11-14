@@ -65,14 +65,15 @@ public class OwlEntityService {
         }
     }
 
-    public OWLEntityDto updateEntity(OWLEntityDto owlEntityDto) {
+    public OWLEntityDto updateEntity(OWLEntityDto owlEntityDto, String existingProjectId) {
         try {
-            ProjectId projectId = ProjectId.valueOf(this.existingProjectId);
+            ProjectId projectId = ProjectId.valueOf(existingProjectId);
             entityLinearizationService.updateEntityLinearization(owlEntityDto, projectId );
             entityPostCoordinationService.updateEntityPostCoordination(owlEntityDto.postcoordination(), projectId, owlEntityDto.entityIRI());
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+            entityOntologyService.updateLogicalDefinition(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.logicalConditions());
+            entityOntologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents());
+            entityOntologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms());
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return owlEntityDto;

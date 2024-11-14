@@ -32,11 +32,6 @@ public class ApplicationBeans  implements WebMvcConfigurer {
         urlPathHelper.setUrlDecode(false);
         configurer.setUrlPathHelper(urlPathHelper);
     }
-    @Bean
-    public WebServerFactoryCustomizer<TomcatServletWebServerFactory> tomcatCustomizer() {
-        return factory -> factory.addConnectorCustomizers(connector -> connector.setEncodedSolidusHandling(
-                EncodedSolidusHandling.DECODE.getValue()));
-    }
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -107,5 +102,20 @@ public class ApplicationBeans  implements WebMvcConfigurer {
     @Bean
     CommandExecutor<GetTablePostCoordinationAxisRequest, GetTablePostCoordinationAxisResponse> executorForGetPostCoordinationTableConfiguration(){
         return new CommandExecutorImpl<>(GetTablePostCoordinationAxisResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> executorForUpdateLogicalDefinition(){
+        return new CommandExecutorImpl<>(UpdateLogicalDefinitionsResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> executorForChangeEntityParents(){
+        return new CommandExecutorImpl<>(ChangeEntityParentsResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> executorForUpdateLanguageTerms(){
+        return new CommandExecutorImpl<>(SetEntityFormDataFromJsonResponse.class);
     }
 }
