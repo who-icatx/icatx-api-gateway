@@ -1,0 +1,207 @@
+{
+  "logicalDefinitions": [
+    {
+      "logicalDefinitionParent": {
+        "@type": "ClassData",
+        "shortForms": [
+          {
+            "dictionaryLanguage": {
+              "type": "AnnotationAssertionPath",
+              "path": [
+              ],
+              "lang": "en"
+            },
+            "shortForm": "Cholera"
+          },
+          {
+            "dictionaryLanguage": {
+              "type": "LocalName"
+            },
+            "shortForm": "257068234"
+          }
+        ],
+        "iri": "http://id.who.int/icd/entity/257068234"
+      },
+      "axis2filler": [
+        {
+          "@type": "PropertyClassValue",
+          "property": {
+            "@type": "ObjectPropertyData",
+            "shortForms": [
+              {
+                "dictionaryLanguage": {
+                  "type": "LocalName"
+                },
+                "shortForm": "hasSeverity"
+              }
+            ],
+            "iri": "http://id.who.int/icd/schema/hasSeverity"
+          },
+          "value": {
+            "@type": "ClassData",
+            "shortForms": [
+              {
+                "dictionaryLanguage": {
+                  "type": "LocalName"
+                },
+                "shortForm": "815889539"
+              }
+            ],
+            "iri": "http://id.who.int/icd/entity/815889539"
+          },
+          "state": "ASSERTED"
+        },
+        {
+          "@type": "PropertyClassValue",
+          "property": {
+            "@type": "ObjectPropertyData",
+            "shortForms": [
+              {
+                "dictionaryLanguage": {
+                  "type": "LocalName"
+                },
+                "shortForm": "infectiousAgent"
+              }
+            ],
+            "iri": "http://id.who.int/icd/schema/infectiousAgent"
+          },
+          "value": {
+            "@type": "ClassData",
+            "shortForms": [
+              {
+                "dictionaryLanguage": {
+                  "type": "LocalName"
+                },
+                "shortForm": "194483911"
+              }
+            ],
+            "iri": "http://id.who.int/icd/entity/194483911"
+          },
+          "state": "ASSERTED"
+        }
+      ]
+    }
+  ],
+  "necessaryConditions": [
+    {
+      "@type": "PropertyClassValue",
+      "property": {
+        "@type": "ObjectPropertyData",
+        "shortForms": [
+          {
+            "dictionaryLanguage": {
+              "type": "LocalName"
+            },
+            "shortForm": "distribution"
+          }
+        ],
+        "iri": "http://id.who.int/icd/schema/distribution"
+      },
+      "value": {
+        "@type": "ClassData",
+        "shortForms": [
+          {
+            "dictionaryLanguage": {
+              "type": "LocalName"
+            },
+            "shortForm": "169306432"
+          }
+        ],
+        "iri": "http://id.who.int/icd/entity/169306432"
+      },
+      "state": "ASSERTED"
+    },
+    {
+      "@type": "PropertyClassValue",
+      "property": {
+        "@type": "ObjectPropertyData",
+        "shortForms": [
+          {
+            "dictionaryLanguage": {
+              "type": "LocalName"
+            },
+            "shortForm": "infectiousAgent"
+          }
+        ],
+        "iri": "http://id.who.int/icd/schema/infectiousAgent"
+      },
+      "value": {
+        "@type": "ClassData",
+        "shortForms": [
+          {
+            "dictionaryLanguage": {
+              "type": "LocalName"
+            },
+            "shortForm": "194483911"
+          }
+        ],
+        "iri": "http://id.who.int/icd/entity/194483911"
+      },
+      "state": "ASSERTED"
+    },
+    {
+      "@type": "PropertyClassValue",
+      "property": {
+        "@type": "ObjectPropertyData",
+        "shortForms": [
+          {
+            "dictionaryLanguage": {
+              "type": "LocalName"
+            },
+            "shortForm": "histopathology"
+          }
+        ],
+        "iri": "http://id.who.int/icd/schema/histopathology"
+      },
+      "value": {
+        "@type": "ClassData",
+        "shortForms": [
+          {
+            "dictionaryLanguage": {
+              "type": "LocalName"
+            },
+            "shortForm": "411368752"
+          }
+        ],
+        "iri": "http://id.who.int/icd/entity/411368752"
+      },
+      "state": "ASSERTED"
+    },
+    {
+      "@type": "PropertyClassValue",
+      "property": {
+        "@type": "ObjectPropertyData",
+        "shortForms": [
+          {
+            "dictionaryLanguage": {
+              "type": "LocalName"
+            },
+            "shortForm": "infectiousAgent"
+          }
+        ],
+        "iri": "http://id.who.int/icd/schema/infectiousAgent"
+      },
+      "value": {
+        "@type": "ClassData",
+        "shortForms": [
+          {
+            "dictionaryLanguage": {
+              "type": "LocalName"
+            },
+            "shortForm": "194483911"
+          }
+        ],
+        "iri": "http://id.who.int/icd/entity/194483911"
+      },
+      "state": "ASSERTED"
+    }
+  ],
+  "functionalAxioms": [
+    "EquivalentClasses(<http://id.who.int/icd/entity/1205958647> ObjectIntersectionOf(<http://id.who.int/icd/entity/257068234> ObjectSomeValuesFrom(<http://id.who.int/icd/schema/hasSeverity> <http://id.who.int/icd/entity/815889539>) ObjectSomeValuesFrom(<http://id.who.int/icd/schema/infectiousAgent> <http://id.who.int/icd/entity/194483911>)))",
+    "SubClassOf(<http://id.who.int/icd/entity/1205958647> ObjectSomeValuesFrom(<http://id.who.int/icd/schema/distribution> <http://id.who.int/icd/entity/169306432>))",
+    "SubClassOf(<http://id.who.int/icd/entity/1205958647> ObjectSomeValuesFrom(<http://id.who.int/icd/schema/infectiousAgent> <http://id.who.int/icd/entity/194483911>))",
+    "SubClassOf(<http://id.who.int/icd/entity/1205958647> ObjectSomeValuesFrom(<http://id.who.int/icd/schema/histopathology> <http://id.who.int/icd/entity/411368752>))",
+    "SubClassOf(<http://id.who.int/icd/entity/1205958647> ObjectSomeValuesFrom(<http://id.who.int/icd/schema/infectiousAgent> <http://id.who.int/icd/entity/194483911>))"
+  ],
+  "lastRevisionDate": null
+}

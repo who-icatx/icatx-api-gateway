@@ -75,7 +75,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI3Q2ZUeHRkcnNRWUc0ZzdPdkFYWUw4VDBYMUk1Qmx5dmRNOFhWVU44Ymx3In0.eyJleHAiOjE3MzA5MzE1NzgsImlhdCI6MTczMDg5NTU3OCwianRpIjoiNWZmODJlNTMtOWIwYS00MmM1LWI5MTgtZWFlNGRhMTQxMWE0IiwiaXNzIjoiaHR0cHM6Ly9rZXljbG9hay5hc2h5YnVzaC0yYWZjZTNlYi5ub3J0aGV1cm9wZS5henVyZWNvbnRhaW5lcmFwcHMuaW8vYXV0aC9yZWFsbXMvd2VicHJvdGVnZSIsImF1ZCI6IndlYnByb3RlZ2UiLCJzdWIiOiIxOTljY2ZkMC0xN2M1LTQ1NTUtOTdkZi0yZWUwMTliMzkzYTgiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJJY2F0eF9hcHBsaWNhdGlvbiIsImFjciI6IjEiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImRlZmF1bHQtcm9sZXMtd2VicHJvdGVnZSIsInVzZXIiXX0sInJlc291cmNlX2FjY2VzcyI6eyJ3ZWJwcm90ZWdlIjp7InJvbGVzIjpbIlByb2plY3RDcmVhdG9yIiwidXNlciIsIlByb2plY3RNYW5hZ2VyIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiY2xpZW50SG9zdCI6IjE4OC4yNi42Mi45MiIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiY2xpZW50SWQiOiJJY2F0eF9hcHBsaWNhdGlvbiIsInByZWZlcnJlZF91c2VybmFtZSI6InNlcnZpY2UtYWNjb3VudC1pY2F0eF9hcHBsaWNhdGlvbiIsImNsaWVudEFkZHJlc3MiOiIxODguMjYuNjIuOTIifQ.RbAJl1L0OVxq1SfQ5E8ar76I-ft6AJLZoYJbRNw3T1tf4_ooG0mzda9xJfHWc31KX21ycmqA8_aU5pMLxe_TbMZCGw9VAREH6ymPQ5BTol3HfTKNHpicmTLYz0bSoqi5K-Ga8_4p4ge8s9cOov4JdpBsQbcnAsDKrYzS9uJmt7KwZL40h-YgavmIiVchMo5aQWsSXi_JEblWs6WKkYg8ajZpE6yWE0OKIlA6n2pzF65FPjvCLsI3HbvKQgBtWAnOKMGpCNMQlnnT8lmnCSC2rx4kcLULh8EZPc6VeAQi1DgY9YGLb62e3wpMhk8hXDtqhM4q_bLD8oT5w198hZkCZg",
+							"value": "{{AZURE-JWT-TOKEN}}",
 							"type": "string"
 						}
 					]
@@ -89,7 +89,7 @@
 					}
 				],
 				"url": {
-					"raw": "https://icatx-api-gateway.ashybush-2afce3eb.northeurope.azurecontainerapps.io/icat/entity?entityIri=http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F1205958647",
+					"raw": "https://icatx-api-gateway.ashybush-2afce3eb.northeurope.azurecontainerapps.io/icat/entity?entityIri=http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F257068234",
 					"protocol": "https",
 					"host": [
 						"icatx-api-gateway",
@@ -105,7 +105,7 @@
 					"query": [
 						{
 							"key": "entityIri",
-							"value": "http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F1205958647"
+							"value": "http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F257068234"
 						}
 					]
 				}

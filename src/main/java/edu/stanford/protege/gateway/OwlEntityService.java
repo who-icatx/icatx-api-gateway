@@ -1,20 +1,23 @@
 package edu.stanford.protege.gateway;
 
 
-import edu.stanford.protege.gateway.dto.EntityLinearizationWrapperDto;
-import edu.stanford.protege.gateway.dto.EntityPostCoordinationWrapperDto;
-import edu.stanford.protege.gateway.dto.OWLEntityDto;
+import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.EntityOntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 
 @Service
 public class OwlEntityService {
+    private final Logger LOGGER = LoggerFactory.getLogger(OwlEntityService.class);
 
     private final EntityLinearizationService entityLinearizationService;
 
@@ -22,9 +25,7 @@ public class OwlEntityService {
 
     private final EntityOntologyService entityOntologyService;
 
-    @Value("${icatx.projectId}")
-    private String existingProjectId;
-
+    
     @Value("${icatx.formId}")
     private String formId;
 
@@ -36,18 +37,30 @@ public class OwlEntityService {
     }
 
 
-    public OWLEntityDto getEntityInfo(String entityIri) {
-        EntityLinearizationWrapperDto linearizationDto = entityLinearizationService.getEntityLinearizationDto(entityIri, this.existingProjectId);
-        EntityPostCoordinationWrapperDto postcoordinationDto = entityPostCoordinationService.getEntityPostCoordination(entityIri, this.existingProjectId);
+    public OWLEntityDto getEntityInfo(String entityIri, String projectId) {
+        CompletableFuture<EntityLinearizationWrapperDto> linearizationDto = entityLinearizationService.getEntityLinearizationDto(entityIri, projectId);
+        CompletableFuture<List<EntityPostCoordinationSpecificationDto>> specList = entityPostCoordinationService.getPostCoordinationSpecifications(entityIri, projectId);
+        CompletableFuture<List<EntityPostCoordinationCustomScalesDto>> customScalesDtos = entityPostCoordinationService.getEntityCustomScales(entityIri, projectId);
+        CompletableFuture<EntityLanguageTerms> entityLanguageTerms = entityOntologyService.getEntityLanguageTerms(entityIri, projectId, this.formId);
+        CompletableFuture<EntityLogicalConditionsWrapper> logicalConditions = entityOntologyService.getEntityLogicalConditions(entityIri, projectId);
+        CompletableFuture<List<String>> parents = entityOntologyService.getEntityParents(entityIri, projectId);
 
-        Date lastChangeDate = MappingHelper.getClosestToTodayDate(Arrays.asList(linearizationDto.lastRevisionDate(), postcoordinationDto.lastRevisionDate()));
-        return new OWLEntityDto(entityIri,
-                entityOntologyService.getEntityLanguageTerms(entityIri, this.existingProjectId, this.formId),
-                linearizationDto,
-                postcoordinationDto,
-                lastChangeDate,
-                entityOntologyService.getEntityLogicalConditions(entityIri, this.existingProjectId),
-                entityOntologyService.getEntityParents(entityIri, this.existingProjectId)
-                );
+        CompletableFuture<Void> combinedFutures = CompletableFuture.allOf(linearizationDto, specList, customScalesDtos, entityLanguageTerms, logicalConditions, parents);
+        combinedFutures.join();
+
+        try{
+            return new OWLEntityDto(entityIri,
+                    entityLanguageTerms.get(),
+                    linearizationDto.get(),
+                    new EntityPostCoordinationWrapperDto(specList.get(),new Date(), customScalesDtos.get()),
+                    new Date(),
+                    logicalConditions.get(),
+                    parents.get()
+            );
+        } catch (Exception e){
+            LOGGER.error("Error fetching data for entity " + entityIri, e);
+            throw new RuntimeException(e);
+        }
+
     }
 }
