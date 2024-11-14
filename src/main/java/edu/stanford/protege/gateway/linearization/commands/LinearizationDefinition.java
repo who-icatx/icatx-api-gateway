@@ -1,6 +1,7 @@
 package edu.stanford.protege.gateway.linearization.commands;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class LinearizationDefinition {
@@ -55,6 +56,8 @@ public class LinearizationDefinition {
         this.displayLabel = displayLabel;
     }
 
+
+    @JsonIgnore
     public String getId() {
         return id;
     }
