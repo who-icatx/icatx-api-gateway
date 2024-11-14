@@ -89,7 +89,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:7779/icat/entity/http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F257068234",
+					"raw": "http://localhost:7779/icat/projects/03a3f282-8671-45bf-901e-362e0e1ac3e2?entityIri=http://id.who.int/icd/entity/1105069515",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -97,45 +97,14 @@
 					"port": "7779",
 					"path": [
 						"icat",
-						"entity",
-						"http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F257068234"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "get-changed-entities",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
+						"projects",
+						"03a3f282-8671-45bf-901e-362e0e1ac3e2"
+					],
+					"query": [
 						{
-							"key": "token",
-							"value": "{{JWT-TOKEN}}",
-							"type": "string"
+							"key": "entityIri",
+							"value": "http://id.who.int/icd/entity/1105069515"
 						}
-					]
-				},
-				"method": "GET",
-				"header": [
-					{
-						"key": "Content-Type",
-						"value": "application/json",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:7779/icat/entity/http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F257068234",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "7779",
-					"path": [
-						"icat",
-						"entity",
-						"http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F257068234"
 					]
 				}
 			},
@@ -234,7 +203,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:7779/icat/history/changedEntities?projectId=03a3f282-8671-45bf-901e-362e0e1ac3e2&timestamp=1731335277300",
+					"raw": "http://localhost:7779/icat/history/entityChanges?projectId=03a3f282-8671-45bf-901e-362e0e1ac3e2&changedAfter=2024-11-12T19:00:50Z",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -243,7 +212,7 @@
 					"path": [
 						"icat",
 						"history",
-						"changedEntities"
+						"entityChanges"
 					],
 					"query": [
 						{
@@ -251,8 +220,46 @@
 							"value": "03a3f282-8671-45bf-901e-362e0e1ac3e2"
 						},
 						{
-							"key": "timestamp",
-							"value": "1731335277300"
+							"key": "changedAfter",
+							"value": "2024-11-12T19:00:50Z"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-entity-children",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7779/icat/projects/03a3f282-8671-45bf-901e-362e0e1ac3e2/entityChildren?entityIri=http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F1105069515",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects",
+						"03a3f282-8671-45bf-901e-362e0e1ac3e2",
+						"entityChildren"
+					],
+					"query": [
+						{
+							"key": "entityIri",
+							"value": "http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F1105069515"
 						}
 					]
 				}
