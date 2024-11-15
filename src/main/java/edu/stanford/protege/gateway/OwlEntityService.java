@@ -73,9 +73,9 @@ public class OwlEntityService {
             entityOntologyService.updateLogicalDefinition(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.logicalConditions());
             entityOntologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents());
             entityOntologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms());
+            return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return owlEntityDto;
     }
 }

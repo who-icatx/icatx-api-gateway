@@ -100,13 +100,11 @@ public class EntityFormToDtoMapper {
     private static List<BaseIndexTerm> mapBaseIndexTerms(List<EntityForm.EntityFormBaseIndexTerm> formBaseIndexTerms) {
         return formBaseIndexTerms.stream().map(formBaseIndexTerm -> {
             String indexType = "";
-            String indexTypeId = "";
             if(formBaseIndexTerm.indexType() != null) {
-                indexType = formBaseIndexTerm.indexType().id().toLowerCase().contains("synonym") ? "Synonym" : "Narrower";
-                indexTypeId = formBaseIndexTerm.indexType().id();
+                indexType = formBaseIndexTerm.indexType().id();
             }
 
-            return new BaseIndexTerm(formBaseIndexTerm.label(), indexType, getBooleanOutOfStringArray(formBaseIndexTerm.isInclusion()), indexTypeId);
+            return new BaseIndexTerm(formBaseIndexTerm.label(), indexType, getBooleanOutOfStringArray(formBaseIndexTerm.isInclusion()), formBaseIndexTerm.id());
         }).collect(Collectors.toList());
     }
 
@@ -120,7 +118,7 @@ public class EntityFormToDtoMapper {
             if(baseExclusionTerm.foundationReference() != null){
                 id =  baseExclusionTerm.foundationReference().id();
             }
-            return new BaseExclusionTerm(baseExclusionTerm.label(),id, "");
+            return new BaseExclusionTerm(baseExclusionTerm.label(),id, baseExclusionTerm.id());
         }).collect(Collectors.toList());
     }
 
@@ -133,8 +131,8 @@ public class EntityFormToDtoMapper {
 
     private static EntityForm.EntityFormBaseIndexTerm mapFromDto(BaseIndexTerm baseIndexTerm) {
         return new EntityForm.EntityFormBaseIndexTerm(baseIndexTerm.label(),
-                new EntityForm.EntityFormBaseIndexTerm.EntityFormIndexType(baseIndexTerm.termId(), "NamedIndividual"),
-                Collections.singletonList(String.valueOf(baseIndexTerm.isInclusion())));
+                new EntityForm.EntityFormBaseIndexTerm.EntityFormIndexType(baseIndexTerm.indexType(), "NamedIndividual"),
+                Collections.singletonList(String.valueOf(baseIndexTerm.isInclusion())), baseIndexTerm.termId());
     }
 
 
@@ -143,7 +141,9 @@ public class EntityFormToDtoMapper {
     }
 
     private static EntityForm.EntityFormBaseExclusionTerm mapFromDto(BaseExclusionTerm baseExclusionTerm) {
-        return new EntityForm.EntityFormBaseExclusionTerm(baseExclusionTerm.foundationReference(),
+        return new EntityForm.EntityFormBaseExclusionTerm(
+                baseExclusionTerm.termId(),
+                baseExclusionTerm.label(),
                 new EntityForm.EntityFormBaseExclusionTerm.EntityFormFoundationReference(baseExclusionTerm.foundationReference(), "Class"));
     }
 }

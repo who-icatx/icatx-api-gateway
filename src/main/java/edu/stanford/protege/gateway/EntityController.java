@@ -37,7 +37,7 @@ public class EntityController {
 
     @PutMapping(value = "/{projectId}/entities")
     public ResponseEntity<OWLEntityDto> updateEntity(@PathVariable @Nonnull String projectId, @RequestBody OWLEntityDto owlEntityDto){
-        owlEntityService.updateEntity(owlEntityDto, projectId);
-        return ResponseEntity.ok(owlEntityDto);
+        OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId);
+        return ResponseEntity.ok(response);
     }
 }

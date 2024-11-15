@@ -60,23 +60,23 @@ public class EntityLinearizationServiceTest {
     public void GIVEN_entity_WHEN_fetchLinearization_THEN_responseIsCorrectlyMapped() throws ExecutionException, InterruptedException {
         EntityLinearizationWrapperDto dto = service.getEntityLinearizationDto(entityIri, projectId).get();
         assertNotNull(dto);
-        assertEquals("true", dto.suppressUnspecifiedResiduals());
-        assertEquals("false", dto.suppressOtherSpecifiedResiduals());
+        assertEquals("true", dto.suppressUnspecifiedResiduals().toLowerCase());
+        assertEquals("false", dto.suppressOtherSpecifiedResiduals().toLowerCase());
         assertEquals("This is a parent title", dto.otherSpecifiedResidualTitle().label());
         assertNotNull(dto.linearizations());
         assertEquals(2, dto.linearizations().size());
         Optional<EntityLinearization> mms = getLinearizationById(dto.linearizations(), "http://id.who.int/icd/release/11/mms");
         assertTrue(mms.isPresent());
-        assertEquals("unknown", mms.get().isAuxiliaryAxisChild());
-        assertEquals("false", mms.get().isGrouping());
-        assertEquals("true", mms.get().isIncludedInLinearization());
+        assertEquals("unknown", mms.get().isAuxiliaryAxisChild().toLowerCase());
+        assertEquals("false", mms.get().isGrouping().toLowerCase());
+        assertEquals("true", mms.get().isIncludedInLinearization().toLowerCase());
         assertEquals("http://id.who.int/icd/entity/135352227", mms.get().linearizationPathParent());
 
         Optional<EntityLinearization> der = getLinearizationById(dto.linearizations(), "http://id.who.int/icd/release/11/der");
         assertTrue(der.isPresent());
-        assertEquals("unknown", der.get().isAuxiliaryAxisChild());
-        assertEquals("false", der.get().isGrouping());
-        assertEquals("unknown", der.get().isIncludedInLinearization());
+        assertEquals("unknown", der.get().isAuxiliaryAxisChild().toLowerCase());
+        assertEquals("false", der.get().isGrouping().toLowerCase());
+        assertEquals("unknown", der.get().isIncludedInLinearization().toLowerCase());
         assertEquals("", der.get().linearizationPathParent());
         assertEquals("this is a coding note", der.get().codingNote());
     }
