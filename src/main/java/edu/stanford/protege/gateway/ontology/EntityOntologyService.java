@@ -14,12 +14,11 @@ import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.slf4j.*;
 import org.springframework.stereotype.Service;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -36,14 +35,20 @@ public class EntityOntologyService {
     private final CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor;
     private final CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor;
 
+    private final CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
 
-    public EntityOntologyService(CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor, CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor, CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor, CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor, CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor, CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor) {
+
+    public EntityOntologyService(CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
+                                 CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
+                                 CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor,
+                                 CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor) {
         this.ancestorsExecutor = ancestorsExecutor;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
         this.updateLogicalDefinitionExecutor = updateLogicalDefinitionExecutor;
         this.updateParentsExecutor = updateParentsExecutor;
         this.updateLanguageTermsExecutor = updateLanguageTermsExecutor;
+        this.entityChildrenExecutor = entityChildrenExecutor;
     }
 
 
@@ -117,5 +122,15 @@ public class EntityOntologyService {
                 formId,
                 objectMapper.convertValue(EntityFormToDtoMapper.mapFromDto(entityIri, languageTerms), JsonNode.class)),
                 SecurityContextHelper.getExecutionContext()).get();
+    }
+
+    public CompletableFuture<List<String>> getEntityChildren(String entityIri, String projectId) {
+        return entityChildrenExecutor.execute(GetEntityChildrenRequest.create(IRI.create(entityIri), ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
+                .thenApply(
+                        response -> response.childrenIris()
+                                .stream()
+                                .map(IRI::toString)
+                                .collect(Collectors.toList())
+                );
     }
 }

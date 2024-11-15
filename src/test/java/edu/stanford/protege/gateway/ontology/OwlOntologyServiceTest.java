@@ -1,31 +1,22 @@
 package edu.stanford.protege.gateway.ontology;
 
-
-import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.annotation.Nulls;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
-import edu.stanford.protege.gateway.dto.EntityLogicalConditionsWrapper;
-import edu.stanford.protege.gateway.dto.EntityLogicalDefinition;
+import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.io.*;
+import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 
@@ -53,6 +44,9 @@ public class OwlOntologyServiceTest {
     private CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor;
 
 
+    @Mock
+    private CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
+
     private GetLogicalDefinitionsResponse response;
 
     private ProjectId projectId;
@@ -66,7 +60,7 @@ public class OwlOntologyServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyLogicalDefinitionResponse.json");
         response = objectMapper.readValue(specFile, GetLogicalDefinitionsResponse.class);
-        service = new EntityOntologyService(ancestorsExecutor, logicalDefinitionExecutor, formDataExecutor, updateLogicalDefinitionExecutor, updateParentsExecutor, updateLanguageTermsExecutor);
+        service = new EntityOntologyService(ancestorsExecutor, logicalDefinitionExecutor, formDataExecutor, entityChildrenExecutor);
         projectId = ProjectId.generate();
         entityIri = "http://id.who.int/icd/entity/257068234";
         when(logicalDefinitionExecutor.execute(any(), any()))
@@ -74,10 +68,9 @@ public class OwlOntologyServiceTest {
     }
 
 
-
     @Test
     public void GIVEN_validLogicalDefinitionResponse_WHEN_mappingTheData_THEN_dataIsCorrectlyMapped() throws ExecutionException, InterruptedException, TimeoutException {
-        EntityLogicalConditionsWrapper wrapper =  service.getEntityLogicalConditions(entityIri, projectId.id()).get(1, TimeUnit.SECONDS);
+        EntityLogicalConditionsWrapper wrapper = service.getEntityLogicalConditions(entityIri, projectId.id()).get(1, TimeUnit.SECONDS);
 
         assertNotNull(wrapper);
         assertNotNull(wrapper.jsonRepresentation());
