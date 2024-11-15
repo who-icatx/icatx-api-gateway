@@ -26,16 +26,19 @@ public class EntityOntologyService {
     private final CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor;
 
     private final CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
+    private final CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
 
 
     public EntityOntologyService(CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
                                  CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
                                  CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor,
-                                 CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor) {
+                                 CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor,
+                                 CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor) {
         this.ancestorsExecutor = ancestorsExecutor;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
         this.entityChildrenExecutor = entityChildrenExecutor;
+        this.entityDiscussionExecutor = entityDiscussionExecutor;
     }
 
 
@@ -96,5 +99,10 @@ public class EntityOntologyService {
                                 .map(IRI::toString)
                                 .collect(Collectors.toList())
                 );
+    }
+
+    public CompletableFuture<EntityComments> getEntityDiscussionThreads(String entityIri, String projectId) {
+        return entityDiscussionExecutor.execute(GetEntityCommentsRequest.create(ProjectId.valueOf(projectId), entityIri), SecurityContextHelper.getExecutionContext())
+                .thenApply(GetEntityCommentsResponse::comments);
     }
 }

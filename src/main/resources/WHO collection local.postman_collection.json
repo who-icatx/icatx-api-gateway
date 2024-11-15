@@ -265,6 +265,44 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "get-entity-comments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7779/icat/projects/03a3f282-8671-45bf-901e-362e0e1ac3e2/entityComments?entityIri=http%3A%2F%2Fwho.int%2Ficd%23ICDEntity",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects",
+						"03a3f282-8671-45bf-901e-362e0e1ac3e2",
+						"entityComments"
+					],
+					"query": [
+						{
+							"key": "entityIri",
+							"value": "http%3A%2F%2Fwho.int%2Ficd%23ICDEntity"
+						}
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"variable": [
