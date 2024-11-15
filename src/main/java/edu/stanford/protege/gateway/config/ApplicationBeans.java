@@ -88,4 +88,9 @@ public class ApplicationBeans implements WebMvcConfigurer {
         return new CommandExecutorImpl<>(GetEntityChildrenResponse.class);
     }
 
+    @Bean
+    CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor() {
+        return new CommandExecutorImpl<>(GetEntityCommentsResponse.class);
+    }
+
 }

@@ -38,6 +38,8 @@ public class OwlOntologyServiceTest {
     @Mock
     private CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
 
+    @Mock
+    private CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
     private GetLogicalDefinitionsResponse response;
 
     private ProjectId projectId;
@@ -51,7 +53,7 @@ public class OwlOntologyServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyLogicalDefinitionResponse.json");
         response = objectMapper.readValue(specFile, GetLogicalDefinitionsResponse.class);
-        service = new EntityOntologyService(ancestorsExecutor, logicalDefinitionExecutor, formDataExecutor, entityChildrenExecutor);
+        service = new EntityOntologyService(ancestorsExecutor, logicalDefinitionExecutor, formDataExecutor, entityChildrenExecutor, entityDiscussionExecutor);
         projectId = ProjectId.generate();
         entityIri = "http://id.who.int/icd/entity/257068234";
         when(logicalDefinitionExecutor.execute(any(), any()))

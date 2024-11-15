@@ -42,4 +42,13 @@ public class EntityController {
         return ResponseEntity.ok()
                 .body(EntityChildren.create(children));
     }
+
+
+    @GetMapping(value = "/{projectId}/entityComments")
+    public ResponseEntity<EntityComments> getEntityComments(@PathVariable String projectId, @RequestParam String entityIri) {
+        EntityComments entityComments = owlEntityService.getEntityComments(entityIri, projectId);
+
+        return ResponseEntity.ok()
+                .body(entityComments);
+    }
 }
