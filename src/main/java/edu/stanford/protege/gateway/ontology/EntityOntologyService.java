@@ -41,7 +41,11 @@ public class EntityOntologyService {
     public EntityOntologyService(CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
                                  CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
                                  CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor,
-                                 CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor) {
+                                 CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor,
+                                 CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor,
+                                 CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor,
+                                 CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor
+    ) {
         this.ancestorsExecutor = ancestorsExecutor;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
@@ -76,6 +80,7 @@ public class EntityOntologyService {
                 .thenApply(formResponse -> EntityFormToDtoMapper.mapFormToTerms(formResponse.form()));
 
     }
+
     public void updateLogicalDefinition(String entityIri, String projectId, EntityLogicalConditionsWrapper logicalConditionsWrapper) {
         try {
             GetLogicalDefinitionsResponse response = logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), SecurityContextHelper.getExecutionContext())
@@ -92,11 +97,10 @@ public class EntityOntologyService {
             updateLogicalDefinitionExecutor.execute(request, SecurityContextHelper.getExecutionContext()).get();
 
         } catch (Exception e) {
-            LOGGER.error("Error updating logical definition",e);
+            LOGGER.error("Error updating logical definition", e);
             throw new RuntimeException(e);
         }
     }
-
 
 
     public void updateEntityParents(String entityIri, String projectId, List<String> parents) {
@@ -109,18 +113,18 @@ public class EntityOntologyService {
                     new OWLClassImpl(IRI.create(entityIri)),
                     "Update parents through API"), SecurityContextHelper.getExecutionContext()).get();
         } catch (Exception e) {
-            LOGGER.error("Error updating entity parents",e);
+            LOGGER.error("Error updating entity parents", e);
             throw new RuntimeException(e);
         }
     }
 
-    public void updateLanguageTerms(String entityIri, String projectId, String formId, EntityLanguageTerms languageTerms ) throws ExecutionException, InterruptedException {
+    public void updateLanguageTerms(String entityIri, String projectId, String formId, EntityLanguageTerms languageTerms) throws ExecutionException, InterruptedException {
         ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
         updateLanguageTermsExecutor.execute(new SetEntityFormDataFromJsonRequest(ChangeRequestId.generate(),
-                ProjectId.valueOf(projectId),
-                new OWLClassImpl(IRI.create(entityIri)),
-                formId,
-                objectMapper.convertValue(EntityFormToDtoMapper.mapFromDto(entityIri, languageTerms), JsonNode.class)),
+                        ProjectId.valueOf(projectId),
+                        new OWLClassImpl(IRI.create(entityIri)),
+                        formId,
+                        objectMapper.convertValue(EntityFormToDtoMapper.mapFromDto(entityIri, languageTerms), JsonNode.class)),
                 SecurityContextHelper.getExecutionContext()).get();
     }
 
