@@ -14,6 +14,7 @@ import edu.stanford.protege.webprotege.jackson.IriDeserializer;
 import edu.stanford.protege.webprotege.jackson.*;
 import org.semanticweb.owlapi.model.IRI;
 import org.springframework.context.annotation.*;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.util.UrlPathHelper;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
@@ -40,6 +41,11 @@ public class ApplicationBeans implements WebMvcConfigurer {
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
         return objectMapper;
+    }
+
+    @Bean
+    public LocalValidatorFactoryBean validator() {
+        return new LocalValidatorFactoryBean();
     }
 
     @Bean
@@ -86,6 +92,21 @@ public class ApplicationBeans implements WebMvcConfigurer {
     @Bean
     CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor() {
         return new CommandExecutorImpl<>(GetEntityChildrenResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> getIsExistingProjectExecutor() {
+        return new CommandExecutorImpl<>(GetIsExistingProjectResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor() {
+        return new CommandExecutorImpl<>(FilterExistingEntitiesResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassesExecutor() {
+        return new CommandExecutorImpl<>(CreateClassesFromApiResponse.class);
     }
 
 }
