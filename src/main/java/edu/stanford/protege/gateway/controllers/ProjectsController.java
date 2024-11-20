@@ -71,4 +71,12 @@ public class ProjectsController {
         return ResponseEntity.ok()
                 .body(availableProjects.stream().toList());
     }
+
+    @GetMapping(value = "/{projectId}/entityComments")
+    public ResponseEntity<EntityComments> getEntityComments(@PathVariable String projectId, @RequestParam String entityIRI) {
+        EntityComments entityComments = owlEntityService.getEntityComments(entityIRI, projectId);
+
+        return ResponseEntity.ok()
+                .body(entityComments);
+    }
 }
