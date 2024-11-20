@@ -122,11 +122,19 @@ public class EntityOntologyService {
                 );
     }
 
-    public CompletableFuture<Set<String>> createClassEntity(String projectId, String entityName, List<String> entityParents, String langTag) {
-        var entityParentsSet = entityParents.stream().collect(ImmutableSet.toImmutableSet());
-        return createClassEntityExecutor.execute(CreateClassesFromApiRequest.create(ChangeRequestId.generate(), ProjectId.valueOf(projectId), entityName, langTag, entityParentsSet), SecurityContextHelper.getExecutionContext())
-                .thenApply(
-                        CreateClassesFromApiResponse::newEntityIris
-                );
+    public CompletableFuture<Set<String>> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
+        var entityParentsSet = createEntityDto.entityParents().stream().collect(ImmutableSet.toImmutableSet());
+        return createClassEntityExecutor.execute(
+                CreateClassesFromApiRequest.create(
+                        ChangeRequestId.generate(),
+                        ProjectId.valueOf(projectId),
+                        createEntityDto.entityName(),
+                        createEntityDto.languageTag(),
+                        entityParentsSet
+                ),
+                SecurityContextHelper.getExecutionContext()
+        ).thenApply(
+                CreateClassesFromApiResponse::newEntityIris
+        );
     }
 }

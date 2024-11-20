@@ -73,12 +73,12 @@ public class OwlEntityService {
         }
     }
 
-    public Set<String> createClassEntity(String projectId, String entityName, List<String> entityParents, String langTag) {
-        CompletableFuture<Set<String>> newCreatedEntityIri = entityOntologyService.createClassEntity(projectId, entityName, entityParents, langTag);
+    public Set<String> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
+        CompletableFuture<Set<String>> newCreatedEntityIri = entityOntologyService.createClassEntity(projectId, createEntityDto);
         try {
             return newCreatedEntityIri.get();
         } catch (Exception e) {
-            LOGGER.error("Error creating new class entity " + entityName, e);
+            LOGGER.error("Error creating new class entity " + createEntityDto.entityName(), e);
             /*
             ToDo:
                 Here we can add the revert event for all the services if the creation fails for whatever reason.

@@ -5,16 +5,17 @@ import com.google.common.hash.Hashing;
 import edu.stanford.protege.gateway.OwlEntityService;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.validators.CreateEntityValidatorService;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @RestController
 @RequestMapping("/projects")
+@Validated
 public class EntityController {
 
     private final OwlEntityService owlEntityService;
@@ -53,19 +54,10 @@ public class EntityController {
     public ResponseEntity<List<OWLEntityDto>> createEntity(@PathVariable("projectId")
                                                            @NotNull(message = "Project ID cannot be null")
                                                            String projectId,
-                                                           @RequestParam
-                                                           @NotNull(message = "Entity name cannot be null")
-                                                           @NotEmpty(message = "Entity name cannot be empty")
-                                                           String entityName,
-                                                           @RequestParam
-                                                           @NotNull(message = "Entity parents cannot be null")
-                                                           @NotEmpty(message = "Entity parents cannot be empty")
-                                                           List<String> entityParents,
-                                                           @RequestParam
-                                                           @Nullable
-                                                           String languageTag) {
-        createEntityValidator.validateCreateEntityRequest(projectId, entityParents);
-        var newCreatedIri = owlEntityService.createClassEntity(projectId, entityName, entityParents, languageTag);
+                                                           @RequestBody CreateEntityDto createEntityDto) {
+        System.out.println(createEntityDto);
+        createEntityValidator.validateCreateEntityRequest(projectId, createEntityDto.entityParents());
+        var newCreatedIri = owlEntityService.createClassEntity(projectId, createEntityDto);
         List<OWLEntityDto> result = newCreatedIri.stream()
                 .map(newIri -> owlEntityService.getEntityInfo(newIri, projectId))
                 .toList();

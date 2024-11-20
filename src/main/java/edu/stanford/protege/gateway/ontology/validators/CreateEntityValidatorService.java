@@ -44,8 +44,9 @@ public class CreateEntityValidatorService {
             LOGGER.error("Could not verify if parentEntities:" + entityParents + " are valid!", e);
             throw new RuntimeException(e);
         }
-        entityParents.removeAll(existingParents);
-        if (!entityParents.isEmpty()) {
+        var invalidParents = entityParents.stream()
+                .filter(parent -> existingParents.stream().noneMatch(existingParent -> existingParent.equals(parent))).toList();
+        if (!invalidParents.isEmpty()) {
             throw new IllegalArgumentException("Invalid Entity Parents: " + entityParents);
         }
     }
