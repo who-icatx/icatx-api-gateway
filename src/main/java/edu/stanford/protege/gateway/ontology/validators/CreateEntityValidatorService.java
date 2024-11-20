@@ -37,6 +37,9 @@ public class CreateEntityValidatorService {
     }
 
     private void validateEntityParents(String projectId, List<String> entityParents) {
+        if(entityParents == null || entityParents.isEmpty()){
+            throw new IllegalArgumentException("At least a parent should be specified!");
+        }
         Set<String> existingParents;
         try {
             existingParents = entityOntService.getExistingEntities(projectId, entityParents).get();
