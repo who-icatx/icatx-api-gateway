@@ -114,9 +114,9 @@ public class OntologyService {
                 .thenApply(GetIsExistingProjectResponse::isExistingProject);
     }
 
-    public CompletableFuture<Set<String>> getExistingEntities(String projectId, List<String> entityParents) {
-        var iriSet = entityParents.stream().map(IRI::create).collect(Collectors.toSet());
-        return filterExistingEntitiesExecutor.execute(FilterExistingEntitiesRequest.create(ProjectId.valueOf(projectId), iriSet), SecurityContextHelper.getExecutionContext())
+    public CompletableFuture<Set<String>> getExistingEntities(String projectId, String parent) {
+        var parentIri = IRI.create(parent);
+        return filterExistingEntitiesExecutor.execute(FilterExistingEntitiesRequest.create(ProjectId.valueOf(projectId), ImmutableSet.of(parentIri)), SecurityContextHelper.getExecutionContext())
                 .thenApply(
                         response -> response.existingEntities()
                                 .stream()
@@ -126,14 +126,14 @@ public class OntologyService {
     }
 
     public CompletableFuture<Set<String>> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
-        var entityParentsSet = createEntityDto.entityParents().stream().collect(ImmutableSet.toImmutableSet());
+        var entityParent = ImmutableSet.of(createEntityDto.parent());
         return createClassEntityExecutor.execute(
                 CreateClassesFromApiRequest.create(
                         ChangeRequestId.generate(),
                         ProjectId.valueOf(projectId),
-                        createEntityDto.entityName(),
+                        createEntityDto.title(),
                         createEntityDto.languageTag(),
-                        entityParentsSet
+                        entityParent
                 ),
                 SecurityContextHelper.getExecutionContext()
         ).thenApply(

@@ -4,7 +4,7 @@ import edu.stanford.protege.gateway.ontology.OntologyService;
 import org.slf4j.*;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -18,9 +18,9 @@ public class CreateEntityValidatorService {
         this.entityOntService = entityOntService;
     }
 
-    public void validateCreateEntityRequest(String projectId, List<String> entityParents) {
+    public void validateCreateEntityRequest(String projectId, String parents) {
         validateProjectId(projectId);
-        validateEntityParents(projectId, entityParents);
+        validateEntityParents(projectId, parents);
     }
 
     private void validateProjectId(String projectId) {
@@ -36,21 +36,20 @@ public class CreateEntityValidatorService {
         }
     }
 
-    private void validateEntityParents(String projectId, List<String> entityParents) {
-        if(entityParents == null || entityParents.isEmpty()){
+    private void validateEntityParents(String projectId, String parent) {
+        if (parent == null || parent.isEmpty()) {
             throw new IllegalArgumentException("At least a parent should be specified!");
         }
         Set<String> existingParents;
         try {
-            existingParents = entityOntService.getExistingEntities(projectId, entityParents).get();
+            existingParents = entityOntService.getExistingEntities(projectId, parent).get();
         } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("Could not verify if parentEntities:" + entityParents + " are valid!", e);
+            LOGGER.error("Could not verify if parent:" + parent + " is valid!", e);
             throw new RuntimeException(e);
         }
-        var invalidParents = entityParents.stream()
-                .filter(parent -> existingParents.stream().noneMatch(existingParent -> existingParent.equals(parent))).toList();
-        if (!invalidParents.isEmpty()) {
-            throw new IllegalArgumentException("Invalid Entity Parents: " + entityParents);
+        boolean isValid = existingParents.stream().anyMatch(existingParent -> existingParent.equals(parent));
+        if (!isValid) {
+            throw new IllegalArgumentException("Invalid Entity Parent: " + parent);
         }
     }
 }

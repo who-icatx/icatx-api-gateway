@@ -42,8 +42,8 @@ public class ProjectsController {
     }
 
     @GetMapping(value = "/{projectId}/entityChildren")
-    public ResponseEntity<EntityChildren> getEntityChildren(@PathVariable String projectId, @RequestParam String entityIri) {
-        List<String> children = owlEntityService.getEntityChildren(entityIri, projectId);
+    public ResponseEntity<EntityChildren> getEntityChildren(@PathVariable String projectId, @RequestParam String entityIRI) {
+        List<String> children = owlEntityService.getEntityChildren(entityIRI, projectId);
 
         return ResponseEntity.ok()
                 .body(EntityChildren.create(children));
@@ -55,7 +55,7 @@ public class ProjectsController {
                                                            @NotNull(message = "Project ID cannot be null")
                                                            String projectId,
                                                            @RequestBody CreateEntityDto createEntityDto) {
-        createEntityValidator.validateCreateEntityRequest(projectId, createEntityDto.entityParents());
+        createEntityValidator.validateCreateEntityRequest(projectId, createEntityDto.parent());
         var newCreatedIri = owlEntityService.createClassEntity(projectId, createEntityDto);
         List<OWLEntityDto> result = newCreatedIri.stream()
                 .map(newIri -> owlEntityService.getEntityInfo(newIri, projectId))

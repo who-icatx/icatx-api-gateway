@@ -62,13 +62,13 @@ public class OwlEntityService {
 
     }
 
-    public List<String> getEntityChildren(String entityIri, String projectId) {
-        CompletableFuture<List<String>> entityChildren = ontologyService.getEntityChildren(entityIri, projectId);
+    public List<String> getEntityChildren(String entityIRI, String projectId) {
+        CompletableFuture<List<String>> entityChildren = ontologyService.getEntityChildren(entityIRI, projectId);
 
         try {
             return entityChildren.get();
         } catch (Exception e) {
-            LOGGER.error("Error fetching data for entity " + entityIri, e);
+            LOGGER.error("Error fetching data for entity " + entityIRI, e);
             throw new RuntimeException(e);
         }
     }
@@ -78,7 +78,7 @@ public class OwlEntityService {
         try {
             return newCreatedEntityIri.get();
         } catch (Exception e) {
-            LOGGER.error("Error creating new class entity " + createEntityDto.entityName(), e);
+            LOGGER.error("Error creating new class entity " + createEntityDto.title(), e);
             /*
             ToDo:
                 Here we can add the revert event for all the services if the creation fails for whatever reason.
