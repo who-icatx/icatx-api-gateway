@@ -29,6 +29,7 @@ public class OntologyService {
     private final CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor;
     private final CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor;
     private final CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getProjectsExecutor;
+    private final CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
 
 
     public OntologyService(CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
@@ -38,7 +39,8 @@ public class OntologyService {
                            CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor,
                            CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor,
                            CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor,
-                           CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getProjectsExecutor) {
+                           CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getProjectsExecutor,
+                           CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor) {
         this.ancestorsExecutor = ancestorsExecutor;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
@@ -47,6 +49,7 @@ public class OntologyService {
         this.filterExistingEntitiesExecutor = filterExistingEntitiesExecutor;
         this.createClassEntityExecutor = createClassEntityExecutor;
         this.getProjectsExecutor = getProjectsExecutor;
+        this.entityDiscussionExecutor = entityDiscussionExecutor;
     }
 
 
@@ -148,5 +151,10 @@ public class OntologyService {
         ).thenApply(
                 response -> new HashSet<>(response.availableProjects())
         );
+    }
+
+    public CompletableFuture<EntityComments> getEntityDiscussionThreads(String entityIri, String projectId) {
+        return entityDiscussionExecutor.execute(GetEntityCommentsRequest.create(ProjectId.valueOf(projectId), entityIri), SecurityContextHelper.getExecutionContext())
+                .thenApply(GetEntityCommentsResponse::comments);
     }
 }

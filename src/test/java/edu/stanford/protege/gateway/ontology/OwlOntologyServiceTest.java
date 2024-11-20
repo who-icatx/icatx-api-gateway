@@ -48,6 +48,8 @@ public class OwlOntologyServiceTest {
     @Mock
     private CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getAvailableProjectsExecutor;
 
+    @Mock
+    private CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
     private GetLogicalDefinitionsResponse response;
 
     private ProjectId projectId;
@@ -68,7 +70,8 @@ public class OwlOntologyServiceTest {
                 isExistingProjectExecutor,
                 filterExistingEntitiesExecutor,
                 createClassEntityExecutor,
-                getAvailableProjectsExecutor);
+                getAvailableProjectsExecutor,
+                entityDiscussionExecutor);
         projectId = ProjectId.generate();
         entityIri = "http://id.who.int/icd/entity/257068234";
         when(logicalDefinitionExecutor.execute(any(), any()))

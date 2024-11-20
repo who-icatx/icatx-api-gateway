@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 
 
 @Service
@@ -93,6 +93,15 @@ public class OwlEntityService {
             return availableProjects.get();
         } catch (Exception e) {
             LOGGER.error("Error retrieving available projects!", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public EntityComments getEntityComments(String entityIri, String projectId) {
+        try {
+            return entityOntologyService.getEntityDiscussionThreads(entityIri, projectId).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Error fetching data for entity discussion threads for entity" + entityIri, e);
             throw new RuntimeException(e);
         }
     }
