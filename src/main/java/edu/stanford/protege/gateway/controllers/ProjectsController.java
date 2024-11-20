@@ -16,12 +16,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/projects")
 @Validated
-public class EntityController {
+public class ProjectsController {
 
     private final OwlEntityService owlEntityService;
     private final CreateEntityValidatorService createEntityValidator;
 
-    public EntityController(OwlEntityService owlEntityService, CreateEntityValidatorService createEntityValidator) {
+    public ProjectsController(OwlEntityService owlEntityService, CreateEntityValidatorService createEntityValidator) {
         this.owlEntityService = owlEntityService;
         this.createEntityValidator = createEntityValidator;
     }
@@ -55,7 +55,6 @@ public class EntityController {
                                                            @NotNull(message = "Project ID cannot be null")
                                                            String projectId,
                                                            @RequestBody CreateEntityDto createEntityDto) {
-        System.out.println(createEntityDto);
         createEntityValidator.validateCreateEntityRequest(projectId, createEntityDto.entityParents());
         var newCreatedIri = owlEntityService.createClassEntity(projectId, createEntityDto);
         List<OWLEntityDto> result = newCreatedIri.stream()
@@ -63,5 +62,13 @@ public class EntityController {
                 .toList();
         return ResponseEntity.ok()
                 .body(result);
+    }
+
+
+    @GetMapping(value = "/getProjects")
+    public ResponseEntity<List<ProjectSummaryDto>> getProjects() {
+        var availableProjects = owlEntityService.getProjects();
+        return ResponseEntity.ok()
+                .body(availableProjects.stream().toList());
     }
 }

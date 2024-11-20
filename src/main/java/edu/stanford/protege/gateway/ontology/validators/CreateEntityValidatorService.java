@@ -1,6 +1,6 @@
 package edu.stanford.protege.gateway.ontology.validators;
 
-import edu.stanford.protege.gateway.ontology.EntityOntologyService;
+import edu.stanford.protege.gateway.ontology.OntologyService;
 import org.slf4j.*;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +12,9 @@ public class CreateEntityValidatorService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CreateEntityValidatorService.class);
 
-    private final EntityOntologyService entityOntService;
+    private final OntologyService entityOntService;
 
-    public CreateEntityValidatorService(EntityOntologyService entityOntService) {
+    public CreateEntityValidatorService(OntologyService entityOntService) {
         this.entityOntService = entityOntService;
     }
 

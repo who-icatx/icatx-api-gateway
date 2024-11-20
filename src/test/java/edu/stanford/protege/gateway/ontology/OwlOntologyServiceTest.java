@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 public class OwlOntologyServiceTest {
 
 
-    EntityOntologyService service;
+    OntologyService service;
 
     @Mock
     private CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor;
@@ -45,6 +45,9 @@ public class OwlOntologyServiceTest {
     @Mock
     private CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor;
 
+    @Mock
+    private CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getAvailableProjectsExecutor;
+
     private GetLogicalDefinitionsResponse response;
 
     private ProjectId projectId;
@@ -58,7 +61,14 @@ public class OwlOntologyServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyLogicalDefinitionResponse.json");
         response = objectMapper.readValue(specFile, GetLogicalDefinitionsResponse.class);
-        service = new EntityOntologyService(ancestorsExecutor, logicalDefinitionExecutor, formDataExecutor, entityChildrenExecutor, isExistingProjectExecutor, filterExistingEntitiesExecutor, createClassEntityExecutor);
+        service = new OntologyService(ancestorsExecutor,
+                logicalDefinitionExecutor,
+                formDataExecutor,
+                entityChildrenExecutor,
+                isExistingProjectExecutor,
+                filterExistingEntitiesExecutor,
+                createClassEntityExecutor,
+                getAvailableProjectsExecutor);
         projectId = ProjectId.generate();
         entityIri = "http://id.who.int/icd/entity/257068234";
         when(logicalDefinitionExecutor.execute(any(), any()))

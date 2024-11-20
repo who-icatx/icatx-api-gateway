@@ -18,9 +18,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
-public class EntityOntologyService {
+public class OntologyService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(EntityOntologyService.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(OntologyService.class);
     private final CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor;
     private final CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor;
     private final CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor;
@@ -28,15 +28,17 @@ public class EntityOntologyService {
     private final CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor;
     private final CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor;
     private final CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor;
+    private final CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getProjectsExecutor;
 
 
-    public EntityOntologyService(CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
-                                 CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
-                                 CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor,
-                                 CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor,
-                                 CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor,
-                                 CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor,
-                                 CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor) {
+    public OntologyService(CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
+                           CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
+                           CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor,
+                           CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor,
+                           CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor,
+                           CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor,
+                           CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor,
+                           CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getProjectsExecutor) {
         this.ancestorsExecutor = ancestorsExecutor;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
@@ -44,6 +46,7 @@ public class EntityOntologyService {
         this.isExistingProjectExecutor = isExistingProjectExecutor;
         this.filterExistingEntitiesExecutor = filterExistingEntitiesExecutor;
         this.createClassEntityExecutor = createClassEntityExecutor;
+        this.getProjectsExecutor = getProjectsExecutor;
     }
 
 
@@ -135,6 +138,15 @@ public class EntityOntologyService {
                 SecurityContextHelper.getExecutionContext()
         ).thenApply(
                 CreateClassesFromApiResponse::newEntityIris
+        );
+    }
+
+    public CompletableFuture<Set<ProjectSummaryDto>> getProjects() {
+        return getProjectsExecutor.execute(
+                GetAvailableProjectsForApiRequest.create(),
+                SecurityContextHelper.getExecutionContext()
+        ).thenApply(
+                response -> new HashSet<>(response.availableProjects())
         );
     }
 }
