@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import edu.stanford.protege.gateway.history.commands.*;
 import edu.stanford.protege.gateway.linearization.commands.*;
+import edu.stanford.protege.gateway.linearization.commands.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
 import edu.stanford.protege.gateway.postcoordination.commands.*;
 import edu.stanford.protege.webprotege.common.UserId;
@@ -15,6 +16,12 @@ import edu.stanford.protege.webprotege.jackson.*;
 import org.semanticweb.owlapi.model.IRI;
 import org.springframework.context.annotation.*;
 import org.springframework.web.servlet.config.annotation.*;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.util.UrlPathHelper;
 import uk.ac.manchester.cs.owl.owlapi.OWLDataFactoryImpl;
 
@@ -33,6 +40,7 @@ public class ApplicationBeans implements WebMvcConfigurer {
         ObjectMapper objectMapper = new WebProtegeJacksonApplication().objectMapper(new OWLDataFactoryImpl());
         SimpleModule module = new SimpleModule("linearizationModule");
         module.addDeserializer(IRI.class, new IriDeserializer());
+        module.addDeserializer(LinearizationSpecificationStatus.class, new LinearizationSpecificationStatusDeserializer());
         module.addSerializer(IRI.class, new IriSerializer());
         module.addDeserializer(UserId.class, new UserIdDeserializer());
         module.addSerializer(UserId.class, new UserIdSerializer());
@@ -88,4 +96,37 @@ public class ApplicationBeans implements WebMvcConfigurer {
         return new CommandExecutorImpl<>(GetEntityChildrenResponse.class);
     }
 
+    @Bean
+    CommandExecutor<SaveEntityLinearizationRequest, SaveEntityLinearizationResponse> executorForSaveEntityLinearization(){
+        return new CommandExecutorImpl<>(SaveEntityLinearizationResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<AddEntityCustomScalesRevisionRequest, AddEntityCustomScalesRevisionResponse> executorForSaveEntityCustomScales(){
+        return new CommandExecutorImpl<>(AddEntityCustomScalesRevisionResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<AddEntitySpecificationRevisionRequest, AddEntitySpecificationRevisionResponse> executorForSaveEntityPostCoordinationSpec(){
+        return new CommandExecutorImpl<>(AddEntitySpecificationRevisionResponse.class);
+    }
+    @Bean
+    CommandExecutor<GetTablePostCoordinationAxisRequest, GetTablePostCoordinationAxisResponse> executorForGetPostCoordinationTableConfiguration(){
+        return new CommandExecutorImpl<>(GetTablePostCoordinationAxisResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> executorForUpdateLogicalDefinition(){
+        return new CommandExecutorImpl<>(UpdateLogicalDefinitionsResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> executorForChangeEntityParents(){
+        return new CommandExecutorImpl<>(ChangeEntityParentsResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> executorForUpdateLanguageTerms(){
+        return new CommandExecutorImpl<>(SetEntityFormDataFromJsonResponse.class);
+    }
 }

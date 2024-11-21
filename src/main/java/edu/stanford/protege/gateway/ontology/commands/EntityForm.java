@@ -28,7 +28,8 @@ public record EntityForm(
     public record EntityFormBaseIndexTerm(
             @JsonProperty("label") String label,
             @JsonProperty("indexType") EntityFormIndexType indexType,
-            @JsonProperty("isInclusion") List<String> isInclusion
+            @JsonProperty("isInclusion") List<String> isInclusion,
+            @JsonProperty("@id") String id
     ) {
         @JsonIgnoreProperties(ignoreUnknown = true)
         public record EntityFormIndexType(
@@ -45,6 +46,7 @@ public record EntityForm(
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record EntityFormBaseExclusionTerm(
+            @JsonProperty("@id") String id,
             @JsonProperty("label") String label,
             @JsonProperty("foundationReference") EntityFormFoundationReference foundationReference
     ) {

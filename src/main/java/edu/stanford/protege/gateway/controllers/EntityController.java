@@ -7,6 +7,7 @@ import edu.stanford.protege.gateway.dto.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class EntityController {
     }
 
     @GetMapping(value = "/{projectId}")
-    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable String projectId, @RequestParam String entityIri) {
+    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable @Nonnull String projectId, @RequestParam String entityIri){
         OWLEntityDto dto = owlEntityService.getEntityInfo(entityIri, projectId);
         HttpHeaders httpHeaders = new HttpHeaders();
         String etag = "";
@@ -41,5 +42,11 @@ public class EntityController {
 
         return ResponseEntity.ok()
                 .body(EntityChildren.create(children));
+    }
+
+    @PutMapping(value = "/{projectId}/entities")
+    public ResponseEntity<OWLEntityDto> updateEntity(@PathVariable @Nonnull String projectId, @RequestBody OWLEntityDto owlEntityDto){
+        OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId);
+        return ResponseEntity.ok(response);
     }
 }

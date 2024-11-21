@@ -2,19 +2,16 @@ package edu.stanford.protege.gateway.linearization;
 
 
 import edu.stanford.protege.gateway.SecurityContextHelper;
-import edu.stanford.protege.gateway.dto.EntityLinearization;
 import edu.stanford.protege.gateway.dto.EntityLinearizationWrapperDto;
-import edu.stanford.protege.gateway.dto.LinearizationTitle;
+import edu.stanford.protege.gateway.dto.OWLEntityDto;
 import edu.stanford.protege.gateway.linearization.commands.*;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import edu.stanford.protege.webprotege.ipc.ExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -28,63 +25,31 @@ public class EntityLinearizationService {
 
     private final CommandExecutor<LinearizationDefinitionRequest, LinearizationDefinitionResponse> definitionExecutor;
 
-    public EntityLinearizationService(CommandExecutor<GetEntityLinearizationsRequest, GetEntityLinearizationsResponse> entityLinearizationCommand, CommandExecutor<LinearizationDefinitionRequest, LinearizationDefinitionResponse> definitionExecutor) {
+    private final CommandExecutor<SaveEntityLinearizationRequest, SaveEntityLinearizationResponse> saveLinearizationCommand;
+
+    public EntityLinearizationService(CommandExecutor<GetEntityLinearizationsRequest, GetEntityLinearizationsResponse> entityLinearizationCommand, CommandExecutor<LinearizationDefinitionRequest, LinearizationDefinitionResponse> definitionExecutor, CommandExecutor<SaveEntityLinearizationRequest, SaveEntityLinearizationResponse> saveLinearizationCommand) {
         this.entityLinearizationCommand = entityLinearizationCommand;
         this.definitionExecutor = definitionExecutor;
-    }
-
-
-    public List<LinearizationDefinition> getLinearizationDefinitions() {
-        try {
-            return definitionExecutor.execute(new LinearizationDefinitionRequest(), SecurityContextHelper.getExecutionContext()).get().definitionList();
-        } catch (Exception e) {
-            LOGGER.error("Error fetching linearization definitions");
-            throw new RuntimeException(e);
-        }
+        this.saveLinearizationCommand = saveLinearizationCommand;
     }
 
     public CompletableFuture<EntityLinearizationWrapperDto> getEntityLinearizationDto(String entityIri, String projectId) {
         try {
             return entityLinearizationCommand.execute(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
-                    .thenApply(response -> mapFromResponse(response.linearizationSpecification(), response.lastRevisionDate()));
+                    .thenApply(response -> LinearizationMapper.mapFromResponse(response.linearizationSpecification(), response.lastRevisionDate()));
         } catch (Exception e) {
             LOGGER.error("Error fetching linearization of entity " + entityIri);
             throw new RuntimeException(e);
         }
     }
 
-
-
     public List<LinearizationDefinition> getDefinitionList(ExecutionContext executionContext) throws ExecutionException, InterruptedException {
-        return definitionExecutor.execute(new LinearizationDefinitionRequest(), executionContext).thenApply(LinearizationDefinitionResponse::definitionList).get();
+        return definitionExecutor.execute(new LinearizationDefinitionRequest(), executionContext)
+                .thenApply(LinearizationDefinitionResponse::definitionList).get();
     }
 
-
-    private EntityLinearizationWrapperDto mapFromResponse(WhoficEntityLinearizationSpecification whoficSpecification, Date latsRevisionDate) {
-        List<EntityLinearization> linearizations = whoficSpecification.linearizationSpecifications()
-                .stream().map(this::mapFromSpecification).toList();
-        if (whoficSpecification.linearizationResiduals() != null) {
-            return new EntityLinearizationWrapperDto(whoficSpecification.linearizationResiduals().getSuppressOtherSpecifiedResiduals(),
-                    whoficSpecification.linearizationResiduals().getSuppressUnspecifiedResiduals(),
-                    latsRevisionDate,
-                    new LinearizationTitle(whoficSpecification.linearizationResiduals().getUnspecifiedResidualTitle()),
-                    new LinearizationTitle(whoficSpecification.linearizationResiduals().getOtherSpecifiedResidualTitle()),
-                    linearizations);
-        }
-        return new EntityLinearizationWrapperDto(null,
-                null,
-                latsRevisionDate,
-                null,
-                null,
-                linearizations);
-    }
-
-    private EntityLinearization mapFromSpecification(LinearizationSpecification specification) {
-        return new EntityLinearization(specification.getIsAuxiliaryAxisChild(),
-                specification.getIsGrouping(),
-                specification.getIsIncludedInLinearization(),
-                specification.getLinearizationParent() == null ? "" : specification.getLinearizationParent().toString(),
-                specification.getLinearizationView() == null ? "" : specification.getLinearizationView().toString(),
-                specification.getCodingNote());
+    public void updateEntityLinearization(OWLEntityDto owlEntityDto, ProjectId projectId) throws ExecutionException, InterruptedException {
+        WhoficEntityLinearizationSpecification linearizationSpecification = LinearizationMapper.mapFromDto(owlEntityDto.entityIRI(), owlEntityDto.entityLinearizations());
+        saveLinearizationCommand.execute(new SaveEntityLinearizationRequest(projectId, linearizationSpecification), SecurityContextHelper.getExecutionContext()).get();
     }
 }
