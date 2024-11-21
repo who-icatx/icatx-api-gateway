@@ -1,6 +1,7 @@
 package edu.stanford.protege.gateway.linearization;
 
 
+import edu.stanford.protege.gateway.ApplicationException;
 import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.dto.EntityLinearizationWrapperDto;
 import edu.stanford.protege.gateway.dto.OWLEntityDto;
@@ -38,8 +39,8 @@ public class EntityLinearizationService {
             return entityLinearizationCommand.execute(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
                     .thenApply(response -> LinearizationMapper.mapFromResponse(response.linearizationSpecification(), response.lastRevisionDate()));
         } catch (Exception e) {
-            LOGGER.error("Error fetching linearization of entity " + entityIri);
-            throw new RuntimeException(e);
+            LOGGER.error("Error fetching linearization of entity " + entityIri, e);
+            throw new ApplicationException("Error fetching linearization of entity " + entityIri);
         }
     }
 
@@ -48,8 +49,13 @@ public class EntityLinearizationService {
                 .thenApply(LinearizationDefinitionResponse::definitionList).get();
     }
 
-    public void updateEntityLinearization(OWLEntityDto owlEntityDto, ProjectId projectId) throws ExecutionException, InterruptedException {
-        WhoficEntityLinearizationSpecification linearizationSpecification = LinearizationMapper.mapFromDto(owlEntityDto.entityIRI(), owlEntityDto.entityLinearizations());
-        saveLinearizationCommand.execute(new SaveEntityLinearizationRequest(projectId, linearizationSpecification), SecurityContextHelper.getExecutionContext()).get();
+    public void updateEntityLinearization(OWLEntityDto owlEntityDto, ProjectId projectId) {
+        try {
+            WhoficEntityLinearizationSpecification linearizationSpecification = LinearizationMapper.mapFromDto(owlEntityDto.entityIRI(), owlEntityDto.entityLinearizations());
+            saveLinearizationCommand.execute(new SaveEntityLinearizationRequest(projectId, linearizationSpecification), SecurityContextHelper.getExecutionContext()).get();
+        } catch (Exception e) {
+            LOGGER.error("Error updating linearization for entity " + owlEntityDto.entityIRI(), e);
+            throw new ApplicationException("Error updating linearization for entity " + owlEntityDto.entityIRI());
+        }
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 
@@ -46,8 +47,10 @@ public class EntityController {
     }
 
     @PutMapping(value = "/{projectId}/entities")
-    public ResponseEntity<OWLEntityDto> updateEntity(@PathVariable @Nonnull String projectId, @RequestBody OWLEntityDto owlEntityDto){
-        OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId);
+    public ResponseEntity<OWLEntityDto> updateEntity( @RequestHeader(value = "If-Match", required = false) String ifMatch,
+                                                     @PathVariable @Nonnull String projectId,
+                                                     @RequestBody OWLEntityDto owlEntityDto){
+        OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId,ifMatch);
         return ResponseEntity.ok(response);
     }
 }
