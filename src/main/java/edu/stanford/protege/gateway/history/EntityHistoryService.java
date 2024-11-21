@@ -9,6 +9,9 @@ import org.slf4j.*;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -47,5 +50,17 @@ public class EntityHistoryService {
             LOGGER.error("Error while requestion entity history summary. " + e.getMessage());
             throw new RuntimeException(e);
         }
+
+    }
+
+    public CompletableFuture<LocalDateTime> getEntityLatestChangeTime(String projectId, String entityIri) {
+        return entityHistorySummaryExecutor.execute(new GetEntityHistorySummaryRequest(projectId, entityIri), SecurityContextHelper.getExecutionContext())
+                .thenApply(response -> {
+                    if (response.entityHistorySummary() != null && response.entityHistorySummary().changes() != null && response.entityHistorySummary().changes().size() > 0) {
+                        response.entityHistorySummary().changes().sort(Comparator.comparing(EntityChange::dateTime).reversed());
+                        return response.entityHistorySummary().changes().get(0).dateTime();
+                    }
+                    return LocalDateTime.MIN;
+                });
     }
 }

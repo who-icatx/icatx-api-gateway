@@ -76,14 +76,14 @@ public class OwlOntologyServiceTest {
                 logicalDefinitionExecutor,
                 formDataExecutor,
                 entityChildrenExecutor,
-                updateLogicalDefinitionExecutor,
-                updateParentsExecutor,
-                updateLanguageTermsExecutor,
                 isExistingProjectExecutor,
                 filterExistingEntitiesExecutor,
                 createClassEntityExecutor,
                 getAvailableProjectsExecutor,
-                entityDiscussionExecutor);
+                entityDiscussionExecutor,
+                updateLogicalDefinitionExecutor,
+                updateParentsExecutor,
+                updateLanguageTermsExecutor);
         projectId = ProjectId.generate();
         entityIri = "http://id.who.int/icd/entity/257068234";
         when(logicalDefinitionExecutor.execute(any(), any()))

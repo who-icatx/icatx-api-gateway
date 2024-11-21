@@ -1,12 +1,11 @@
 package edu.stanford.protege.gateway.ontology;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSet;
 import edu.stanford.protege.gateway.SecurityContextHelper;
+import edu.stanford.protege.gateway.ApplicationException;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
@@ -113,8 +112,8 @@ public class OntologyService {
             updateLogicalDefinitionExecutor.execute(request, SecurityContextHelper.getExecutionContext()).get();
 
         } catch (Exception e) {
-            LOGGER.error("Error updating logical definition", e);
-            throw new RuntimeException(e);
+            LOGGER.error("Error updating logical definition for entity " + entityIri, e);
+            throw new ApplicationException("Error updating logical definition for entity " + entityIri);
         }
     }
 
@@ -129,19 +128,24 @@ public class OntologyService {
                     new OWLClassImpl(IRI.create(entityIri)),
                     "Update parents through API"), SecurityContextHelper.getExecutionContext()).get();
         } catch (Exception e) {
-            LOGGER.error("Error updating entity parents", e);
-            throw new RuntimeException(e);
+            LOGGER.error("Error updating entity parents for entity " + entityIri, e);
+            throw new ApplicationException("Error updating entity parents for entity " + entityIri);
         }
     }
 
-    public void updateLanguageTerms(String entityIri, String projectId, String formId, EntityLanguageTerms languageTerms) throws ExecutionException, InterruptedException {
-        ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
-        updateLanguageTermsExecutor.execute(new SetEntityFormDataFromJsonRequest(ChangeRequestId.generate(),
-                        ProjectId.valueOf(projectId),
-                        new OWLClassImpl(IRI.create(entityIri)),
-                        formId,
-                        objectMapper.convertValue(EntityFormToDtoMapper.mapFromDto(entityIri, languageTerms), JsonNode.class)),
-                SecurityContextHelper.getExecutionContext()).get();
+    public void updateLanguageTerms(String entityIri, String projectId, String formId, EntityLanguageTerms languageTerms) {
+        try {
+            ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
+            updateLanguageTermsExecutor.execute(new SetEntityFormDataFromJsonRequest(ChangeRequestId.generate(),
+                            ProjectId.valueOf(projectId),
+                            new OWLClassImpl(IRI.create(entityIri)),
+                            formId,
+                            objectMapper.convertValue(EntityFormToDtoMapper.mapFromDto(entityIri, languageTerms), JsonNode.class)),
+                    SecurityContextHelper.getExecutionContext()).get();
+        }catch (Exception e) {
+            LOGGER.error("Error updating updateLanguageTerms entity " + entityIri, e);
+            throw new ApplicationException("Error updating updateLanguageTerms entity " + entityIri);
+        }
     }
 
     public CompletableFuture<List<String>> getEntityChildren(String entityIri, String projectId) {

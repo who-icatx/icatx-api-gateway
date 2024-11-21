@@ -5,13 +5,14 @@ import com.google.common.hash.Hashing;
 import edu.stanford.protege.gateway.OwlEntityService;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.validators.CreateEntityValidatorService;
-import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
@@ -28,12 +29,12 @@ public class ProjectsController {
     }
 
     @GetMapping(value = "/{projectId}")
-    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable String projectId, @RequestParam String entityIri) {
+    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable @javax.annotation.Nonnull String projectId, @RequestParam String entityIri){
         OWLEntityDto dto = owlEntityService.getEntityInfo(entityIri, projectId);
         HttpHeaders httpHeaders = new HttpHeaders();
         String etag = "";
         if (dto.lastChangeDate() != null) {
-            httpHeaders.setLastModified(dto.lastChangeDate().toInstant());
+            httpHeaders.setLastModified(dto.lastChangeDate().toInstant(ZoneOffset.UTC));
             etag = Hashing.sha256().hashString(dto.lastChangeDate().toString(), StandardCharsets.UTF_8).toString();
         }
         return ResponseEntity.ok()
@@ -81,9 +82,12 @@ public class ProjectsController {
                 .body(entityComments);
     }
 
+
     @PutMapping(value = "/{projectId}/entities")
-    public ResponseEntity<OWLEntityDto> updateEntity(@PathVariable @Nonnull String projectId, @RequestBody OWLEntityDto owlEntityDto){
-        OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId);
+    public ResponseEntity<OWLEntityDto> updateEntity( @RequestHeader(value = "If-Match", required = false) String ifMatch,
+                                                      @PathVariable @Nonnull String projectId,
+                                                      @RequestBody OWLEntityDto owlEntityDto){
+        OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId,ifMatch);
         return ResponseEntity.ok(response);
     }
 }
