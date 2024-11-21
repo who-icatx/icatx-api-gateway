@@ -8,6 +8,7 @@ import edu.stanford.protege.gateway.dto.EntityPostCoordinationWrapperDto;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.linearization.commands.LinearizationDefinition;
 import edu.stanford.protege.gateway.postcoordination.commands.*;
+import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import edu.stanford.protege.webprotege.ipc.ExecutionContext;
@@ -65,7 +66,7 @@ public class EntityPostCoordinationService {
     }
 
 
-    public void updateEntityPostCoordination(EntityPostCoordinationWrapperDto postcoordination, ProjectId projectId, String entityIri) {
+    public void updateEntityPostCoordination(EntityPostCoordinationWrapperDto postcoordination, ProjectId projectId, String entityIri, ChangeRequestId changeRequestId) {
         try {
             if(postcoordination != null) {
                 ExecutionContext executionContext = SecurityContextHelper.getExecutionContext();
@@ -78,8 +79,8 @@ public class EntityPostCoordinationService {
                         definitions,
                         tableConfiguration);
 
-                updateCustomScalesExecutor.execute(new AddEntityCustomScalesRevisionRequest(projectId, customScalesValues), executionContext).get();
-                updateSpecificationExecutor.execute(new AddEntitySpecificationRevisionRequest(projectId, specification), executionContext).get();
+                updateCustomScalesExecutor.execute(new AddEntityCustomScalesRevisionRequest(projectId, customScalesValues, changeRequestId), executionContext).get();
+                updateSpecificationExecutor.execute(new AddEntitySpecificationRevisionRequest(projectId, specification, changeRequestId), executionContext).get();
             }
         } catch (Exception e) {
             LOGGER.error("Error saving postcoordination for entity " + entityIri);
