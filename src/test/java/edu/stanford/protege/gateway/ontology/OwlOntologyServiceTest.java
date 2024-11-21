@@ -1,6 +1,5 @@
 package edu.stanford.protege.gateway.ontology;
 
-
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
@@ -36,6 +35,16 @@ public class OwlOntologyServiceTest {
     private CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor;
 
     @Mock
+    private CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor;
+
+    @Mock
+    private CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor;
+
+    @Mock
+    private CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor;
+
+
+    @Mock
     private CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
 
     private GetLogicalDefinitionsResponse response;
@@ -51,7 +60,13 @@ public class OwlOntologyServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyLogicalDefinitionResponse.json");
         response = objectMapper.readValue(specFile, GetLogicalDefinitionsResponse.class);
-        service = new EntityOntologyService(ancestorsExecutor, logicalDefinitionExecutor, formDataExecutor, entityChildrenExecutor);
+        service = new EntityOntologyService(ancestorsExecutor,
+                logicalDefinitionExecutor,
+                formDataExecutor,
+                entityChildrenExecutor,
+                updateLogicalDefinitionExecutor,
+                updateParentsExecutor,
+                updateLanguageTermsExecutor);
         projectId = ProjectId.generate();
         entityIri = "http://id.who.int/icd/entity/257068234";
         when(logicalDefinitionExecutor.execute(any(), any()))

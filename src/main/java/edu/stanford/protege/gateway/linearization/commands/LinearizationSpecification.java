@@ -9,24 +9,15 @@ import javax.annotation.Nonnull;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 
-public class LinearizationSpecification  {
-
-    private final String isAuxiliaryAxisChild;
-
-    private final String isGrouping;
-
-    private final String isIncludedInLinearization;
-
-    private final IRI linearizationParent;
-
-    private final IRI linearizationView;
-
-    private final String codingNote;
+public record LinearizationSpecification(LinearizationSpecificationStatus isAuxiliaryAxisChild,
+                                         LinearizationSpecificationStatus isGrouping,
+                                         LinearizationSpecificationStatus isIncludedInLinearization,
+                                         IRI linearizationParent, IRI linearizationView, String codingNote) {
 
     @JsonCreator
-    public LinearizationSpecification(@JsonProperty("isAuxiliaryAxisChild") String isAuxiliaryAxisChild,
-                                      @JsonProperty("isGrouping") String isGrouping,
-                                      @JsonProperty("isIncludedInLinearization") String isIncludedInLinearization,
+    public LinearizationSpecification(@JsonProperty("isAuxiliaryAxisChild") LinearizationSpecificationStatus isAuxiliaryAxisChild,
+                                      @JsonProperty("isGrouping") LinearizationSpecificationStatus isGrouping,
+                                      @JsonProperty("isIncludedInLinearization") LinearizationSpecificationStatus isIncludedInLinearization,
                                       @JsonProperty("linearizationParent") IRI linearizationParent,
                                       @JsonProperty("linearizationView") @Nonnull IRI linearizationView,
                                       @JsonProperty("codingNote") String codingNote) {
@@ -36,30 +27,5 @@ public class LinearizationSpecification  {
         this.linearizationParent = linearizationParent;
         this.linearizationView = checkNotNull(linearizationView);
         this.codingNote = codingNote;
-    }
-
-
-    public String getIsAuxiliaryAxisChild() {
-        return isAuxiliaryAxisChild;
-    }
-
-    public String getIsGrouping() {
-        return isGrouping;
-    }
-
-    public String getIsIncludedInLinearization() {
-        return isIncludedInLinearization;
-    }
-
-    public IRI getLinearizationParent() {
-        return linearizationParent;
-    }
-
-    public IRI getLinearizationView() {
-        return linearizationView;
-    }
-
-    public String getCodingNote() {
-        return codingNote;
     }
 }

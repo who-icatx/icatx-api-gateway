@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
-public record OWLEntityDto(String entityURI,
+public record OWLEntityDto(String entityIRI,
 
                            EntityLanguageTerms languageTerms,
                            EntityLinearizationWrapperDto entityLinearizations,

@@ -6,6 +6,7 @@ import edu.stanford.protege.gateway.history.EntityHistoryService;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.EntityOntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
+import edu.stanford.protege.webprotege.common.ProjectId;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 
 @Service
@@ -79,6 +81,20 @@ public class OwlEntityService {
             return entityChildren.get();
         } catch (Exception e) {
             LOGGER.error("Error fetching data for entity " + entityIri, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public OWLEntityDto updateEntity(OWLEntityDto owlEntityDto, String existingProjectId) {
+        try {
+            ProjectId projectId = ProjectId.valueOf(existingProjectId);
+            entityLinearizationService.updateEntityLinearization(owlEntityDto, projectId );
+            entityPostCoordinationService.updateEntityPostCoordination(owlEntityDto.postcoordination(), projectId, owlEntityDto.entityIRI());
+            entityOntologyService.updateLogicalDefinition(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.logicalConditions());
+            entityOntologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents());
+            entityOntologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms());
+            return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

@@ -6,11 +6,11 @@ import edu.stanford.protege.gateway.dto.EntityLanguageTerms;
 import edu.stanford.protege.gateway.dto.LanguageTerm;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class EntityFormToDtoMapper {
-
 
     public static EntityLanguageTerms mapFormToTerms(EntityForm entityForm) {
         LanguageTerm label = null;
@@ -62,17 +62,49 @@ public class EntityFormToDtoMapper {
                 isObsolete);
     }
 
+    public static EntityForm mapFromDto(String entityIri, EntityLanguageTerms languageTerms) {
+
+        List<EntityForm.EntityFormBaseIndexTerm> baseIndexTerms = languageTerms.baseIndexTerms()
+                .stream()
+                .map(EntityFormToDtoMapper::mapFromDto)
+                .toList();
+
+        List<EntityForm.EntityFormSubclassBaseInclusion> subclassBaseInclusions = languageTerms.subclassBaseInclusions()
+                .stream()
+                .map(EntityFormToDtoMapper::mapFromDto)
+                .toList();
+
+        List<EntityForm.EntityFormBaseExclusionTerm> baseExclusionTerms = languageTerms.baseExclusionTerms()
+                .stream()
+                .map(EntityFormToDtoMapper::mapFromDto)
+                .toList();
+
+        EntityForm.EntityFormLanguageTerm label = new EntityForm.EntityFormLanguageTerm(languageTerms.title().termId(), languageTerms.title().label());
+        EntityForm.EntityFormLanguageTerm fullySpecifiedName = new EntityForm.EntityFormLanguageTerm(languageTerms.fullySpecifiedName().termId(), languageTerms.fullySpecifiedName().label());
+        EntityForm.EntityFormLanguageTerm definition = new EntityForm.EntityFormLanguageTerm(languageTerms.definition().termId(), languageTerms.definition().label());
+        EntityForm.EntityFormLanguageTerm longDefinition = new EntityForm.EntityFormLanguageTerm(languageTerms.longDefinition().termId(), languageTerms.longDefinition().label());
+
+
+        return new EntityForm(entityIri,
+                label,
+                fullySpecifiedName,
+                definition,
+                longDefinition,
+                Collections.singletonList(String.valueOf(languageTerms.isObsolete())),
+                baseIndexTerms,
+                subclassBaseInclusions,
+                baseExclusionTerms
+        );
+    }
 
     private static List<BaseIndexTerm> mapBaseIndexTerms(List<EntityForm.EntityFormBaseIndexTerm> formBaseIndexTerms) {
         return formBaseIndexTerms.stream().map(formBaseIndexTerm -> {
             String indexType = "";
-            String indexTypeId = "";
             if(formBaseIndexTerm.indexType() != null) {
-                indexType = formBaseIndexTerm.indexType().id().toLowerCase().contains("synonym") ? "Synonym" : "Narrower";
-                indexTypeId = formBaseIndexTerm.indexType().id();
+                indexType = formBaseIndexTerm.indexType().id();
             }
 
-            return new BaseIndexTerm(formBaseIndexTerm.label(), indexType, getBooleanOutOfStringArray(formBaseIndexTerm.isInclusion()), indexTypeId);
+            return new BaseIndexTerm(formBaseIndexTerm.label(), indexType, getBooleanOutOfStringArray(formBaseIndexTerm.isInclusion()), formBaseIndexTerm.id());
         }).collect(Collectors.toList());
     }
 
@@ -86,7 +118,7 @@ public class EntityFormToDtoMapper {
             if(baseExclusionTerm.foundationReference() != null){
                 id =  baseExclusionTerm.foundationReference().id();
             }
-            return new BaseExclusionTerm(baseExclusionTerm.label(),id, "");
+            return new BaseExclusionTerm(baseExclusionTerm.label(),id, baseExclusionTerm.id());
         }).collect(Collectors.toList());
     }
 
@@ -97,5 +129,21 @@ public class EntityFormToDtoMapper {
         return false;
     }
 
+    private static EntityForm.EntityFormBaseIndexTerm mapFromDto(BaseIndexTerm baseIndexTerm) {
+        return new EntityForm.EntityFormBaseIndexTerm(baseIndexTerm.label(),
+                new EntityForm.EntityFormBaseIndexTerm.EntityFormIndexType(baseIndexTerm.indexType(), "NamedIndividual"),
+                Collections.singletonList(String.valueOf(baseIndexTerm.isInclusion())), baseIndexTerm.termId());
+    }
 
+
+    private static EntityForm.EntityFormSubclassBaseInclusion mapFromDto(String subclassBaseInclusion) {
+        return new EntityForm.EntityFormSubclassBaseInclusion(subclassBaseInclusion, "Class");
+    }
+
+    private static EntityForm.EntityFormBaseExclusionTerm mapFromDto(BaseExclusionTerm baseExclusionTerm) {
+        return new EntityForm.EntityFormBaseExclusionTerm(
+                baseExclusionTerm.termId(),
+                baseExclusionTerm.label(),
+                new EntityForm.EntityFormBaseExclusionTerm.EntityFormFoundationReference(baseExclusionTerm.foundationReference(), "Class"));
+    }
 }
