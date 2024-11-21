@@ -89,7 +89,7 @@
 					}
 				],
 				"url": {
-					"raw": "http://localhost:7779/icat/projects/03a3f282-8671-45bf-901e-362e0e1ac3e2?entityIri=http://id.who.int/icd/entity/1105069515",
+					"raw": "http://localhost:7779/icat/projects/03a3f282-8671-45bf-901e-362e0e1ac3e2?entityIRI=http://id.who.int/icd/entity/1105069515",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -102,7 +102,7 @@
 					],
 					"query": [
 						{
-							"key": "entityIri",
+							"key": "entityIRI",
 							"value": "http://id.who.int/icd/entity/1105069515"
 						}
 					]
@@ -244,7 +244,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:7779/icat/projects/03a3f282-8671-45bf-901e-362e0e1ac3e2/entityChildren?entityIri=http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F1105069515",
+					"raw": "http://localhost:7779/icat/projects/03a3f282-8671-45bf-901e-362e0e1ac3e2/entityChildren?entityIRI=http://id.who.int/icd/entity/921595235",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -258,9 +258,119 @@
 					],
 					"query": [
 						{
-							"key": "entityIri",
-							"value": "http%3A%2F%2Fid.who.int%2Ficd%2Fentity%2F1105069515"
+							"key": "entityIRI",
+							"value": "http://id.who.int/icd/entity/921595235"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-entity-comments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7779/icat/projects/03a3f282-8671-45bf-901e-362e0e1ac3e2/entityComments?entityIRI=http%3A%2F%2Fwho.int%2Ficd%23ICDEntity",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects",
+						"03a3f282-8671-45bf-901e-362e0e1ac3e2",
+						"entityComments"
+					],
+					"query": [
+						{
+							"key": "entityIRI",
+							"value": "http%3A%2F%2Fwho.int%2Ficd%23ICDEntity"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-projects",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7779/icat/projects/getProjects",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects",
+						"getProjects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create-entity",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"api created entity\",\r\n    \"parent\": \"http://www.example.org/RyDLC7ryi1k7gfNP3olLiJ\",\r\n    \"languageTag\": \"en\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:7779/icat/projects/89092045-479e-46fb-a0d5-985e1ba1cfc2/createEntity",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects",
+						"89092045-479e-46fb-a0d5-985e1ba1cfc2",
+						"createEntity"
 					]
 				}
 			},

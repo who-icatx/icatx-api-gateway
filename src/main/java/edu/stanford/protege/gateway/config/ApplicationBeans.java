@@ -15,6 +15,7 @@ import edu.stanford.protege.webprotege.jackson.IriDeserializer;
 import edu.stanford.protege.webprotege.jackson.*;
 import org.semanticweb.owlapi.model.IRI;
 import org.springframework.context.annotation.*;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
@@ -48,6 +49,11 @@ public class ApplicationBeans implements WebMvcConfigurer {
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
         return objectMapper;
+    }
+
+    @Bean
+    public LocalValidatorFactoryBean validator() {
+        return new LocalValidatorFactoryBean();
     }
 
     @Bean
@@ -133,4 +139,34 @@ public class ApplicationBeans implements WebMvcConfigurer {
     CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> executorForUpdateLanguageTerms(){
         return new CommandExecutorImpl<>(SetEntityFormDataFromJsonResponse.class);
     }
+    @Bean
+    CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> getIsExistingProjectExecutor() {
+        return new CommandExecutorImpl<>(GetIsExistingProjectResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor() {
+        return new CommandExecutorImpl<>(FilterExistingEntitiesResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassesExecutor() {
+        return new CommandExecutorImpl<>(CreateClassesFromApiResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getAvailableProjectsExecutor() {
+        return new CommandExecutorImpl<>(GetAvailableProjectsForApiResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor() {
+        return new CommandExecutorImpl<>(GetEntityCommentsResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<GetEntityHistorySummaryRequest, GetEntityHistorySummaryResponse> getEntityHistorySummaryExecutor() {
+        return new CommandExecutorImpl<>(GetEntityHistorySummaryResponse.class);
+    }
+
 }

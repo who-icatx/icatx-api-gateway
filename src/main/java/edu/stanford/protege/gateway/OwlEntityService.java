@@ -5,7 +5,7 @@ import com.google.common.hash.Hashing;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.history.EntityHistoryService;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
-import edu.stanford.protege.gateway.ontology.EntityOntologyService;
+import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import org.slf4j.*;
@@ -17,7 +17,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 import java.util.concurrent.ExecutionException;
 
 
@@ -29,7 +29,7 @@ public class OwlEntityService {
 
     private final EntityPostCoordinationService entityPostCoordinationService;
 
-    private final EntityOntologyService entityOntologyService;
+    private final OntologyService ontologyService;
 
     private final EntityHistoryService entityHistoryService;
 
@@ -39,11 +39,11 @@ public class OwlEntityService {
 
     public OwlEntityService(EntityLinearizationService entityLinearizationService,
                             EntityPostCoordinationService entityPostCoordinationService,
-                            EntityOntologyService entityOntologyService,
-                            EntityHistoryService entityHistoryService) {
+                            EntityHistoryService entityHistoryService,
+                            OntologyService ontologyService) {
         this.entityLinearizationService = entityLinearizationService;
         this.entityPostCoordinationService = entityPostCoordinationService;
-        this.entityOntologyService = entityOntologyService;
+        this.ontologyService = ontologyService;
         this.entityHistoryService = entityHistoryService;
     }
 
@@ -85,13 +85,46 @@ public class OwlEntityService {
 
     }
 
-    public List<String> getEntityChildren(String entityIri, String projectId) {
-        CompletableFuture<List<String>> entityChildren = entityOntologyService.getEntityChildren(entityIri, projectId);
+    public List<String> getEntityChildren(String entityIRI, String projectId) {
+        CompletableFuture<List<String>> entityChildren = ontologyService.getEntityChildren(entityIRI, projectId);
 
         try {
             return entityChildren.get();
         } catch (Exception e) {
-            LOGGER.error("Error fetching data for entity " + entityIri, e);
+            LOGGER.error("Error fetching data for entity " + entityIRI, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Set<String> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
+        CompletableFuture<Set<String>> newCreatedEntityIri = ontologyService.createClassEntity(projectId, createEntityDto);
+        try {
+            return newCreatedEntityIri.get();
+        } catch (Exception e) {
+            LOGGER.error("Error creating new class entity " + createEntityDto.title(), e);
+            /*
+            ToDo:
+                Here we can add the revert event for all the services if the creation fails for whatever reason.
+             */
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Set<ProjectSummaryDto> getProjects() {
+        CompletableFuture<Set<ProjectSummaryDto>> availableProjects = ontologyService.getProjects();
+        try {
+            return availableProjects.get();
+        } catch (Exception e) {
+            LOGGER.error("Error retrieving available projects!", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public EntityComments getEntityComments(String entityIri, String projectId) {
+        try {
+            return ontologyService.getEntityDiscussionThreads(entityIri, projectId).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Error fetching data for entity discussion threads for entity" + entityIri, e);
             throw new RuntimeException(e);
         }
     }

@@ -1,10 +1,11 @@
 package edu.stanford.protege.gateway.history.commands;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import edu.stanford.protege.webprotege.common.Request;
 
-@JsonTypeName(GetEntityHistorySummaryRequest.CHANNEL)
+import static edu.stanford.protege.gateway.history.commands.GetEntityHistorySummaryRequest.CHANNEL;
+
+@JsonTypeName(CHANNEL)
 public record GetEntityHistorySummaryRequest(
         @JsonProperty("projectId") String projectId,
         @JsonProperty("entityIri") String entityIri
