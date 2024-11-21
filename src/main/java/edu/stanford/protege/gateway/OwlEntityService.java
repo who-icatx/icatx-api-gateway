@@ -5,12 +5,14 @@ import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
+import edu.stanford.protege.webprotege.common.ProjectId;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
 
 
 @Service
@@ -28,7 +30,9 @@ public class OwlEntityService {
     private String formId;
 
 
-    public OwlEntityService(EntityLinearizationService entityLinearizationService, EntityPostCoordinationService entityPostCoordinationService, OntologyService ontologyService) {
+    public OwlEntityService(EntityLinearizationService entityLinearizationService,
+                            EntityPostCoordinationService entityPostCoordinationService,
+                            OntologyService ontologyService) {
         this.entityLinearizationService = entityLinearizationService;
         this.entityPostCoordinationService = entityPostCoordinationService;
         this.ontologyService = ontologyService;
@@ -102,6 +106,20 @@ public class OwlEntityService {
             return ontologyService.getEntityDiscussionThreads(entityIri, projectId).get();
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error fetching data for entity discussion threads for entity" + entityIri, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public OWLEntityDto updateEntity(OWLEntityDto owlEntityDto, String existingProjectId) {
+        try {
+            ProjectId projectId = ProjectId.valueOf(existingProjectId);
+            entityLinearizationService.updateEntityLinearization(owlEntityDto, projectId );
+            entityPostCoordinationService.updateEntityPostCoordination(owlEntityDto.postcoordination(), projectId, owlEntityDto.entityIRI());
+            entityOntologyService.updateLogicalDefinition(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.logicalConditions());
+            entityOntologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents());
+            entityOntologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms());
+            return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

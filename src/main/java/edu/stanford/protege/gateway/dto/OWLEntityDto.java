@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.List;
 
-public record OWLEntityDto(String entityURI,
+public record OWLEntityDto(String entityIRI,
 
                            EntityLanguageTerms languageTerms,
                            EntityLinearizationWrapperDto entityLinearizations,

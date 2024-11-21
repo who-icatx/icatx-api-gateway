@@ -1,20 +1,29 @@
 package edu.stanford.protege.gateway.ontology;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet;
 import edu.stanford.protege.gateway.SecurityContextHelper;
+import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
 import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotege.frame.PropertyClassValue;
+import edu.stanford.protege.webprotege.common.ChangeRequestId;
+import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.slf4j.*;
 import org.springframework.stereotype.Service;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +33,10 @@ public class OntologyService {
     private final CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor;
     private final CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor;
     private final CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor;
+    private final CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor;
+    private final CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor;
+    private final CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor;
+
     private final CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
     private final CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor;
     private final CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor;
@@ -40,10 +53,16 @@ public class OntologyService {
                            CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor,
                            CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor,
                            CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getProjectsExecutor,
-                           CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor) {
+                           CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor,
+                           CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor,
+                           CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor,
+                           CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor) {
         this.ancestorsExecutor = ancestorsExecutor;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
+        this.updateLogicalDefinitionExecutor = updateLogicalDefinitionExecutor;
+        this.updateParentsExecutor = updateParentsExecutor;
+        this.updateLanguageTermsExecutor = updateLanguageTermsExecutor;
         this.entityChildrenExecutor = entityChildrenExecutor;
         this.isExistingProjectExecutor = isExistingProjectExecutor;
         this.filterExistingEntitiesExecutor = filterExistingEntitiesExecutor;
@@ -65,8 +84,8 @@ public class OntologyService {
     public CompletableFuture<EntityLogicalConditionsWrapper> getEntityLogicalConditions(String entityIri, String projectId) {
         return logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), SecurityContextHelper.getExecutionContext())
                 .thenApply(response ->
-                        new EntityLogicalConditionsWrapper(new LogicalConditions(mapToEntityLogicalDefinition(response.logicalDefinitions()),
-                                extractRelationshipsFromPropertyClassValue(response.necessaryConditions())),
+                        new EntityLogicalConditionsWrapper(new LogicalConditions(LogicalDefinitionMapper.mapToEntityLogicalDefinition(response.logicalDefinitions()),
+                                LogicalDefinitionMapper.extractRelationshipsFromPropertyClassValue(response.necessaryConditions())),
                                 new LogicalConditionsFunctionalOwl("OWLFunctionalSyntax", response.functionalAxioms()))
                 );
 
@@ -78,28 +97,51 @@ public class OntologyService {
 
     }
 
-    private List<EntityLogicalDefinition> mapToEntityLogicalDefinition(List<LogicalDefinition> logicalDefinitions) {
-        return logicalDefinitions.stream().map(definition -> {
-            List<LogicalConditionRelationship> relationships = extractRelationshipsFromPropertyClassValue(definition.axis2filler());
-            return new EntityLogicalDefinition(definition.logicalDefinitionParent().getEntity().getIRI().toString(), relationships);
-        }).collect(Collectors.toList());
+    public void updateLogicalDefinition(String entityIri, String projectId, EntityLogicalConditionsWrapper logicalConditionsWrapper) {
+        try {
+            GetLogicalDefinitionsResponse response = logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), SecurityContextHelper.getExecutionContext())
+                    .get();
+
+            OntologicalLogicalDefinitionConditions pristine = new OntologicalLogicalDefinitionConditions(response.logicalDefinitions(), response.necessaryConditions());
+            UpdateLogicalDefinitionsRequest request = UpdateLogicalDefinitionsRequest.create(ChangeRequestId.generate(),
+                    ProjectId.valueOf(projectId),
+                    new OWLClassImpl(IRI.create(entityIri)),
+                    pristine,
+                    LogicalDefinitionMapper.mapFromDto(logicalConditionsWrapper.jsonRepresentation()),
+                    "Update from API");
+
+            updateLogicalDefinitionExecutor.execute(request, SecurityContextHelper.getExecutionContext()).get();
+
+        } catch (Exception e) {
+            LOGGER.error("Error updating logical definition", e);
+            throw new RuntimeException(e);
+        }
     }
 
-    private List<LogicalConditionRelationship> extractRelationshipsFromPropertyClassValue(List<PropertyClassValue> values) {
-        List<LogicalConditionRelationship> relationships = new ArrayList<>();
-        Map<String, List<String>> axisFillerMap = new HashMap<>();
-        for (PropertyClassValue propertyClassValue : values) {
-            List<String> existingFillers = axisFillerMap.get(propertyClassValue.getProperty().getEntity().getIRI().toString());
-            if (existingFillers == null) {
-                existingFillers = new ArrayList<>();
-            }
-            existingFillers.add(propertyClassValue.getValue().getEntity().getIRI().toString());
-            axisFillerMap.put(propertyClassValue.getProperty().getEntity().getIRI().toString(), existingFillers);
+
+    public void updateEntityParents(String entityIri, String projectId, List<String> parents) {
+        ImmutableSet<OWLClass> parentsAsClass = ImmutableSet.copyOf(parents.stream().map(p -> new OWLClassImpl(IRI.create(p))).collect(Collectors.toList()));
+
+        try {
+            updateParentsExecutor.execute(new ChangeEntityParentsRequest(ChangeRequestId.generate(),
+                    ProjectId.valueOf(projectId),
+                    parentsAsClass,
+                    new OWLClassImpl(IRI.create(entityIri)),
+                    "Update parents through API"), SecurityContextHelper.getExecutionContext()).get();
+        } catch (Exception e) {
+            LOGGER.error("Error updating entity parents", e);
+            throw new RuntimeException(e);
         }
-        axisFillerMap.keySet().forEach(key -> relationships.addAll(axisFillerMap.get(key).stream()
-                .map(filler -> new LogicalConditionRelationship(key, filler)).toList())
-        );
-        return relationships;
+    }
+
+    public void updateLanguageTerms(String entityIri, String projectId, String formId, EntityLanguageTerms languageTerms) throws ExecutionException, InterruptedException {
+        ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
+        updateLanguageTermsExecutor.execute(new SetEntityFormDataFromJsonRequest(ChangeRequestId.generate(),
+                        ProjectId.valueOf(projectId),
+                        new OWLClassImpl(IRI.create(entityIri)),
+                        formId,
+                        objectMapper.convertValue(EntityFormToDtoMapper.mapFromDto(entityIri, languageTerms), JsonNode.class)),
+                SecurityContextHelper.getExecutionContext()).get();
     }
 
     public CompletableFuture<List<String>> getEntityChildren(String entityIri, String projectId) {

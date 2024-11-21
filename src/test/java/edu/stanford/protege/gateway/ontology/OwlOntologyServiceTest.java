@@ -1,6 +1,5 @@
 package edu.stanford.protege.gateway.ontology;
 
-
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
@@ -36,6 +35,16 @@ public class OwlOntologyServiceTest {
     private CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor;
 
     @Mock
+    private CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor;
+
+    @Mock
+    private CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor;
+
+    @Mock
+    private CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor;
+
+
+    @Mock
     private CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
 
     @Mock
@@ -67,6 +76,9 @@ public class OwlOntologyServiceTest {
                 logicalDefinitionExecutor,
                 formDataExecutor,
                 entityChildrenExecutor,
+                updateLogicalDefinitionExecutor,
+                updateParentsExecutor,
+                updateLanguageTermsExecutor,
                 isExistingProjectExecutor,
                 filterExistingEntitiesExecutor,
                 createClassEntityExecutor,
