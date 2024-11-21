@@ -5,6 +5,7 @@ import com.google.common.hash.Hashing;
 import edu.stanford.protege.gateway.OwlEntityService;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.validators.CreateEntityValidatorService;
+import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
@@ -78,5 +79,11 @@ public class ProjectsController {
 
         return ResponseEntity.ok()
                 .body(entityComments);
+    }
+
+    @PutMapping(value = "/{projectId}/entities")
+    public ResponseEntity<OWLEntityDto> updateEntity(@PathVariable @Nonnull String projectId, @RequestBody OWLEntityDto owlEntityDto){
+        OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId);
+        return ResponseEntity.ok(response);
     }
 }
