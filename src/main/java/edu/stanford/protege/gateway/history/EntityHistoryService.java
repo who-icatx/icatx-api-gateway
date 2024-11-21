@@ -54,7 +54,7 @@ public class EntityHistoryService {
     }
 
     public CompletableFuture<LocalDateTime> getEntityLatestChangeTime(String projectId, String entityIri) {
-        return historySummaryExecutor.execute(new GetEntityHistorySummaryRequest(projectId, entityIri), SecurityContextHelper.getExecutionContext())
+        return entityHistorySummaryExecutor.execute(new GetEntityHistorySummaryRequest(projectId, entityIri), SecurityContextHelper.getExecutionContext())
                 .thenApply(response -> {
                     if (response.entityHistorySummary() != null && response.entityHistorySummary().changes() != null && response.entityHistorySummary().changes().size() > 0) {
                         response.entityHistorySummary().changes().sort(Comparator.comparing(EntityChange::dateTime).reversed());

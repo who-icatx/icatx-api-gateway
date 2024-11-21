@@ -8,7 +8,7 @@ import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.history.EntityHistoryService;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
-import edu.stanford.protege.gateway.ontology.EntityOntologyService;
+import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ public class OwlEntityServiceTest {
     @Mock
     private EntityPostCoordinationService entityPostCoordinationService;
     @Mock
-    private EntityOntologyService entityOntologyService;
+    private OntologyService entityOntologyService;
     @Mock
     private EntityHistoryService entityHistoryService;
     @Mock
@@ -64,7 +64,7 @@ public class OwlEntityServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyOwlEntityDto.json");
         dto = objectMapper.readValue(specFile, OWLEntityDto.class);
-        service = new OwlEntityService(entityLinearizationService, entityPostCoordinationService, entityOntologyService, entityHistoryService);
+        service = new OwlEntityService(entityLinearizationService, entityPostCoordinationService,entityHistoryService, entityOntologyService);
 
     }
 
