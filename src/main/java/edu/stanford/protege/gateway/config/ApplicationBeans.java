@@ -101,10 +101,6 @@ public class ApplicationBeans implements WebMvcConfigurer {
     CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor() {
         return new CommandExecutorImpl<>(GetEntityChildrenResponse.class);
     }
-    @Bean
-    CommandExecutor<GetEntityHistorySummaryRequest, GetEntityHistorySummaryResponse> historySummaryExecutor() {
-        return new CommandExecutorImpl<>(GetEntityHistorySummaryResponse.class);
-    }
 
     @Bean
     CommandExecutor<SaveEntityLinearizationRequest, SaveEntityLinearizationResponse> executorForSaveEntityLinearization(){
