@@ -2,6 +2,7 @@ package edu.stanford.protege.gateway;
 
 
 import edu.stanford.protege.gateway.dto.*;
+import edu.stanford.protege.gateway.history.EntityHistoryService;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.EntityOntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
@@ -9,6 +10,7 @@ import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -23,15 +25,17 @@ public class OwlEntityService {
 
     private final EntityOntologyService entityOntologyService;
 
+    private final EntityHistoryService entityHistoryService;
 
     @Value("${icatx.formId}")
     private String formId;
 
 
-    public OwlEntityService(EntityLinearizationService entityLinearizationService, EntityPostCoordinationService entityPostCoordinationService, EntityOntologyService entityOntologyService) {
+    public OwlEntityService(EntityLinearizationService entityLinearizationService, EntityPostCoordinationService entityPostCoordinationService, EntityOntologyService entityOntologyService, EntityHistoryService entityHistoryService) {
         this.entityLinearizationService = entityLinearizationService;
         this.entityPostCoordinationService = entityPostCoordinationService;
         this.entityOntologyService = entityOntologyService;
+        this.entityHistoryService = entityHistoryService;
     }
 
 
@@ -42,8 +46,14 @@ public class OwlEntityService {
         CompletableFuture<EntityLanguageTerms> entityLanguageTerms = entityOntologyService.getEntityLanguageTerms(entityIri, projectId, this.formId);
         CompletableFuture<EntityLogicalConditionsWrapper> logicalConditions = entityOntologyService.getEntityLogicalConditions(entityIri, projectId);
         CompletableFuture<List<String>> parents = entityOntologyService.getEntityParents(entityIri, projectId);
-
-        CompletableFuture<Void> combinedFutures = CompletableFuture.allOf(linearizationDto, specList, customScalesDtos, entityLanguageTerms, logicalConditions, parents);
+        CompletableFuture<LocalDateTime> latestChange = entityHistoryService.getEntityLatestChangeTime(projectId, entityIri);
+        CompletableFuture<Void> combinedFutures = CompletableFuture.allOf(linearizationDto,
+                specList,
+                customScalesDtos,
+                entityLanguageTerms,
+                logicalConditions,
+                parents,
+                latestChange);
         combinedFutures.join();
 
         try {
@@ -51,7 +61,7 @@ public class OwlEntityService {
                     entityLanguageTerms.get(),
                     linearizationDto.get(),
                     new EntityPostCoordinationWrapperDto(specList.get(), new Date(), customScalesDtos.get()),
-                    new Date(),
+                    latestChange.get(),
                     logicalConditions.get(),
                     parents.get()
             );

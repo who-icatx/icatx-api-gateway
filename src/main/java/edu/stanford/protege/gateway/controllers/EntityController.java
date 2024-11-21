@@ -8,6 +8,7 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
@@ -26,7 +27,7 @@ public class EntityController {
         HttpHeaders httpHeaders = new HttpHeaders();
         String etag = "";
         if (dto.lastChangeDate() != null) {
-            httpHeaders.setLastModified(dto.lastChangeDate().toInstant());
+            httpHeaders.setLastModified(dto.lastChangeDate().toInstant(ZoneOffset.UTC));
             etag = Hashing.sha256().hashString(dto.lastChangeDate().toString(), StandardCharsets.UTF_8).toString();
         }
         return ResponseEntity.ok()

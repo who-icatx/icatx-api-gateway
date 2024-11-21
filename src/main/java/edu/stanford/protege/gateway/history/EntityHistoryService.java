@@ -9,6 +9,9 @@ import org.slf4j.*;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -17,9 +20,11 @@ public class EntityHistoryService {
     private final static Logger LOGGER = LoggerFactory.getLogger(EntityHistoryService.class);
 
     private final CommandExecutor<GetChangedEntitiesRequest, GetChangedEntitiesResponse> changedEntitiesExecutor;
+    private final CommandExecutor<GetEntityHistorySummaryRequest, GetEntityHistorySummaryResponse> historySummaryExecutor;
 
-    public EntityHistoryService(CommandExecutor<GetChangedEntitiesRequest, GetChangedEntitiesResponse> changedEntitiesExecutor) {
+    public EntityHistoryService(CommandExecutor<GetChangedEntitiesRequest, GetChangedEntitiesResponse> changedEntitiesExecutor, CommandExecutor<GetEntityHistorySummaryRequest, GetEntityHistorySummaryResponse> historySummaryExecutor) {
         this.changedEntitiesExecutor = changedEntitiesExecutor;
+        this.historySummaryExecutor = historySummaryExecutor;
     }
 
     public ChangedEntities getChangedEntities(String projectId, Timestamp timestamp) {
@@ -33,5 +38,16 @@ public class EntityHistoryService {
             throw new RuntimeException(e);
         }
 
+    }
+
+    public CompletableFuture<LocalDateTime> getEntityLatestChangeTime(String projectId, String entityIri) {
+        return historySummaryExecutor.execute(new GetEntityHistorySummaryRequest(projectId, entityIri), SecurityContextHelper.getExecutionContext())
+                .thenApply(response -> {
+                    if (response.entityHistorySummary() != null && response.entityHistorySummary().changes() != null && response.entityHistorySummary().changes().size() > 0) {
+                        response.entityHistorySummary().changes().sort(Comparator.comparing(EntityChange::dateTime).reversed());
+                        return response.entityHistorySummary().changes().get(0).dateTime();
+                    }
+                    return LocalDateTime.MIN;
+                });
     }
 }
