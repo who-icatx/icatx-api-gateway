@@ -7,7 +7,10 @@ import edu.stanford.protege.gateway.history.EntityHistoryService;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
+import edu.stanford.protege.webprotege.common.ChangeRequestId;
+import edu.stanford.protege.webprotege.common.EventId;
 import edu.stanford.protege.webprotege.common.ProjectId;
+import edu.stanford.protege.webprotege.ipc.EventDispatcher;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,9 +19,11 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.CompletableFuture;
 
 
 @Service
@@ -30,7 +35,8 @@ public class OwlEntityService {
     private final EntityPostCoordinationService entityPostCoordinationService;
 
     private final OntologyService ontologyService;
-
+    @Nonnull
+    private final EventDispatcher eventDispatcher;
     private final EntityHistoryService entityHistoryService;
 
     @Value("${icatx.formId}")
@@ -40,10 +46,12 @@ public class OwlEntityService {
     public OwlEntityService(EntityLinearizationService entityLinearizationService,
                             EntityPostCoordinationService entityPostCoordinationService,
                             EntityHistoryService entityHistoryService,
+                            @Nonnull EventDispatcher eventDispatcher,
                             OntologyService ontologyService) {
         this.entityLinearizationService = entityLinearizationService;
         this.entityPostCoordinationService = entityPostCoordinationService;
         this.ontologyService = ontologyService;
+        this.eventDispatcher = eventDispatcher;
         this.entityHistoryService = entityHistoryService;
     }
 
@@ -130,18 +138,28 @@ public class OwlEntityService {
     }
 
     public OWLEntityDto updateEntity(OWLEntityDto owlEntityDto, String existingProjectId, String callerHash) {
-        validateEntityUpdate(owlEntityDto, existingProjectId, callerHash);
-
+        ChangeRequestId changeRequestId = ChangeRequestId.generate();
         ProjectId projectId = ProjectId.valueOf(existingProjectId);
-        entityLinearizationService.updateEntityLinearization(owlEntityDto, projectId);
-        entityPostCoordinationService.updateEntityPostCoordination(owlEntityDto.postcoordination(), projectId, owlEntityDto.entityIRI());
-        ontologyService.updateLogicalDefinition(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.logicalConditions());
-        ontologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents());
-        ontologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms());
-        return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
+
+        try {
+            validateEntityUpdate(owlEntityDto, existingProjectId, callerHash);
+            entityLinearizationService.updateEntityLinearization(owlEntityDto, projectId);
+            entityPostCoordinationService.updateEntityPostCoordination(owlEntityDto.postcoordination(), projectId, owlEntityDto.entityIRI());
+            ontologyService.updateLogicalDefinition(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.logicalConditions());
+            ontologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents());
+            ontologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms());
+            return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
+
+        } catch (ApplicationException e) {
+            LOGGER.error("Error updating entity ", e);
+            eventDispatcher.dispatchEvent(new EntityUpdateFailedEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId));
+            throw new RuntimeException(e);
+
+        }
+
+
 
     }
-
 
     private void validateEntityUpdate(OWLEntityDto owlEntityDto, String existingProjectId, String callerHash) {
         callerVersionMatchesLatestVersion(owlEntityDto, existingProjectId, callerHash);

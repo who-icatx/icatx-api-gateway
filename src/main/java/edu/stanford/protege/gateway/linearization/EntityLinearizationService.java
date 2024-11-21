@@ -6,6 +6,7 @@ import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.dto.EntityLinearizationWrapperDto;
 import edu.stanford.protege.gateway.dto.OWLEntityDto;
 import edu.stanford.protege.gateway.linearization.commands.*;
+import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import edu.stanford.protege.webprotege.ipc.ExecutionContext;
