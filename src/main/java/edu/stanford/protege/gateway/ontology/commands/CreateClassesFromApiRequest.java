@@ -14,7 +14,7 @@ public record CreateClassesFromApiRequest(@JsonProperty("changeRequestId") Chang
                                           @JsonProperty("projectId") ProjectId projectId,
                                           @JsonProperty("sourceText") String sourceText,
                                           @JsonProperty("langTag") @Nullable String langTag,
-                                          @JsonProperty("parent") ImmutableSet<String> parents) implements Request<CreateClassesFromApiResponse> {
+                                          @JsonProperty("parent") ImmutableSet<String> parent) implements Request<CreateClassesFromApiResponse> {
     public static final String CHANNEL = "icatx.webprotege.entities.CreateClassesFromApi";
 
     public static CreateClassesFromApiRequest create(ChangeRequestId changeRequestId,

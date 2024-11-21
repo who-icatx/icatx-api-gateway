@@ -55,7 +55,7 @@ public class ProjectsController {
                                                            @NotNull(message = "Project ID cannot be null")
                                                            String projectId,
                                                            @RequestBody CreateEntityDto createEntityDto) {
-        createEntityValidator.validateCreateEntityRequest(projectId, createEntityDto.parent());
+        createEntityValidator.validateCreateEntityRequest(projectId, createEntityDto);
         var newCreatedIri = owlEntityService.createClassEntity(projectId, createEntityDto);
         List<OWLEntityDto> result = newCreatedIri.stream()
                 .map(newIri -> owlEntityService.getEntityInfo(newIri, projectId))
