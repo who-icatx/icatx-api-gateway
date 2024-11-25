@@ -96,6 +96,40 @@
 			"response": []
 		},
 		{
+			"name": "get-projects",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{AZURE-JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://icatx-api-gateway.ashybush-2afce3eb.northeurope.azurecontainerapps.io/icat/projects/getProjects",
+					"protocol": "https",
+					"host": [
+						"icatx-api-gateway",
+						"ashybush-2afce3eb",
+						"northeurope",
+						"azurecontainerapps",
+						"io"
+					],
+					"path": [
+						"icat",
+						"projects",
+						"getProjects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "basic-get-entity-ashybush",
 			"event": [
 				{
@@ -192,6 +226,50 @@
 					"path": [
 						"icat",
 						"linearization-definitions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create-entity",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{AZURE-JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"api created entity\",\r\n    \"parent\": \"http://id.who.int/icd/entity/1682787895\",\r\n    \"languageTag\": \"en\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://icatx-api-gateway.ashybush-2afce3eb.northeurope.azurecontainerapps.io/icat/projects/8cc2df91-d42f-441e-b586-0d502af60193/createEntity",
+					"protocol": "https",
+					"host": [
+						"icatx-api-gateway",
+						"ashybush-2afce3eb",
+						"northeurope",
+						"azurecontainerapps",
+						"io"
+					],
+					"path": [
+						"icat",
+						"projects",
+						"8cc2df91-d42f-441e-b586-0d502af60193",
+						"createEntity"
 					]
 				}
 			},
@@ -334,7 +412,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{JWT-TOKEN}}",
+							"value": "{{AZURE-JWT-TOKEN}}",
 							"type": "string"
 						}
 					]
@@ -453,84 +531,6 @@
 							"key": "entityIRI",
 							"value": "http%3A%2F%2Fwho.int%2Ficd%23ICDEntity"
 						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "get-projects",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{AZURE-JWT-TOKEN}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://icatx-api-gateway.ashybush-2afce3eb.northeurope.azurecontainerapps.io/icat/projects/getProjects",
-					"protocol": "https",
-					"host": [
-						"icatx-api-gateway",
-						"ashybush-2afce3eb",
-						"northeurope",
-						"azurecontainerapps",
-						"io"
-					],
-					"path": [
-						"icat",
-						"projects",
-						"getProjects"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "create-entity",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{AZURE-JWT-TOKEN}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"title\": \"api created entity\",\r\n    \"parent\": \"http://id.who.int/icd/entity/1682787895\",\r\n    \"languageTag\": \"en\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "https://icatx-api-gateway.ashybush-2afce3eb.northeurope.azurecontainerapps.io/icat/projects/8cc2df91-d42f-441e-b586-0d502af60193/createEntity",
-					"protocol": "https",
-					"host": [
-						"icatx-api-gateway",
-						"ashybush-2afce3eb",
-						"northeurope",
-						"azurecontainerapps",
-						"io"
-					],
-					"path": [
-						"icat",
-						"projects",
-						"8cc2df91-d42f-441e-b586-0d502af60193",
-						"createEntity"
 					]
 				}
 			},
