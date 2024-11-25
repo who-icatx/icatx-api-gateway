@@ -15,7 +15,7 @@
 						"exec": [
 							"let response = pm.response.json();\r",
 							"let jwt = response[\"access_token\"];\r",
-							"pm.globals.set(\"JWT-TOKEN\", jwt);\r",
+							"pm.globals.set(\"AZURE-JWT-TOKEN\", jwt);\r",
 							"\r",
 							"var eTag = pm.response.headers.get(\"etag\");\r",
 							"// Check if the ETag exists\r",
@@ -46,7 +46,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{JWT-TOKEN}}",
+							"value": "{{AZURE-JWT-TOKEN}}",
 							"type": "string"
 						}
 					]
@@ -126,7 +126,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{JWT-TOKEN}}",
+							"value": "{{AZURE-JWT-TOKEN}}",
 							"type": "string"
 						}
 					]
@@ -205,7 +205,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{JWT-TOKEN}}",
+							"value": "{{AZURE-JWT-TOKEN}}",
 							"type": "string"
 						}
 					]
@@ -272,7 +272,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{JWT-TOKEN}}",
+							"value": "{{AZURE-JWT-TOKEN}}",
 							"type": "string"
 						}
 					]
@@ -438,7 +438,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{JWT-TOKEN}}",
+							"value": "{{AZURE-JWT-TOKEN}}",
 							"type": "string"
 						}
 					]

@@ -166,7 +166,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{AZURE-JWT-TOKEN}}",
+							"value": "{{JWT-TOKEN}}",
 							"type": "string"
 						}
 					]
