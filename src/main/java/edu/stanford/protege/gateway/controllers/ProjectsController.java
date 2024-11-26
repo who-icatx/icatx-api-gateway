@@ -43,8 +43,8 @@ public class ProjectsController {
 
     @GetMapping(value = "/{projectId}")
     @Operation(summary = "Reading an entity", operationId = "2_getEntity")
-    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable @javax.annotation.Nonnull String projectId, @RequestParam String entityIri){
-        OWLEntityDto dto = owlEntityService.getEntityInfo(entityIri, projectId);
+    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable @javax.annotation.Nonnull String projectId, @RequestParam String entityIRI){
+        OWLEntityDto dto = owlEntityService.getEntityInfo(entityIRI, projectId);
         HttpHeaders httpHeaders = new HttpHeaders();
         String etag = "";
         if (dto.lastChangeDate() != null) {
