@@ -1,28 +1,21 @@
 package edu.stanford.protege.gateway.ontology;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 import com.google.common.collect.ImmutableSet;
-import edu.stanford.protege.gateway.SecurityContextHelper;
-import edu.stanford.protege.gateway.ApplicationException;
+import edu.stanford.protege.gateway.*;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
 import edu.stanford.protege.webprotege.common.*;
-import edu.stanford.protege.webprotege.frame.PropertyClassValue;
-import edu.stanford.protege.webprotege.common.ChangeRequestId;
-import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.*;
 import org.slf4j.*;
 import org.springframework.stereotype.Service;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
@@ -142,7 +135,7 @@ public class OntologyService {
                             formId,
                             objectMapper.convertValue(EntityFormToDtoMapper.mapFromDto(entityIri, languageTerms), JsonNode.class)),
                     SecurityContextHelper.getExecutionContext()).get();
-        }catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.error("Error updating updateLanguageTerms entity " + entityIri, e);
             throw new ApplicationException("Error updating updateLanguageTerms entity " + entityIri);
         }
@@ -175,14 +168,13 @@ public class OntologyService {
     }
 
     public CompletableFuture<Set<String>> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
-        var entityParent = ImmutableSet.of(createEntityDto.parent());
         return createClassEntityExecutor.execute(
                 CreateClassesFromApiRequest.create(
                         ChangeRequestId.generate(),
                         ProjectId.valueOf(projectId),
                         createEntityDto.title(),
                         createEntityDto.languageTag(),
-                        entityParent
+                        createEntityDto.parent()
                 ),
                 SecurityContextHelper.getExecutionContext()
         ).thenApply(

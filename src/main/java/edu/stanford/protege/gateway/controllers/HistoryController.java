@@ -35,8 +35,8 @@ public class HistoryController {
 
     @GetMapping("/entityHistorySummary")
     public ResponseEntity<EntityHistorySummary> getEntityHistorySummary(@RequestParam("projectId") String projectId,
-                                                                        @RequestParam("entityIri") String entityIri) {
-        EntityHistorySummary entityHistorySummary = entityHistoryService.getEntityHistorySummary(projectId, entityIri);
+                                                                        @RequestParam("entityIRI") String entityIRI) {
+        EntityHistorySummary entityHistorySummary = entityHistoryService.getEntityHistorySummary(projectId, entityIRI);
         return ResponseEntity.ok()
                 .body(entityHistorySummary);
 
