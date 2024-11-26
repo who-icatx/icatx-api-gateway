@@ -7,7 +7,9 @@ import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.common.Request;
 import jakarta.validation.constraints.NotNull;
 
-@JsonTypeName(SaveEntityLinearizationRequest.CHANNEL)
+import static edu.stanford.protege.gateway.linearization.commands.SaveEntityLinearizationRequest.CHANNEL;
+
+@JsonTypeName(CHANNEL)
 public record SaveEntityLinearizationRequest(
         @JsonProperty("projectId")
         ProjectId projectId,
