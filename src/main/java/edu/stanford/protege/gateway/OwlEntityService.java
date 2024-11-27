@@ -148,12 +148,13 @@ public class OwlEntityService {
             entityPostCoordinationService.updateEntityPostCoordination(owlEntityDto.postcoordination(), projectId, owlEntityDto.entityIRI(), changeRequestId);
             ontologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents(), changeRequestId);
             ontologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms(), changeRequestId);
-            eventDispatcher.dispatchEvent(new EntityUpdatedSuccessfullyEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId), SecurityContextHelper.getExecutionContext());
+            ontologyService.updateLogicalDefinition(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.logicalConditions());
         } catch (ApplicationException e) {
             LOGGER.error("Error updating entity ", e);
             eventDispatcher.dispatchEvent(new EntityUpdateFailedEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId), SecurityContextHelper.getExecutionContext());
             throw e;
         }
+        eventDispatcher.dispatchEvent(new EntityUpdatedSuccessfullyEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId), SecurityContextHelper.getExecutionContext());
         return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
     }
 
