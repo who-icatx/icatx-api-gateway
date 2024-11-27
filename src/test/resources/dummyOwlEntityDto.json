@@ -1,0 +1,332 @@
+{
+  "entityIRI": "http://id.who.int/icd/entity/1855860109",
+  "languageTerms": {
+    "title": {
+      "label": "Classical sporadic Creutzfeldt-Jakob Disease",
+      "termId": "http://who.int/icd#3779_d4765700_5765_4591_9aab_337c39ce9c2a"
+    },
+    "definition": {
+      "label": "The most common human prion disease, typically characterised by rapidly progressive dementia, ataxic gait, myoclonus, akinetic mutism, and visual disturbance. Magnetic resonance imaging of the brain, on diffusion-weighted imaging (DWI) sequences, reveals patchy hyperintensity of the cerebral cortices and basal ganglia. Cerebrospinal fluid shows increased 14-3-3 and tau proteins. There are periodic synchronous discharges (PSD) on electroencephalogram (EEG). This is the classical or typical sCJD and its neuropathology is characterised by spongiform encephalopathy consisting of neuronal loss, neuropil vacuolation, and astrogliosis.",
+      "termId": "http://who.int/icd#3547_6649f4ab_e2bf_447e_94a9_797fc66c1078"
+    },
+    "longDefinition": {
+      "label": "This is the long definition with a weird etag",
+      "termId": null
+    },
+    "fullySpecifiedName": {
+      "label": null,
+      "termId": null
+    },
+    "baseIndexTerms": [],
+    "subclassBaseInclusions": [],
+    "baseExclusionTerms": [],
+    "isObsolete": false
+  },
+  "entityLinearizations": {
+    "suppressOtherSpecifiedResiduals": null,
+    "suppressUnspecifiedResiduals": null,
+    "unspecifiedResidualTitle": {
+      "label": "Test de API cand se poate"
+    },
+    "otherSpecifiedResidualTitle": {
+      "label": null
+    },
+    "linearizations": [
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "UNKNOWN",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/rar",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "FALSE",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/research",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "FALSE",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/ocu",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "FALSE",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/mnh",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "UNKNOWN",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/oph",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "FALSE",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/mus",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "FALSE",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/ped",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "UNKNOWN",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/env",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "FALSE",
+        "isIncludedInLinearization": "FALSE",
+        "linearizationPathParent": "http://id.who.int/icd/entity/1553463690",
+        "linearizationId": "http://id.who.int/icd/release/11/mms",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "FALSE",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/der",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "UNKNOWN",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/icd-o",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "FALSE",
+        "isIncludedInLinearization": "FALSE",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/pch",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "FALSE",
+        "isIncludedInLinearization": "TRUE",
+        "linearizationPathParent": "http://id.who.int/icd/entity/1553463690",
+        "linearizationId": "http://id.who.int/icd/release/11/ner",
+        "codingNote": null
+      },
+      {
+        "isAuxiliaryAxisChild": "UNKNOWN",
+        "isGrouping": "FALSE",
+        "isIncludedInLinearization": "UNKNOWN",
+        "linearizationPathParent": "",
+        "linearizationId": "http://id.who.int/icd/release/11/pcl",
+        "codingNote": null
+      }
+    ]
+  },
+  "postcoordination": {
+    "postcoordinationSpecifications": [
+      {
+        "linearizationId": "ICHI",
+        "requiredAxes": [],
+        "allowedAxes": [],
+        "notAllowedAxes": [
+          "http://id.who.int/icd/schema/hasSeverity",
+          "http://id.who.int/icd/schema/hasAlternativeSeverity1",
+          "http://id.who.int/icd/schema/hasAlternativeSeverity2",
+          "http://id.who.int/icd/schema/course",
+          "http://id.who.int/icd/schema/temporalPatternAndOnset",
+          "http://id.who.int/icd/schema/timeInLife",
+          "http://id.who.int/icd/schema/causality",
+          "http://id.who.int/icd/schema/infectiousAgent",
+          "http://id.who.int/icd/schema/chemicalAgent",
+          "http://id.who.int/icd/schema/medication",
+          "http://id.who.int/icd/schema/hasCausingCondition",
+          "http://id.who.int/icd/schema/histopathology",
+          "http://id.who.int/icd/schema/laterality",
+          "http://id.who.int/icd/schema/relational",
+          "http://id.who.int/icd/schema/distribution",
+          "http://id.who.int/icd/schema/regional",
+          "http://id.who.int/icd/schema/specificAnatomy",
+          "http://id.who.int/icd/schema/serotype",
+          "http://id.who.int/icd/schema/genomicAndChomosomalAnomaly",
+          "http://id.who.int/icd/schema/fractureSubtype",
+          "http://id.who.int/icd/schema/fractureOpenOrClosed",
+          "http://id.who.int/icd/schema/jointInvolvementInFracture",
+          "http://id.who.int/icd/schema/typeOfInjury",
+          "http://id.who.int/icd/schema/extentOfBurnByBodySurface",
+          "http://id.who.int/icd/schema/extentOfFullThicknessBurnByBodySurface",
+          "http://id.who.int/icd/schema/outcomeOfFullThicknessBurn",
+          "http://id.who.int/icd/schema/durationOfComa",
+          "http://id.who.int/icd/schema/levelOfConsciousness",
+          "http://id.who.int/icd/schema/diagnosisConfirmedBy",
+          "http://id.who.int/icd/schema/hasManifestation",
+          "http://id.who.int/icd/schema/associatedWith"
+        ],
+        "overwrittenAllowedAxes": [],
+        "overwrittenRequiredAxes": [],
+        "overwrittenNotAllowedAxes": []
+      },
+      {
+        "linearizationId": "MMS",
+        "requiredAxes": [
+          "http://id.who.int/icd/schema/hasSeverity"
+        ],
+        "allowedAxes": [],
+        "notAllowedAxes": [
+          "http://id.who.int/icd/schema/hasAlternativeSeverity1",
+          "http://id.who.int/icd/schema/hasAlternativeSeverity2",
+          "http://id.who.int/icd/schema/course",
+          "http://id.who.int/icd/schema/temporalPatternAndOnset",
+          "http://id.who.int/icd/schema/timeInLife",
+          "http://id.who.int/icd/schema/causality",
+          "http://id.who.int/icd/schema/infectiousAgent",
+          "http://id.who.int/icd/schema/chemicalAgent",
+          "http://id.who.int/icd/schema/medication",
+          "http://id.who.int/icd/schema/hasCausingCondition",
+          "http://id.who.int/icd/schema/histopathology",
+          "http://id.who.int/icd/schema/laterality",
+          "http://id.who.int/icd/schema/relational",
+          "http://id.who.int/icd/schema/distribution",
+          "http://id.who.int/icd/schema/regional",
+          "http://id.who.int/icd/schema/specificAnatomy",
+          "http://id.who.int/icd/schema/serotype",
+          "http://id.who.int/icd/schema/genomicAndChomosomalAnomaly",
+          "http://id.who.int/icd/schema/fractureSubtype",
+          "http://id.who.int/icd/schema/fractureOpenOrClosed",
+          "http://id.who.int/icd/schema/jointInvolvementInFracture",
+          "http://id.who.int/icd/schema/typeOfInjury",
+          "http://id.who.int/icd/schema/extentOfBurnByBodySurface",
+          "http://id.who.int/icd/schema/extentOfFullThicknessBurnByBodySurface",
+          "http://id.who.int/icd/schema/outcomeOfFullThicknessBurn",
+          "http://id.who.int/icd/schema/durationOfComa",
+          "http://id.who.int/icd/schema/levelOfConsciousness",
+          "http://id.who.int/icd/schema/diagnosisConfirmedBy",
+          "http://id.who.int/icd/schema/hasManifestation",
+          "http://id.who.int/icd/schema/associatedWith"
+        ],
+        "overwrittenAllowedAxes": [],
+        "overwrittenRequiredAxes": [],
+        "overwrittenNotAllowedAxes": []
+      },
+      {
+        "linearizationId": "ICD-O",
+        "requiredAxes": [],
+        "allowedAxes": [],
+        "notAllowedAxes": [
+          "http://id.who.int/icd/schema/hasSeverity",
+          "http://id.who.int/icd/schema/hasAlternativeSeverity1",
+          "http://id.who.int/icd/schema/hasAlternativeSeverity2",
+          "http://id.who.int/icd/schema/course",
+          "http://id.who.int/icd/schema/temporalPatternAndOnset",
+          "http://id.who.int/icd/schema/timeInLife",
+          "http://id.who.int/icd/schema/causality",
+          "http://id.who.int/icd/schema/infectiousAgent",
+          "http://id.who.int/icd/schema/chemicalAgent",
+          "http://id.who.int/icd/schema/medication",
+          "http://id.who.int/icd/schema/hasCausingCondition",
+          "http://id.who.int/icd/schema/histopathology",
+          "http://id.who.int/icd/schema/laterality",
+          "http://id.who.int/icd/schema/relational",
+          "http://id.who.int/icd/schema/distribution",
+          "http://id.who.int/icd/schema/regional",
+          "http://id.who.int/icd/schema/specificAnatomy",
+          "http://id.who.int/icd/schema/serotype",
+          "http://id.who.int/icd/schema/genomicAndChomosomalAnomaly",
+          "http://id.who.int/icd/schema/fractureSubtype",
+          "http://id.who.int/icd/schema/fractureOpenOrClosed",
+          "http://id.who.int/icd/schema/jointInvolvementInFracture",
+          "http://id.who.int/icd/schema/typeOfInjury",
+          "http://id.who.int/icd/schema/extentOfBurnByBodySurface",
+          "http://id.who.int/icd/schema/extentOfFullThicknessBurnByBodySurface",
+          "http://id.who.int/icd/schema/outcomeOfFullThicknessBurn",
+          "http://id.who.int/icd/schema/durationOfComa",
+          "http://id.who.int/icd/schema/levelOfConsciousness",
+          "http://id.who.int/icd/schema/diagnosisConfirmedBy",
+          "http://id.who.int/icd/schema/hasManifestation",
+          "http://id.who.int/icd/schema/associatedWith"
+        ],
+        "overwrittenAllowedAxes": [],
+        "overwrittenRequiredAxes": [],
+        "overwrittenNotAllowedAxes": []
+      },
+      {
+        "linearizationId": "ICF",
+        "requiredAxes": [],
+        "allowedAxes": [],
+        "notAllowedAxes": [
+          "http://id.who.int/icd/schema/hasSeverity",
+          "http://id.who.int/icd/schema/hasAlternativeSeverity1",
+          "http://id.who.int/icd/schema/hasAlternativeSeverity2",
+          "http://id.who.int/icd/schema/course",
+          "http://id.who.int/icd/schema/temporalPatternAndOnset",
+          "http://id.who.int/icd/schema/timeInLife",
+          "http://id.who.int/icd/schema/causality",
+          "http://id.who.int/icd/schema/infectiousAgent",
+          "http://id.who.int/icd/schema/chemicalAgent",
+          "http://id.who.int/icd/schema/medication",
+          "http://id.who.int/icd/schema/hasCausingCondition",
+          "http://id.who.int/icd/schema/histopathology",
+          "http://id.who.int/icd/schema/laterality",
+          "http://id.who.int/icd/schema/relational",
+          "http://id.who.int/icd/schema/distribution",
+          "http://id.who.int/icd/schema/regional",
+          "http://id.who.int/icd/schema/specificAnatomy",
+          "http://id.who.int/icd/schema/serotype",
+          "http://id.who.int/icd/schema/genomicAndChomosomalAnomaly",
+          "http://id.who.int/icd/schema/fractureSubtype",
+          "http://id.who.int/icd/schema/fractureOpenOrClosed",
+          "http://id.who.int/icd/schema/jointInvolvementInFracture",
+          "http://id.who.int/icd/schema/typeOfInjury",
+          "http://id.who.int/icd/schema/extentOfBurnByBodySurface",
+          "http://id.who.int/icd/schema/extentOfFullThicknessBurnByBodySurface",
+          "http://id.who.int/icd/schema/outcomeOfFullThicknessBurn",
+          "http://id.who.int/icd/schema/durationOfComa",
+          "http://id.who.int/icd/schema/levelOfConsciousness",
+          "http://id.who.int/icd/schema/diagnosisConfirmedBy",
+          "http://id.who.int/icd/schema/hasManifestation",
+          "http://id.who.int/icd/schema/associatedWith"
+        ],
+        "overwrittenAllowedAxes": [],
+        "overwrittenRequiredAxes": [],
+        "overwrittenNotAllowedAxes": []
+      }
+    ],
+    "scaleCustomizations": []
+  },
+  "logicalConditions": {
+    "jsonRepresentation": {
+      "logicalDefinitions": [],
+      "necessaryConditions": []
+    },
+    "functionalRepresentation": {
+      "owlSyntax": "OWLFunctionalSyntax",
+      "axioms": []
+    }
+  },
+  "parents": [
+    "http://id.who.int/icd/entity/1553463690"
+  ]
+}

@@ -1,6 +1,7 @@
 package edu.stanford.protege.gateway.postcoordination;
 
 
+import edu.stanford.protege.gateway.ApplicationException;
 import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.dto.EntityPostCoordinationCustomScalesDto;
 import edu.stanford.protege.gateway.dto.EntityPostCoordinationSpecificationDto;
@@ -83,8 +84,8 @@ public class EntityPostCoordinationService {
                 updateSpecificationExecutor.execute(new AddEntitySpecificationRevisionRequest(projectId, specification, changeRequestId), executionContext).get();
             }
         } catch (Exception e) {
-            LOGGER.error("Error saving postcoordination for entity " + entityIri);
-            throw new RuntimeException(e);
+            LOGGER.error("Error saving postcoordination for entity " + entityIri, e);
+            throw new ApplicationException("Error saving postcoordination for entity " + entityIri);
         }
     }
 

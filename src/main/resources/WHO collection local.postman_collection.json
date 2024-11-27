@@ -1,0 +1,497 @@
+{
+	"info": {
+		"_postman_id": "ef93d74a-6bef-4ae2-95cb-6f28b1965ba2",
+		"name": "WHO collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "666575"
+	},
+	"item": [
+		{
+			"name": "get-keycloak-token-local",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let response = pm.response.json();\r",
+							"let jwt = response[\"access_token\"];\r",
+							"pm.globals.set(\"JWT-TOKEN\", jwt);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "icatx_application",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{ICAT_APP_SECRET}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://webprotege-local.edu/auth/realms/webprotege/protocol/openid-connect/token",
+					"protocol": "http",
+					"host": [
+						"webprotege-local",
+						"edu"
+					],
+					"path": [
+						"auth",
+						"realms",
+						"webprotege",
+						"protocol",
+						"openid-connect",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-projects",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseData = pm.response.json();\r",
+							"\r",
+							"if (Array.isArray(responseData) && responseData.length > 0) {\r",
+							"    var projectId = responseData[0].projectId;\r",
+							"\r",
+							"    pm.collectionVariables.set(\"projectId\", projectId);\r",
+							"\r",
+							"    console.log(\"Extracted projectId:\", projectId);\r",
+							"} else {\r",
+							"    console.log(\"No data found in response\");\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7779/icat/projects",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "basic-get-entity-local",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var headerValue = pm.response.headers.get(\"ETag\");\r",
+							"\r",
+							"// Check if the header exists\r",
+							"if (headerValue) {\r",
+							"    // Save the header value to a collection variable\r",
+							"    pm.collectionVariables.set(\"ETAG\", headerValue);\r",
+							"\r",
+							"    // Optionally, log the header value to the console for debugging\r",
+							"    console.log(\"Extracted ETAG header:\", headerValue);\r",
+							"} else {\r",
+							"    console.log(\"ETAG header not found in the response.\");\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:7779/icat/projects/{{projectId}}?entityIRI=http://id.who.int/icd/entity/1855860109",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects",
+						"{{projectId}}"
+					],
+					"query": [
+						{
+							"key": "entityIRI",
+							"value": "http://id.who.int/icd/entity/1855860109"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Entity",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "If-Match",
+						"value": "{{ETAG}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"entityIRI\": \"http://id.who.int/icd/entity/1855860109\",\r\n    \"languageTerms\": {\r\n        \"title\": {\r\n            \"label\": \"Classical sporadic Creutzfeldt-Jakob Disease\",\r\n            \"termId\": \"http://who.int/icd#3779_d4765700_5765_4591_9aab_337c39ce9c2a\"\r\n        },\r\n        \"definition\": {\r\n            \"label\": \"The most common human prion disease, typically characterised by rapidly progressive dementia, ataxic gait, myoclonus, akinetic mutism, and visual disturbance. Magnetic resonance imaging of the brain, on diffusion-weighted imaging (DWI) sequences, reveals patchy hyperintensity of the cerebral cortices and basal ganglia. Cerebrospinal fluid shows increased 14-3-3 and tau proteins. There are periodic synchronous discharges (PSD) on electroencephalogram (EEG). This is the classical or typical sCJD and its neuropathology is characterised by spongiform encephalopathy consisting of neuronal loss, neuropil vacuolation, and astrogliosis.\",\r\n            \"termId\": \"http://who.int/icd#3547_6649f4ab_e2bf_447e_94a9_797fc66c1078\"\r\n        },\r\n        \"longDefinition\": {\r\n            \"label\": \"This is the long definition with a weird etag 2\",\r\n            \"termId\": \"http://www.example.org/RBBJsMRbiI1RkZYbPOrsP1t\"\r\n        },\r\n        \"fullySpecifiedName\": {\r\n            \"label\": null,\r\n            \"termId\": null\r\n        },\r\n        \"baseIndexTerms\": [],\r\n        \"subclassBaseInclusions\": [],\r\n        \"baseExclusionTerms\": [],\r\n        \"isObsolete\": false\r\n    },\r\n    \"entityLinearizations\": {\r\n        \"suppressOtherSpecifiedResiduals\": null,\r\n        \"suppressUnspecifiedResiduals\": null,\r\n        \"unspecifiedResidualTitle\": {\r\n            \"label\": null\r\n        },\r\n        \"otherSpecifiedResidualTitle\": {\r\n            \"label\": null\r\n        },\r\n        \"linearizations\": [\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"UNKNOWN\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/rar\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"FALSE\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/research\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"FALSE\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/ocu\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"FALSE\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/mnh\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"UNKNOWN\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/oph\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"FALSE\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/mus\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"FALSE\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/ped\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"UNKNOWN\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/env\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"FALSE\",\r\n                \"isIncludedInLinearization\": \"FALSE\",\r\n                \"linearizationPathParent\": \"http://id.who.int/icd/entity/1553463690\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/mms\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"FALSE\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/der\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"UNKNOWN\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/icd-o\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"FALSE\",\r\n                \"isIncludedInLinearization\": \"FALSE\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/pch\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"FALSE\",\r\n                \"isIncludedInLinearization\": \"TRUE\",\r\n                \"linearizationPathParent\": \"http://id.who.int/icd/entity/1553463690\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/ner\",\r\n                \"codingNote\": null\r\n            },\r\n            {\r\n                \"isAuxiliaryAxisChild\": \"UNKNOWN\",\r\n                \"isGrouping\": \"FALSE\",\r\n                \"isIncludedInLinearization\": \"UNKNOWN\",\r\n                \"linearizationPathParent\": \"\",\r\n                \"linearizationId\": \"http://id.who.int/icd/release/11/pcl\",\r\n                \"codingNote\": null\r\n            }\r\n        ]\r\n    },\r\n    \"postcoordination\": {\r\n        \"postcoordinationSpecifications\": [\r\n            {\r\n                \"linearizationId\": \"MMS\",\r\n                \"requiredAxes\": [\r\n                    \"http://id.who.int/icd/schema/hasSeverity\"\r\n                ],\r\n                \"allowedAxes\": [],\r\n                \"notAllowedAxes\": [\r\n                    \"http://id.who.int/icd/schema/hasAlternativeSeverity1\",\r\n                    \"http://id.who.int/icd/schema/hasAlternativeSeverity2\",\r\n                    \"http://id.who.int/icd/schema/course\",\r\n                    \"http://id.who.int/icd/schema/temporalPatternAndOnset\",\r\n                    \"http://id.who.int/icd/schema/timeInLife\",\r\n                    \"http://id.who.int/icd/schema/causality\",\r\n                    \"http://id.who.int/icd/schema/infectiousAgent\",\r\n                    \"http://id.who.int/icd/schema/chemicalAgent\",\r\n                    \"http://id.who.int/icd/schema/medication\",\r\n                    \"http://id.who.int/icd/schema/hasCausingCondition\",\r\n                    \"http://id.who.int/icd/schema/histopathology\",\r\n                    \"http://id.who.int/icd/schema/laterality\",\r\n                    \"http://id.who.int/icd/schema/relational\",\r\n                    \"http://id.who.int/icd/schema/distribution\",\r\n                    \"http://id.who.int/icd/schema/regional\",\r\n                    \"http://id.who.int/icd/schema/specificAnatomy\",\r\n                    \"http://id.who.int/icd/schema/serotype\",\r\n                    \"http://id.who.int/icd/schema/genomicAndChomosomalAnomaly\",\r\n                    \"http://id.who.int/icd/schema/fractureSubtype\",\r\n                    \"http://id.who.int/icd/schema/fractureOpenOrClosed\",\r\n                    \"http://id.who.int/icd/schema/jointInvolvementInFracture\",\r\n                    \"http://id.who.int/icd/schema/typeOfInjury\",\r\n                    \"http://id.who.int/icd/schema/extentOfBurnByBodySurface\",\r\n                    \"http://id.who.int/icd/schema/extentOfFullThicknessBurnByBodySurface\",\r\n                    \"http://id.who.int/icd/schema/outcomeOfFullThicknessBurn\",\r\n                    \"http://id.who.int/icd/schema/durationOfComa\",\r\n                    \"http://id.who.int/icd/schema/levelOfConsciousness\",\r\n                    \"http://id.who.int/icd/schema/diagnosisConfirmedBy\",\r\n                    \"http://id.who.int/icd/schema/hasManifestation\",\r\n                    \"http://id.who.int/icd/schema/associatedWith\"\r\n                ],\r\n                \"overwrittenAllowedAxes\": [],\r\n                \"overwrittenRequiredAxes\": [],\r\n                \"overwrittenNotAllowedAxes\": []\r\n            },\r\n            {\r\n                \"linearizationId\": \"ICHI\",\r\n                \"requiredAxes\": [],\r\n                \"allowedAxes\": [],\r\n                \"notAllowedAxes\": [\r\n                    \"http://id.who.int/icd/schema/hasSeverity\",\r\n                    \"http://id.who.int/icd/schema/hasAlternativeSeverity1\",\r\n                    \"http://id.who.int/icd/schema/hasAlternativeSeverity2\",\r\n                    \"http://id.who.int/icd/schema/course\",\r\n                    \"http://id.who.int/icd/schema/temporalPatternAndOnset\",\r\n                    \"http://id.who.int/icd/schema/timeInLife\",\r\n                    \"http://id.who.int/icd/schema/causality\",\r\n                    \"http://id.who.int/icd/schema/infectiousAgent\",\r\n                    \"http://id.who.int/icd/schema/chemicalAgent\",\r\n                    \"http://id.who.int/icd/schema/medication\",\r\n                    \"http://id.who.int/icd/schema/hasCausingCondition\",\r\n                    \"http://id.who.int/icd/schema/histopathology\",\r\n                    \"http://id.who.int/icd/schema/laterality\",\r\n                    \"http://id.who.int/icd/schema/relational\",\r\n                    \"http://id.who.int/icd/schema/distribution\",\r\n                    \"http://id.who.int/icd/schema/regional\",\r\n                    \"http://id.who.int/icd/schema/specificAnatomy\",\r\n                    \"http://id.who.int/icd/schema/serotype\",\r\n                    \"http://id.who.int/icd/schema/genomicAndChomosomalAnomaly\",\r\n                    \"http://id.who.int/icd/schema/fractureSubtype\",\r\n                    \"http://id.who.int/icd/schema/fractureOpenOrClosed\",\r\n                    \"http://id.who.int/icd/schema/jointInvolvementInFracture\",\r\n                    \"http://id.who.int/icd/schema/typeOfInjury\",\r\n                    \"http://id.who.int/icd/schema/extentOfBurnByBodySurface\",\r\n                    \"http://id.who.int/icd/schema/extentOfFullThicknessBurnByBodySurface\",\r\n                    \"http://id.who.int/icd/schema/outcomeOfFullThicknessBurn\",\r\n                    \"http://id.who.int/icd/schema/durationOfComa\",\r\n                    \"http://id.who.int/icd/schema/levelOfConsciousness\",\r\n                    \"http://id.who.int/icd/schema/diagnosisConfirmedBy\",\r\n                    \"http://id.who.int/icd/schema/hasManifestation\",\r\n                    \"http://id.who.int/icd/schema/associatedWith\"\r\n                ],\r\n                \"overwrittenAllowedAxes\": [],\r\n                \"overwrittenRequiredAxes\": [],\r\n                \"overwrittenNotAllowedAxes\": []\r\n            },\r\n            {\r\n                \"linearizationId\": \"ICF\",\r\n                \"requiredAxes\": [],\r\n                \"allowedAxes\": [],\r\n                \"notAllowedAxes\": [\r\n                    \"http://id.who.int/icd/schema/hasSeverity\",\r\n                    \"http://id.who.int/icd/schema/hasAlternativeSeverity1\",\r\n                    \"http://id.who.int/icd/schema/hasAlternativeSeverity2\",\r\n                    \"http://id.who.int/icd/schema/course\",\r\n                    \"http://id.who.int/icd/schema/temporalPatternAndOnset\",\r\n                    \"http://id.who.int/icd/schema/timeInLife\",\r\n                    \"http://id.who.int/icd/schema/causality\",\r\n                    \"http://id.who.int/icd/schema/infectiousAgent\",\r\n                    \"http://id.who.int/icd/schema/chemicalAgent\",\r\n                    \"http://id.who.int/icd/schema/medication\",\r\n                    \"http://id.who.int/icd/schema/hasCausingCondition\",\r\n                    \"http://id.who.int/icd/schema/histopathology\",\r\n                    \"http://id.who.int/icd/schema/laterality\",\r\n                    \"http://id.who.int/icd/schema/relational\",\r\n                    \"http://id.who.int/icd/schema/distribution\",\r\n                    \"http://id.who.int/icd/schema/regional\",\r\n                    \"http://id.who.int/icd/schema/specificAnatomy\",\r\n                    \"http://id.who.int/icd/schema/serotype\",\r\n                    \"http://id.who.int/icd/schema/genomicAndChomosomalAnomaly\",\r\n                    \"http://id.who.int/icd/schema/fractureSubtype\",\r\n                    \"http://id.who.int/icd/schema/fractureOpenOrClosed\",\r\n                    \"http://id.who.int/icd/schema/jointInvolvementInFracture\",\r\n                    \"http://id.who.int/icd/schema/typeOfInjury\",\r\n                    \"http://id.who.int/icd/schema/extentOfBurnByBodySurface\",\r\n                    \"http://id.who.int/icd/schema/extentOfFullThicknessBurnByBodySurface\",\r\n                    \"http://id.who.int/icd/schema/outcomeOfFullThicknessBurn\",\r\n                    \"http://id.who.int/icd/schema/durationOfComa\",\r\n                    \"http://id.who.int/icd/schema/levelOfConsciousness\",\r\n                    \"http://id.who.int/icd/schema/diagnosisConfirmedBy\",\r\n                    \"http://id.who.int/icd/schema/hasManifestation\",\r\n                    \"http://id.who.int/icd/schema/associatedWith\"\r\n                ],\r\n                \"overwrittenAllowedAxes\": [],\r\n                \"overwrittenRequiredAxes\": [],\r\n                \"overwrittenNotAllowedAxes\": []\r\n            },\r\n            {\r\n                \"linearizationId\": \"ICD-O\",\r\n                \"requiredAxes\": [],\r\n                \"allowedAxes\": [],\r\n                \"notAllowedAxes\": [\r\n                    \"http://id.who.int/icd/schema/hasSeverity\",\r\n                    \"http://id.who.int/icd/schema/hasAlternativeSeverity1\",\r\n                    \"http://id.who.int/icd/schema/hasAlternativeSeverity2\",\r\n                    \"http://id.who.int/icd/schema/course\",\r\n                    \"http://id.who.int/icd/schema/temporalPatternAndOnset\",\r\n                    \"http://id.who.int/icd/schema/timeInLife\",\r\n                    \"http://id.who.int/icd/schema/causality\",\r\n                    \"http://id.who.int/icd/schema/infectiousAgent\",\r\n                    \"http://id.who.int/icd/schema/chemicalAgent\",\r\n                    \"http://id.who.int/icd/schema/medication\",\r\n                    \"http://id.who.int/icd/schema/hasCausingCondition\",\r\n                    \"http://id.who.int/icd/schema/histopathology\",\r\n                    \"http://id.who.int/icd/schema/laterality\",\r\n                    \"http://id.who.int/icd/schema/relational\",\r\n                    \"http://id.who.int/icd/schema/distribution\",\r\n                    \"http://id.who.int/icd/schema/regional\",\r\n                    \"http://id.who.int/icd/schema/specificAnatomy\",\r\n                    \"http://id.who.int/icd/schema/serotype\",\r\n                    \"http://id.who.int/icd/schema/genomicAndChomosomalAnomaly\",\r\n                    \"http://id.who.int/icd/schema/fractureSubtype\",\r\n                    \"http://id.who.int/icd/schema/fractureOpenOrClosed\",\r\n                    \"http://id.who.int/icd/schema/jointInvolvementInFracture\",\r\n                    \"http://id.who.int/icd/schema/typeOfInjury\",\r\n                    \"http://id.who.int/icd/schema/extentOfBurnByBodySurface\",\r\n                    \"http://id.who.int/icd/schema/extentOfFullThicknessBurnByBodySurface\",\r\n                    \"http://id.who.int/icd/schema/outcomeOfFullThicknessBurn\",\r\n                    \"http://id.who.int/icd/schema/durationOfComa\",\r\n                    \"http://id.who.int/icd/schema/levelOfConsciousness\",\r\n                    \"http://id.who.int/icd/schema/diagnosisConfirmedBy\",\r\n                    \"http://id.who.int/icd/schema/hasManifestation\",\r\n                    \"http://id.who.int/icd/schema/associatedWith\"\r\n                ],\r\n                \"overwrittenAllowedAxes\": [],\r\n                \"overwrittenRequiredAxes\": [],\r\n                \"overwrittenNotAllowedAxes\": []\r\n            }\r\n        ],\r\n        \"scaleCustomizations\": []\r\n    },\r\n    \"logicalConditions\": {\r\n        \"jsonRepresentation\": {\r\n            \"logicalDefinitions\": [],\r\n            \"necessaryConditions\": []\r\n        },\r\n        \"functionalRepresentation\": {\r\n            \"owlSyntax\": \"OWLFunctionalSyntax\",\r\n            \"axioms\": []\r\n        }\r\n    },\r\n    \"parents\": [\r\n        \"http://id.who.int/icd/entity/1553463690\"\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:7779/icat/projects/{{projectId}}/entities",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects",
+						"{{projectId}}",
+						"entities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create-entity",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"api created entity\",\r\n    \"parent\": \"http://id.who.int/icd/entity/1855860109\",\r\n    \"languageTag\": \"en\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:7779/icat/projects/{{projectId}}/entities",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects",
+						"{{projectId}}",
+						"entities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-entity-children",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7779/icat/projects/{{projectId}}/entities/children?entityIRI=http://id.who.int/icd/entity/921595235",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects",
+						"{{projectId}}",
+						"entities",
+						"children"
+					],
+					"query": [
+						{
+							"key": "entityIRI",
+							"value": "http://id.who.int/icd/entity/921595235"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-entity-comments",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7779/icat/projects/{{projectId}}/entities/comments?entityIRI=http%3A%2F%2Fwho.int%2Ficd%23ICDEntity",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"projects",
+						"{{projectId}}",
+						"entities",
+						"comments"
+					],
+					"query": [
+						{
+							"key": "entityIRI",
+							"value": "http%3A%2F%2Fwho.int%2Ficd%23ICDEntity"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-changed-entities",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:7779/icat/history/entities?projectId={{projectId}}&changedAfter=2024-11-12T19:00:50Z",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"history",
+						"entities"
+					],
+					"query": [
+						{
+							"key": "projectId",
+							"value": "{{projectId}}"
+						},
+						{
+							"key": "changedAfter",
+							"value": "2024-11-12T19:00:50Z"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-entity-summary",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:7779/icat/history/entity-summary?projectId={{projectId}}&changedAfter=2024-11-12T19:00:50Z&entityIRI=http://id.who.int/icd/entity/921595235",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"history",
+						"entity-summary"
+					],
+					"query": [
+						{
+							"key": "projectId",
+							"value": "{{projectId}}"
+						},
+						{
+							"key": "changedAfter",
+							"value": "2024-11-12T19:00:50Z"
+						},
+						{
+							"key": "entityIRI",
+							"value": "http://id.who.int/icd/entity/921595235"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-linearization-definitions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT-TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:7779/icat/linearization-definitions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "7779",
+					"path": [
+						"icat",
+						"linearization-definitions"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "ICAT_APP_SECRET",
+			"value": "9960645c-9894-4d25-84d7-4af58838944b"
+		},
+		{
+			"key": "projectId",
+			"value": ""
+		},
+		{
+			"key": "ETAG",
+			"value": ""
+		}
+	]
+}

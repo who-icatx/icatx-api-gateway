@@ -1,9 +1,11 @@
 package edu.stanford.protege.gateway;
 
 
+import com.google.common.hash.Hashing;
 import edu.stanford.protege.gateway.dto.*;
+import edu.stanford.protege.gateway.history.EntityHistoryService;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
-import edu.stanford.protege.gateway.ontology.EntityOntologyService;
+import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
 import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.EventId;
@@ -13,8 +15,14 @@ import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -26,8 +34,9 @@ public class OwlEntityService {
 
     private final EntityPostCoordinationService entityPostCoordinationService;
 
-    private final EntityOntologyService entityOntologyService;
+    private final OntologyService ontologyService;
 
+    private final EntityHistoryService entityHistoryService;
     @Nonnull
     private final EventDispatcher eventDispatcher;
 
@@ -35,11 +44,18 @@ public class OwlEntityService {
     private String formId;
 
 
-    public OwlEntityService(EntityLinearizationService entityLinearizationService, EntityPostCoordinationService entityPostCoordinationService, EntityOntologyService entityOntologyService, @Nonnull EventDispatcher eventDispatcher) {
+    public OwlEntityService(EntityLinearizationService entityLinearizationService,
+                            EntityPostCoordinationService entityPostCoordinationService,
+                            EntityOntologyService entityOntologyService,
+                            EntityHistoryService entityHistoryService,
+                            OntologyService ontologyService)
+                            @Nonnull EventDispatcher eventDispatcher) {
         this.entityLinearizationService = entityLinearizationService;
         this.entityPostCoordinationService = entityPostCoordinationService;
         this.entityOntologyService = entityOntologyService;
         this.eventDispatcher = eventDispatcher;
+        this.ontologyService = ontologyService;
+        this.entityHistoryService = entityHistoryService;
     }
 
 
@@ -47,43 +63,87 @@ public class OwlEntityService {
         CompletableFuture<EntityLinearizationWrapperDto> linearizationDto = entityLinearizationService.getEntityLinearizationDto(entityIri, projectId);
         CompletableFuture<List<EntityPostCoordinationSpecificationDto>> specList = entityPostCoordinationService.getPostCoordinationSpecifications(entityIri, projectId);
         CompletableFuture<List<EntityPostCoordinationCustomScalesDto>> customScalesDtos = entityPostCoordinationService.getEntityCustomScales(entityIri, projectId);
-        CompletableFuture<EntityLanguageTerms> entityLanguageTerms = entityOntologyService.getEntityLanguageTerms(entityIri, projectId, this.formId);
-        CompletableFuture<EntityLogicalConditionsWrapper> logicalConditions = entityOntologyService.getEntityLogicalConditions(entityIri, projectId);
-        CompletableFuture<List<String>> parents = entityOntologyService.getEntityParents(entityIri, projectId);
-
-        CompletableFuture<Void> combinedFutures = CompletableFuture.allOf(linearizationDto, specList, customScalesDtos, entityLanguageTerms, logicalConditions, parents);
+        CompletableFuture<EntityLanguageTerms> entityLanguageTerms = ontologyService.getEntityLanguageTerms(entityIri, projectId, this.formId);
+        CompletableFuture<EntityLogicalConditionsWrapper> logicalConditions = ontologyService.getEntityLogicalConditions(entityIri, projectId);
+        CompletableFuture<List<String>> parents = ontologyService.getEntityParents(entityIri, projectId);
+        CompletableFuture<LocalDateTime> latestChange = entityHistoryService.getEntityLatestChangeTime(projectId, entityIri);
+        CompletableFuture<Void> combinedFutures = CompletableFuture.allOf(linearizationDto,
+                specList,
+                customScalesDtos,
+                entityLanguageTerms,
+                logicalConditions,
+                parents,
+                latestChange);
         combinedFutures.join();
 
         try {
+            EntityLanguageTerms terms = entityLanguageTerms.get();
+            if (terms == null || terms.title() == null || terms.title().label() == null || terms.title().label().isEmpty()) {
+                throw new EntityIsMissingException("Entity with iri " + entityIri + " is missing");
+            }
             return new OWLEntityDto(entityIri,
                     entityLanguageTerms.get(),
                     linearizationDto.get(),
                     new EntityPostCoordinationWrapperDto(specList.get(), new Date(), customScalesDtos.get()),
-                    new Date(),
+                    latestChange.get(),
                     logicalConditions.get(),
                     parents.get()
             );
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error fetching data for entity " + entityIri, e);
-            throw new RuntimeException(e);
+            throw new ApplicationException("Error fetching data for entity " + entityIri);
         }
 
     }
 
-    public List<String> getEntityChildren(String entityIri, String projectId) {
-        CompletableFuture<List<String>> entityChildren = entityOntologyService.getEntityChildren(entityIri, projectId);
+    public List<String> getEntityChildren(String entityIRI, String projectId) {
+        CompletableFuture<List<String>> entityChildren = ontologyService.getEntityChildren(entityIRI, projectId);
 
         try {
             return entityChildren.get();
         } catch (Exception e) {
-            LOGGER.error("Error fetching data for entity " + entityIri, e);
+            LOGGER.error("Error fetching data for entity " + entityIRI, e);
             throw new RuntimeException(e);
         }
     }
 
-    public OWLEntityDto updateEntity(OWLEntityDto owlEntityDto, String existingProjectId) {
+    public Set<String> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
+        CompletableFuture<Set<String>> newCreatedEntityIri = ontologyService.createClassEntity(projectId, createEntityDto);
+        try {
+            return newCreatedEntityIri.get();
+        } catch (Exception e) {
+            LOGGER.error("Error creating new class entity " + createEntityDto.title(), e);
+            /*
+            ToDo:
+                Here we can add the revert event for all the services if the creation fails for whatever reason.
+             */
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Set<ProjectSummaryDto> getProjects() {
+        CompletableFuture<Set<ProjectSummaryDto>> availableProjects = ontologyService.getProjects();
+        try {
+            return availableProjects.get();
+        } catch (Exception e) {
+            LOGGER.error("Error retrieving available projects!", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public EntityComments getEntityComments(String entityIri, String projectId) {
+        try {
+            return ontologyService.getEntityDiscussionThreads(entityIri, projectId).get();
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Error fetching data for entity discussion threads for entity" + entityIri, e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public OWLEntityDto updateEntity(OWLEntityDto owlEntityDto, String existingProjectId, String callerHash) {
         ChangeRequestId changeRequestId = ChangeRequestId.generate();
         ProjectId projectId = ProjectId.valueOf(existingProjectId);
+        validateEntityUpdate(owlEntityDto, existingProjectId, callerHash);
 
         try {
             entityLinearizationService.updateEntityLinearization(owlEntityDto, projectId, changeRequestId);
@@ -96,6 +156,59 @@ public class OwlEntityService {
             eventDispatcher.dispatchEvent(new EntityUpdateFailedEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId));
             throw new RuntimeException(e);
         }
-       return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
+        return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
+    }
+
+
+    private void validateEntityUpdate(OWLEntityDto owlEntityDto, String existingProjectId, String callerHash) {
+        callerVersionMatchesLatestVersion(owlEntityDto, existingProjectId, callerHash);
+        entityIsNotItsOwnParent(owlEntityDto);
+        linearizationParentsAreOnlyDirectParents(owlEntityDto, existingProjectId);
+    }
+
+    private void callerVersionMatchesLatestVersion(OWLEntityDto owlEntityDto, String existingProjectId, String callerHash) {
+        try {
+            LocalDateTime latestChange = entityHistoryService.getEntityLatestChangeTime(existingProjectId, owlEntityDto.entityIRI())
+                    .get();
+            if (latestChange.equals(LocalDateTime.MIN)) {
+                throw new EntityIsMissingException("Entity with iri " + owlEntityDto.entityIRI() + " is missing");
+            }
+            String etag = Hashing.sha256().hashString(latestChange.toString(), StandardCharsets.UTF_8).toString();
+
+            if (callerHash != null && !callerHash.replace("\"", "").equals(etag)) {
+                throw new VersionDoesNotMatchException("Received hash " + callerHash + " is different from " + etag);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Error fetching latest change for validation for entity " + owlEntityDto.entityIRI(), e);
+            throw new ApplicationException("Error fetching latest change for validation for entity " + owlEntityDto.entityIRI());
+        }
+    }
+
+    private void linearizationParentsAreOnlyDirectParents(OWLEntityDto owlEntityDto, String existingProjectId) {
+        try {
+            List<String> parents = ontologyService.getEntityParents(owlEntityDto.entityIRI(), existingProjectId).get();
+            if (owlEntityDto.entityLinearizations() != null && owlEntityDto.entityLinearizations().linearizations() != null) {
+                Optional<String> wrongLinearizationParent = owlEntityDto.entityLinearizations().linearizations().stream()
+                        .map(EntityLinearization::linearizationPathParent)
+                        .filter(pathParent -> pathParent != null && !pathParent.isEmpty())
+                        .filter(parent -> !parents.contains(parent))
+                        .findFirst();
+                if (wrongLinearizationParent.isPresent()) {
+                    throw new ValidationException("Entity has a linearization with parent " + wrongLinearizationParent.get() + " that is not in the available parents " + Arrays.toString(parents.toArray()));
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Error fetching parents for validation for entity " + owlEntityDto.entityIRI(), e);
+            throw new ApplicationException("Error fetching parents for validation" + owlEntityDto.entityIRI());
+        }
+
+    }
+
+    private void entityIsNotItsOwnParent(OWLEntityDto owlEntityDto) {
+
+        if (owlEntityDto.parents().contains(owlEntityDto.entityIRI())) {
+            throw new ValidationException("Entity contains in the parents its own parents");
+        }
+
     }
 }
