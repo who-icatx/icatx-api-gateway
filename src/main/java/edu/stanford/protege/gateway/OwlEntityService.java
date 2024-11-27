@@ -46,13 +46,11 @@ public class OwlEntityService {
 
     public OwlEntityService(EntityLinearizationService entityLinearizationService,
                             EntityPostCoordinationService entityPostCoordinationService,
-                            EntityOntologyService entityOntologyService,
                             EntityHistoryService entityHistoryService,
-                            OntologyService ontologyService)
+                            OntologyService ontologyService,
                             @Nonnull EventDispatcher eventDispatcher) {
         this.entityLinearizationService = entityLinearizationService;
         this.entityPostCoordinationService = entityPostCoordinationService;
-        this.entityOntologyService = entityOntologyService;
         this.eventDispatcher = eventDispatcher;
         this.ontologyService = ontologyService;
         this.entityHistoryService = entityHistoryService;
@@ -148,13 +146,13 @@ public class OwlEntityService {
         try {
             entityLinearizationService.updateEntityLinearization(owlEntityDto, projectId, changeRequestId);
             entityPostCoordinationService.updateEntityPostCoordination(owlEntityDto.postcoordination(), projectId, owlEntityDto.entityIRI(), changeRequestId);
-/*            entityOntologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents(), changeRequestId);
-            entityOntologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms(), changeRequestId);*/
-            eventDispatcher.dispatchEvent(new EntityUpdatedSuccessfullyEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId));
-        } catch (Exception e) {
+            ontologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents(), changeRequestId);
+            ontologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms(), changeRequestId);
+            eventDispatcher.dispatchEvent(new EntityUpdatedSuccessfullyEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId), SecurityContextHelper.getExecutionContext());
+        } catch (ApplicationException e) {
             LOGGER.error("Error updating entity ", e);
-            eventDispatcher.dispatchEvent(new EntityUpdateFailedEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId));
-            throw new RuntimeException(e);
+            eventDispatcher.dispatchEvent(new EntityUpdateFailedEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId), SecurityContextHelper.getExecutionContext());
+            throw e;
         }
         return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
     }
