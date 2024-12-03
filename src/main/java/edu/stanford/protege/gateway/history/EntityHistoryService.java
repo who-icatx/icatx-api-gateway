@@ -5,7 +5,9 @@ import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.history.commands.*;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
+import edu.stanford.protege.webprotege.ipc.ExecutionContext;
 import org.slf4j.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -50,11 +52,15 @@ public class EntityHistoryService {
             LOGGER.error("Error while requestion entity history summary. " + e.getMessage());
             throw new RuntimeException(e);
         }
-
+    }
+    public CompletableFuture<LocalDateTime> getEntityLatestChangeTime(String projectId, String entityIri){
+        return getEntityLatestChangeTime(projectId, entityIri, SecurityContextHelper.getExecutionContext());
     }
 
-    public CompletableFuture<LocalDateTime> getEntityLatestChangeTime(String projectId, String entityIri) {
-        return entityHistorySummaryExecutor.execute(new GetEntityHistorySummaryRequest(projectId, entityIri), SecurityContextHelper.getExecutionContext())
+
+    @Async
+    public CompletableFuture<LocalDateTime> getEntityLatestChangeTime(String projectId, String entityIri, ExecutionContext executionContext) {
+        return entityHistorySummaryExecutor.execute(new GetEntityHistorySummaryRequest(projectId, entityIri), executionContext)
                 .thenApply(response -> {
                     if (response.entityHistorySummary() != null && response.entityHistorySummary().changes() != null && response.entityHistorySummary().changes().size() > 0) {
                         response.entityHistorySummary().changes().sort(Comparator.comparing(EntityChange::dateTime).reversed());
