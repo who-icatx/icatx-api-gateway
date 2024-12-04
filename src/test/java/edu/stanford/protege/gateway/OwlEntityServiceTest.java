@@ -70,13 +70,13 @@ public class OwlEntityServiceTest {
 
     private void initializeGetMocks() {
         when(entityLanguageTerms.title()).thenReturn(dto.languageTerms().title());
-        when(entityLinearizationService.getEntityLinearizationDto(any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> linearizationWrapperDto));
-        when(entityPostCoordinationService.getPostCoordinationSpecifications(any(), any())).thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
-        when(entityPostCoordinationService.getEntityCustomScales(any(), any())).thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
-        when(entityOntologyService.getEntityLanguageTerms(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> entityLanguageTerms));
-        when(entityOntologyService.getEntityLogicalConditions(any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> entityLogicalDefinition));
-        when(entityOntologyService.getEntityParents(any(), any())).thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
-        when(entityHistoryService.getEntityLatestChangeTime(any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> this.latestUpdate));
+        when(entityLinearizationService.getEntityLinearizationDto(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> linearizationWrapperDto));
+        when(entityPostCoordinationService.getPostCoordinationSpecifications(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
+        when(entityPostCoordinationService.getEntityCustomScales(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
+        when(entityOntologyService.getEntityLanguageTerms(any(), any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> entityLanguageTerms));
+        when(entityOntologyService.getEntityLogicalConditions(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> entityLogicalDefinition));
+        when(entityOntologyService.getEntityParents(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
+        when(entityHistoryService.getEntityLatestChangeTime(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> this.latestUpdate));
     }
 
     @Test
