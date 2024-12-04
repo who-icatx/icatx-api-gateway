@@ -9,6 +9,11 @@ logging:
 icatx:
   formId: 013d9d4a-9dac-4d2f-aa52-2a40fad73b77
 
+springdoc:
+  swagger-ui:
+    operations-sorter: alpha
+    tags-sorter: alpha
+
 spring:
   application:
     name: icatx-api-gateway
