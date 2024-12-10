@@ -6,6 +6,7 @@ import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.dto.EntityLinearizationWrapperDto;
 import edu.stanford.protege.gateway.dto.OWLEntityDto;
 import edu.stanford.protege.gateway.linearization.commands.*;
+import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import edu.stanford.protege.webprotege.ipc.ExecutionContext;
@@ -57,10 +58,10 @@ public class EntityLinearizationService {
                 .thenApply(LinearizationDefinitionResponse::definitionList).get();
     }
 
-    public void updateEntityLinearization(OWLEntityDto owlEntityDto, ProjectId projectId) {
+    public void updateEntityLinearization(OWLEntityDto owlEntityDto, ProjectId projectId, ChangeRequestId changeRequestId) {
         try {
             WhoficEntityLinearizationSpecification linearizationSpecification = LinearizationMapper.mapFromDto(owlEntityDto.entityIRI(), owlEntityDto.entityLinearizations());
-            saveLinearizationCommand.execute(new SaveEntityLinearizationRequest(projectId, linearizationSpecification), SecurityContextHelper.getExecutionContext()).get();
+            saveLinearizationCommand.execute(new SaveEntityLinearizationRequest(projectId, linearizationSpecification, changeRequestId), SecurityContextHelper.getExecutionContext()).get();
         } catch (Exception e) {
             LOGGER.error("Error updating linearization for entity " + owlEntityDto.entityIRI(), e);
             throw new ApplicationException("Error updating linearization for entity " + owlEntityDto.entityIRI());

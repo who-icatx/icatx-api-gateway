@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.common.Request;
+import jakarta.validation.constraints.NotNull;
 import org.semanticweb.owlapi.model.OWLClass;
 
 @JsonTypeName(UpdateLogicalDefinitionsRequest.CHANNEL)
@@ -15,7 +16,7 @@ public record UpdateLogicalDefinitionsRequest(
         @JsonProperty("pristineLogicalConditions") OntologicalLogicalDefinitionConditions pristineLogicalConditions,
         @JsonProperty("changedLogicalConditions") OntologicalLogicalDefinitionConditions changedLogicalConditions,
         @JsonProperty("commitMessage") String commitMessage
-        ) implements Request<UpdateLogicalDefinitionsResponse> {
+) implements Request<UpdateLogicalDefinitionsResponse> {
 
 
     public final static String CHANNEL = "icatx.logicalDefinitions.UpdateLogicalDefinition";
