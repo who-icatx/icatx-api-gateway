@@ -144,15 +144,14 @@ public class OwlEntityService {
         ProjectId projectId = ProjectId.valueOf(existingProjectId);
 
         try {
-         //   validateEntityUpdate(owlEntityDto, existingProjectId, callerHash);
+            validateEntityUpdate(owlEntityDto, existingProjectId, callerHash);
             entityLinearizationService.updateEntityLinearization(owlEntityDto, projectId, changeRequestId);
             entityPostCoordinationService.updateEntityPostCoordination(owlEntityDto.postcoordination(), projectId, owlEntityDto.entityIRI(), changeRequestId);
             ontologyService.updateLogicalDefinition(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.logicalConditions(), changeRequestId);
             ontologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents(), changeRequestId);
             ontologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms(), changeRequestId);
-            throw new ApplicationException("Dummy exception");
-            //      eventDispatcher.dispatchEvent(new EntityUpdatedSuccessfullyEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId), SecurityContextHelper.getExecutionContext());
-            //return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
+            eventDispatcher.dispatchEvent(new EntityUpdatedSuccessfullyEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId), SecurityContextHelper.getExecutionContext());
+            return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
 
         } catch (ApplicationException e) {
             LOGGER.error("Error updating entity ", e);
