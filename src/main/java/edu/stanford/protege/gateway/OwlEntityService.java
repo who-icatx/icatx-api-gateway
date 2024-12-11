@@ -76,7 +76,7 @@ public class OwlEntityService {
 
         try {
             EntityLanguageTerms terms = entityLanguageTerms.get();
-            if (terms.title().label() == null || terms.title().label().isEmpty()) {
+            if (terms == null || terms.title() == null || terms.title().label() == null || terms.title().label().isEmpty()) {
                 throw new EntityIsMissingException("Entity with iri " + entityIri + " is missing");
             }
             return new OWLEntityDto(entityIri,
