@@ -167,7 +167,7 @@ public class OntologyService {
                 );
     }
 
-    public CompletableFuture<Set<String>> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
+    public CompletableFuture<String> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
         return createClassEntityExecutor.execute(
                 CreateClassesFromApiRequest.create(
                         ChangeRequestId.generate(),
@@ -178,7 +178,7 @@ public class OntologyService {
                 ),
                 SecurityContextHelper.getExecutionContext()
         ).thenApply(
-                CreateClassesFromApiResponse::newEntityIris
+                CreateClassesFromApiResponse::newEntityIri
         );
     }
 

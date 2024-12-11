@@ -68,15 +68,13 @@ public class ProjectsController {
 
     @PostMapping(value = "/{projectId}/entities")
     @Operation(summary = "Adding a new entity", operationId = "4_createEntity")
-    public ResponseEntity<List<OWLEntityDto>> createEntity(@PathVariable("projectId")
+    public ResponseEntity<OWLEntityDto> createEntity(@PathVariable("projectId")
                                                            @NotNull(message = "Project ID cannot be null")
                                                            String projectId,
                                                            @RequestBody CreateEntityDto createEntityDto) {
         createEntityValidator.validateCreateEntityRequest(projectId, createEntityDto);
         var newCreatedIri = owlEntityService.createClassEntity(projectId, createEntityDto);
-        List<OWLEntityDto> result = newCreatedIri.stream()
-                .map(newIri -> owlEntityService.getEntityInfo(newIri, projectId))
-                .toList();
+        OWLEntityDto result = owlEntityService.getEntityInfo(newCreatedIri, projectId);
         return ResponseEntity.ok()
                 .body(result);
     }
