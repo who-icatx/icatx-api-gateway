@@ -9,5 +9,5 @@ import static edu.stanford.protege.gateway.ontology.commands.CreateClassesFromAp
 
 @JsonTypeName(CHANNEL)
 public record CreateClassesFromApiResponse(@JsonProperty("changeRequestId") ChangeRequestId changeRequestId, ProjectId projectId,
-                                           @JsonProperty("newEntityIris") Set<String> newEntityIris) implements Response {
+                                           @JsonProperty("newEntityIri") String newEntityIri) implements Response {
 }
