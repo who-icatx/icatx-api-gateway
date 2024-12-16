@@ -109,8 +109,8 @@ public class OwlEntityService {
         }
     }
 
-    public Set<String> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
-        CompletableFuture<Set<String>> newCreatedEntityIri = ontologyService.createClassEntity(projectId, createEntityDto);
+    public String createClassEntity(String projectId, CreateEntityDto createEntityDto) {
+        CompletableFuture<String> newCreatedEntityIri = ontologyService.createClassEntity(projectId, createEntityDto);
         try {
             return newCreatedEntityIri.get();
         } catch (Exception e) {
