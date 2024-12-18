@@ -83,17 +83,6 @@ public class OwlEntityServiceTest {
         when(entityHistoryService.getEntityLatestChangeTime(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> this.latestUpdate));
     }
 
-    @Test
-    public void GIVEN_entityThatHasMissingHistory_WHEN_update_THEN_validationExceptionIsThrown(){
-        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
-                CompletableFuture.supplyAsync(() -> LocalDateTime.MIN));
-
-        dto.parents().add(dto.entityIRI());
-        EntityIsMissingException exception  = assertThrows(EntityIsMissingException.class, () -> service.updateEntity(dto, existingProjectId, eTag));
-
-        assertEquals("Entity with iri " + dto.entityIRI() +" is missing", exception.getMessage());
-    }
-
 
     @Test
     public void GIVEN_entityWithLinearizationParentDifferentThanExistingParents_WHEN_update_THEN_validationIsThrown(){
@@ -137,7 +126,7 @@ public class OwlEntityServiceTest {
 
         VersionDoesNotMatchException exception  = assertThrows(VersionDoesNotMatchException.class, () -> service.updateEntity(dto, existingProjectId, "PotatoTag"));
 
-        assertEquals("Received hash PotatoTag is different from cd78e6f5802bff1df5f43103eb17e1b2cf17a3f4cf9b182e7d0194eb112ab3df", exception.getMessage());
+        assertEquals("Received version out of date : Received hash PotatoTag is different from cd78e6f5802bff1df5f43103eb17e1b2cf17a3f4cf9b182e7d0194eb112ab3df", exception.getMessage());
 
     }
 

@@ -174,14 +174,14 @@ public class OwlEntityService {
         try {
             LocalDateTime latestChange = entityHistoryService.getEntityLatestChangeTime(existingProjectId, owlEntityDto.entityIRI())
                     .get();
-            if (latestChange.equals(LocalDateTime.MIN)) {
-                throw new EntityIsMissingException("Entity with iri " + owlEntityDto.entityIRI() + " is missing");
-            }
-            String etag = Hashing.sha256().hashString(latestChange.toString(), StandardCharsets.UTF_8).toString();
+            if (!latestChange.equals(LocalDateTime.MIN)) {
+                String etag = Hashing.sha256().hashString(latestChange.toString(), StandardCharsets.UTF_8).toString();
 
-            if (callerHash != null && !callerHash.replace("\"", "").equals(etag)) {
-                throw new VersionDoesNotMatchException("Received hash " + callerHash + " is different from " + etag);
+                if (callerHash != null && !callerHash.replace("\"", "").equals(etag)) {
+                    throw new VersionDoesNotMatchException("Received version out of date : Received hash " + callerHash + " is different from " + etag);
+                }
             }
+
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error fetching latest change for validation for entity " + owlEntityDto.entityIRI(), e);
             throw new ApplicationException("Error fetching latest change for validation for entity " + owlEntityDto.entityIRI());
