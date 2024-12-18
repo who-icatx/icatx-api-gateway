@@ -89,13 +89,13 @@ public class OntologyService {
 
     }
 
-    public void updateLogicalDefinition(String entityIri, String projectId, EntityLogicalConditionsWrapper logicalConditionsWrapper) {
+    public void updateLogicalDefinition(String entityIri, String projectId, EntityLogicalConditionsWrapper logicalConditionsWrapper, ChangeRequestId changeRequestId) {
         try {
             GetLogicalDefinitionsResponse response = logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), SecurityContextHelper.getExecutionContext())
                     .get();
 
             OntologicalLogicalDefinitionConditions pristine = new OntologicalLogicalDefinitionConditions(response.logicalDefinitions(), response.necessaryConditions());
-            UpdateLogicalDefinitionsRequest request = UpdateLogicalDefinitionsRequest.create(ChangeRequestId.generate(),
+            UpdateLogicalDefinitionsRequest request = UpdateLogicalDefinitionsRequest.create(changeRequestId,
                     ProjectId.valueOf(projectId),
                     new OWLClassImpl(IRI.create(entityIri)),
                     pristine,
@@ -111,11 +111,11 @@ public class OntologyService {
     }
 
 
-    public void updateEntityParents(String entityIri, String projectId, List<String> parents) {
+    public void updateEntityParents(String entityIri, String projectId, List<String> parents, ChangeRequestId changeRequestId) {
         ImmutableSet<OWLClass> parentsAsClass = ImmutableSet.copyOf(parents.stream().map(p -> new OWLClassImpl(IRI.create(p))).collect(Collectors.toList()));
 
         try {
-            updateParentsExecutor.execute(new ChangeEntityParentsRequest(ChangeRequestId.generate(),
+            updateParentsExecutor.execute(new ChangeEntityParentsRequest(changeRequestId,
                     ProjectId.valueOf(projectId),
                     parentsAsClass,
                     new OWLClassImpl(IRI.create(entityIri)),
@@ -126,10 +126,10 @@ public class OntologyService {
         }
     }
 
-    public void updateLanguageTerms(String entityIri, String projectId, String formId, EntityLanguageTerms languageTerms) {
+    public void updateLanguageTerms(String entityIri, String projectId, String formId, EntityLanguageTerms languageTerms, ChangeRequestId changeRequestId) {
         try {
             ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
-            updateLanguageTermsExecutor.execute(new SetEntityFormDataFromJsonRequest(ChangeRequestId.generate(),
+            updateLanguageTermsExecutor.execute(new SetEntityFormDataFromJsonRequest(changeRequestId,
                             ProjectId.valueOf(projectId),
                             new OWLClassImpl(IRI.create(entityIri)),
                             formId,

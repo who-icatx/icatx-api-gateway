@@ -11,6 +11,8 @@ import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
 import edu.stanford.protege.webprotege.common.ProjectId;
+import edu.stanford.protege.webprotege.ipc.EventDispatcher;
+import edu.stanford.protege.webprotege.ipc.ExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +48,9 @@ public class OwlEntityServiceTest {
     EntityLinearizationWrapperDto linearizationWrapperDto;
     @Mock
     EntityLanguageTerms entityLanguageTerms;
+
+    @Mock
+    private EventDispatcher eventDispatcher;
     @Mock
     EntityLogicalConditionsWrapper entityLogicalDefinition;
 
@@ -64,7 +69,7 @@ public class OwlEntityServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyOwlEntityDto.json");
         dto = objectMapper.readValue(specFile, OWLEntityDto.class);
-        service = new OwlEntityService(entityLinearizationService, entityPostCoordinationService,entityHistoryService, entityOntologyService);
+        service = new OwlEntityService(entityLinearizationService, entityPostCoordinationService,entityHistoryService,eventDispatcher, entityOntologyService);
 
     }
 
@@ -161,10 +166,45 @@ public class OwlEntityServiceTest {
 
         service.updateEntity(dto, existingProjectId, eTag);
 
-        verify(entityLinearizationService, times(1)).updateEntityLinearization(eq(dto), eq(ProjectId.valueOf(existingProjectId)));
-        verify(entityPostCoordinationService, times(1)).updateEntityPostCoordination(any(), any(), any());
-        verify(entityOntologyService, times(1)).updateLanguageTerms(any(), any(), any(), any());
-        verify(entityOntologyService, times(1)).updateEntityParents(any(), any(), any());
-        verify(entityOntologyService, times(1)).updateLogicalDefinition(any(), any(), any());
+        verify(entityLinearizationService, times(1)).updateEntityLinearization(eq(dto), eq(ProjectId.valueOf(existingProjectId)), any());
+        verify(entityPostCoordinationService, times(1)).updateEntityPostCoordination(any(), any(), any(), any());
+        verify(entityOntologyService, times(1)).updateLanguageTerms(any(), any(), any(), any(), any());
+        verify(entityOntologyService, times(1)).updateEntityParents(any(), any(), any(), any());
+        verify(entityOntologyService, times(1)).updateLogicalDefinition(any(), any(), any(), any());
+    }
+
+    @Test
+    public void GIVEN_validRequest_WHEN_callUpdate_THEN_entityUpdatedSuccessfullyIsEmitted(){
+        initializeGetMocks();
+
+        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
+                CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
+        );
+
+        when(entityOntologyService.getEntityParents(eq(dto.entityIRI()), eq(existingProjectId))).thenReturn(
+                CompletableFuture.supplyAsync(() -> Arrays.asList("http://id.who.int/icd/entity/1553463690"))
+        );
+
+        service.updateEntity(dto, existingProjectId, eTag);
+        verify(eventDispatcher, times(1)).dispatchEvent(any(EntityUpdatedSuccessfullyEvent.class), any());
+    }
+
+    @Test
+    public void GIVEN_applicationExceptionFromLinearization_WHEN_callUpdate_THEN_entityUpdateFailedEventIsEmitted(){
+
+        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
+                CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
+        );
+        when(entityOntologyService.getEntityParents(eq(dto.entityIRI()), eq(existingProjectId))).thenReturn(
+                CompletableFuture.supplyAsync(() -> Arrays.asList("http://id.who.int/icd/entity/1553463690"))
+        );
+
+        doThrow(new ApplicationException("Error"))
+                .when(entityLinearizationService).updateEntityLinearization(any(), eq(ProjectId.valueOf(existingProjectId)), any());
+        assertThrows(ApplicationException.class, () ->
+                service.updateEntity(dto, existingProjectId, eTag)
+        );
+        verify(eventDispatcher, times(1)).dispatchEvent(any(EntityUpdateFailedEvent.class), any());
+
     }
 }
