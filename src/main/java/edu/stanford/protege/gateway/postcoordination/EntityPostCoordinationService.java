@@ -49,11 +49,13 @@ public class EntityPostCoordinationService {
         this.linearizationService = linearizationService;
     }
 
-
     @Async
-    public CompletableFuture<List<EntityPostCoordinationSpecificationDto>> getPostCoordinationSpecifications(String entityIri, String projectIdString) {
+    public CompletableFuture<List<EntityPostCoordinationSpecificationDto>> getPostCoordinationSpecifications(String entityIri, String projectIdString){
+        return getPostCoordinationSpecifications(entityIri, projectIdString, SecurityContextHelper.getExecutionContext());
+    }
+    @Async
+    public CompletableFuture<List<EntityPostCoordinationSpecificationDto>> getPostCoordinationSpecifications(String entityIri, String projectIdString, ExecutionContext executionContext) {
         ProjectId projectId = ProjectId.valueOf(projectIdString);
-        ExecutionContext executionContext = SecurityContextHelper.getExecutionContext();
         return specificationExecutor.execute(new GetEntityPostCoordinationRequest(entityIri, projectId), executionContext)
                 .thenApply(postCoordinationResponse -> {
                     try {
@@ -89,9 +91,14 @@ public class EntityPostCoordinationService {
         }
     }
 
-    public CompletableFuture<List<EntityPostCoordinationCustomScalesDto>> getEntityCustomScales(String entityIri, String projectIdString) {
+    @Async
+    public CompletableFuture<List<EntityPostCoordinationCustomScalesDto>> getEntityCustomScales(String entityIri, String projectIdString){
+        return getEntityCustomScales(entityIri, projectIdString, SecurityContextHelper.getExecutionContext());
+    }
+
+    @Async
+    public CompletableFuture<List<EntityPostCoordinationCustomScalesDto>> getEntityCustomScales(String entityIri, String projectIdString, ExecutionContext executionContext) {
         ProjectId projectId = ProjectId.valueOf(projectIdString);
-        ExecutionContext executionContext = SecurityContextHelper.getExecutionContext();
         return customScaleExecutor.execute(new GetEntityCustomScaleValuesRequest(entityIri, projectId), executionContext)
                 .thenApply(CustomScalesMapper::mapFromResponse
                 );

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.common.Request;
-import jakarta.validation.constraints.NotNull;
 import org.semanticweb.owlapi.model.OWLClass;
 
 @JsonTypeName(UpdateLogicalDefinitionsRequest.CHANNEL)

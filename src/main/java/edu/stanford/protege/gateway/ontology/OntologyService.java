@@ -9,8 +9,10 @@ import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
 import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
+import edu.stanford.protege.webprotege.ipc.ExecutionContext;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
@@ -64,17 +66,29 @@ public class OntologyService {
     }
 
 
-    public CompletableFuture<List<String>> getEntityParents(String entityIri, String projectId) {
 
-        return ancestorsExecutor.execute(new GetClassAncestorsRequest(IRI.create(entityIri), ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
+    @Async
+    public CompletableFuture<List<String>> getEntityParents(String entityIri, String projectId) {
+        return getEntityParents(entityIri, projectId, SecurityContextHelper.getExecutionContext());
+    }
+
+    @Async
+    public CompletableFuture<List<String>> getEntityParents(String entityIri, String projectId, ExecutionContext executionContext) {
+
+        return ancestorsExecutor.execute(new GetClassAncestorsRequest(IRI.create(entityIri), ProjectId.valueOf(projectId)),executionContext)
                 .thenApply(response ->
                         response.getAncestorClassHierarchy().getChildren().stream().map(child -> child.getNode().getEntity().getIRI().toString())
                                 .collect(Collectors.toList()));
 
     }
 
+    @Async
     public CompletableFuture<EntityLogicalConditionsWrapper> getEntityLogicalConditions(String entityIri, String projectId) {
-        return logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), SecurityContextHelper.getExecutionContext())
+        return getEntityLogicalConditions(entityIri, projectId, SecurityContextHelper.getExecutionContext());
+    }
+    @Async
+    public CompletableFuture<EntityLogicalConditionsWrapper> getEntityLogicalConditions(String entityIri, String projectId, ExecutionContext executionContext) {
+        return logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), executionContext)
                 .thenApply(response ->
                         new EntityLogicalConditionsWrapper(new LogicalConditions(LogicalDefinitionMapper.mapToEntityLogicalDefinition(response.logicalDefinitions()),
                                 LogicalDefinitionMapper.extractRelationshipsFromPropertyClassValue(response.necessaryConditions())),
@@ -83,8 +97,14 @@ public class OntologyService {
 
     }
 
-    public CompletableFuture<EntityLanguageTerms> getEntityLanguageTerms(String entityIri, String projectId, String formId) {
-        return formDataExecutor.execute(new GetEntityFormAsJsonRequest(ProjectId.valueOf(projectId), entityIri, formId), SecurityContextHelper.getExecutionContext())
+    @Async
+    public CompletableFuture<EntityLanguageTerms> getEntityLanguageTerms(String entityIri, String projectId, String formId){
+        return getEntityLanguageTerms(entityIri, projectId, formId, SecurityContextHelper.getExecutionContext());
+    }
+
+    @Async
+    public CompletableFuture<EntityLanguageTerms> getEntityLanguageTerms(String entityIri, String projectId, String formId, ExecutionContext executionContext) {
+        return formDataExecutor.execute(new GetEntityFormAsJsonRequest(ProjectId.valueOf(projectId), entityIri, formId), executionContext)
                 .thenApply(formResponse -> EntityFormToDtoMapper.mapFormToTerms(formResponse.form()));
 
     }

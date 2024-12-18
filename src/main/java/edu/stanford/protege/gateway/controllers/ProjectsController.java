@@ -45,16 +45,7 @@ public class ProjectsController {
     @Operation(summary = "Reading an entity", operationId = "2_getEntity")
     public ResponseEntity<OWLEntityDto> getEntity(@PathVariable @javax.annotation.Nonnull String projectId, @RequestParam String entityIRI){
         OWLEntityDto dto = owlEntityService.getEntityInfo(entityIRI, projectId);
-        HttpHeaders httpHeaders = new HttpHeaders();
-        String etag = "";
-        if (dto.lastChangeDate() != null) {
-            httpHeaders.setLastModified(dto.lastChangeDate().toInstant(ZoneOffset.UTC));
-            etag = Hashing.sha256().hashString(dto.lastChangeDate().toString(), StandardCharsets.UTF_8).toString();
-        }
-        return ResponseEntity.ok()
-                .headers(httpHeaders)
-                .eTag(etag)
-                .body(dto);
+        return getOwlEntityDtoResponseEntity(dto);
     }
 
     @PutMapping(value = "/{projectId}/entities")
@@ -63,7 +54,7 @@ public class ProjectsController {
                                                       @PathVariable @Nonnull String projectId,
                                                       @RequestBody OWLEntityDto owlEntityDto){
         OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId,ifMatch);
-        return ResponseEntity.ok(response);
+        return getOwlEntityDtoResponseEntity(response);
     }
 
     @PostMapping(value = "/{projectId}/entities")
@@ -75,8 +66,8 @@ public class ProjectsController {
         createEntityValidator.validateCreateEntityRequest(projectId, createEntityDto);
         var newCreatedIri = owlEntityService.createClassEntity(projectId, createEntityDto);
         OWLEntityDto result = owlEntityService.getEntityInfo(newCreatedIri, projectId);
-        return ResponseEntity.ok()
-                .body(result);
+        return getOwlEntityDtoResponseEntity(result);
+
     }
 
     @GetMapping(value = "/{projectId}/entities/children")
@@ -96,5 +87,18 @@ public class ProjectsController {
 
         return ResponseEntity.ok()
                 .body(entityComments);
+    }
+
+    private static ResponseEntity<OWLEntityDto> getOwlEntityDtoResponseEntity(OWLEntityDto dto) {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        String etag = "";
+        if (dto.lastChangeDate() != null) {
+            httpHeaders.setLastModified(dto.lastChangeDate().toInstant(ZoneOffset.UTC));
+            etag = Hashing.sha256().hashString(dto.lastChangeDate().toString(), StandardCharsets.UTF_8).toString();
+        }
+        return ResponseEntity.ok()
+                .headers(httpHeaders)
+                .eTag(etag)
+                .body(dto);
     }
 }
