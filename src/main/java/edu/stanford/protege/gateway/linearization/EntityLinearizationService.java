@@ -12,6 +12,7 @@ import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import edu.stanford.protege.webprotege.ipc.ExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,9 +36,16 @@ public class EntityLinearizationService {
         this.saveLinearizationCommand = saveLinearizationCommand;
     }
 
-    public CompletableFuture<EntityLinearizationWrapperDto> getEntityLinearizationDto(String entityIri, String projectId) {
+
+    @Async
+    public CompletableFuture<EntityLinearizationWrapperDto> getEntityLinearizationDto(String entityIri, String projectId){
+        return getEntityLinearizationDto(entityIri, projectId, SecurityContextHelper.getExecutionContext());
+    }
+
+    @Async
+    public CompletableFuture<EntityLinearizationWrapperDto> getEntityLinearizationDto(String entityIri, String projectId, ExecutionContext executionContext) {
         try {
-            return entityLinearizationCommand.execute(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
+            return entityLinearizationCommand.execute(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId)), executionContext)
                     .thenApply(response -> LinearizationMapper.mapFromResponse(response.linearizationSpecification(), response.lastRevisionDate()));
         } catch (Exception e) {
             LOGGER.error("Error fetching linearization of entity " + entityIri, e);

@@ -12,6 +12,7 @@ import edu.stanford.protege.webprotege.common.EventId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.EventDispatcher;
 import edu.stanford.protege.webprotege.ipc.ExecutionContext;
+import edu.stanford.protege.webprotege.ipc.ExecutionContext;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -56,15 +57,18 @@ public class OwlEntityService {
         this.entityHistoryService = entityHistoryService;
     }
 
-
     public OWLEntityDto getEntityInfo(String entityIri, String projectId) {
-        CompletableFuture<EntityLinearizationWrapperDto> linearizationDto = entityLinearizationService.getEntityLinearizationDto(entityIri, projectId);
-        CompletableFuture<List<EntityPostCoordinationSpecificationDto>> specList = entityPostCoordinationService.getPostCoordinationSpecifications(entityIri, projectId);
-        CompletableFuture<List<EntityPostCoordinationCustomScalesDto>> customScalesDtos = entityPostCoordinationService.getEntityCustomScales(entityIri, projectId);
-        CompletableFuture<EntityLanguageTerms> entityLanguageTerms = ontologyService.getEntityLanguageTerms(entityIri, projectId, this.formId);
-        CompletableFuture<EntityLogicalConditionsWrapper> logicalConditions = ontologyService.getEntityLogicalConditions(entityIri, projectId);
-        CompletableFuture<List<String>> parents = ontologyService.getEntityParents(entityIri, projectId);
-        CompletableFuture<LocalDateTime> latestChange = entityHistoryService.getEntityLatestChangeTime(projectId, entityIri);
+        return getEntityInfo(entityIri, projectId, SecurityContextHelper.getExecutionContext());
+    }
+
+    public OWLEntityDto getEntityInfo(String entityIri, String projectId, ExecutionContext executionContext) {
+        CompletableFuture<EntityLinearizationWrapperDto> linearizationDto = entityLinearizationService.getEntityLinearizationDto(entityIri, projectId, executionContext);
+        CompletableFuture<List<EntityPostCoordinationSpecificationDto>> specList = entityPostCoordinationService.getPostCoordinationSpecifications(entityIri, projectId, executionContext);
+        CompletableFuture<List<EntityPostCoordinationCustomScalesDto>> customScalesDtos = entityPostCoordinationService.getEntityCustomScales(entityIri, projectId, executionContext);
+        CompletableFuture<EntityLanguageTerms> entityLanguageTerms = ontologyService.getEntityLanguageTerms(entityIri, projectId, this.formId, executionContext);
+        CompletableFuture<EntityLogicalConditionsWrapper> logicalConditions = ontologyService.getEntityLogicalConditions(entityIri, projectId, executionContext);
+        CompletableFuture<List<String>> parents = ontologyService.getEntityParents(entityIri, projectId, executionContext);
+        CompletableFuture<LocalDateTime> latestChange = entityHistoryService.getEntityLatestChangeTime(projectId, entityIri, executionContext);
         CompletableFuture<Void> combinedFutures = CompletableFuture.allOf(linearizationDto,
                 specList,
                 customScalesDtos,
@@ -170,14 +174,14 @@ public class OwlEntityService {
         try {
             LocalDateTime latestChange = entityHistoryService.getEntityLatestChangeTime(existingProjectId, owlEntityDto.entityIRI())
                     .get();
-            if (latestChange.equals(LocalDateTime.MIN)) {
-                throw new EntityIsMissingException("Entity with iri " + owlEntityDto.entityIRI() + " is missing");
-            }
-            String etag = Hashing.sha256().hashString(latestChange.toString(), StandardCharsets.UTF_8).toString();
+            if (!latestChange.equals(LocalDateTime.MIN)) {
+                String etag = Hashing.sha256().hashString(latestChange.toString(), StandardCharsets.UTF_8).toString();
 
-            if (callerHash != null && !callerHash.replace("\"", "").equals(etag)) {
-                throw new VersionDoesNotMatchException("Received hash " + callerHash + " is different from " + etag);
+                if (callerHash != null && !callerHash.replace("\"", "").equals(etag)) {
+                    throw new VersionDoesNotMatchException("Received version out of date : Received hash " + callerHash + " is different from " + etag);
+                }
             }
+
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error fetching latest change for validation for entity " + owlEntityDto.entityIRI(), e);
             throw new ApplicationException("Error fetching latest change for validation for entity " + owlEntityDto.entityIRI());
