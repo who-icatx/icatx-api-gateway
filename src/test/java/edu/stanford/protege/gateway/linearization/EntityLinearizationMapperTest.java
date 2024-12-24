@@ -1,28 +1,36 @@
 package edu.stanford.protege.gateway.linearization;
 
-import edu.stanford.protege.gateway.dto.EntityLinearization;
-import edu.stanford.protege.gateway.dto.EntityLinearizationWrapperDto;
-import edu.stanford.protege.gateway.dto.LinearizationTitle;
-import edu.stanford.protege.gateway.linearization.commands.LinearizationMapper;
-import edu.stanford.protege.gateway.linearization.commands.LinearizationSpecificationStatus;
-import edu.stanford.protege.gateway.linearization.commands.WhoficEntityLinearizationSpecification;
-import org.junit.jupiter.api.Test;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.stanford.protege.gateway.config.ApplicationBeans;
+import edu.stanford.protege.gateway.dto.*;
+import edu.stanford.protege.gateway.linearization.commands.*;
+import org.junit.jupiter.api.*;
 
-import java.util.Collections;
+import java.io.*;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EntityLinearizationMapperTest {
 
+    private List<LinearizationDefinition> definitionList;
 
+    @BeforeEach
+    public void setUp() throws IOException {
+        ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
+        File defFile = new File("src/test/resources/LinearizationDefinitions.json");
+        definitionList = objectMapper.readValue(defFile, new TypeReference<>() {
+        });
+    }
 
 
     @Test
     public void GIVEN_scrambledLinearizationDTO_WHEN_mapToRequest_THEN_fieldsAreCorrectlyMapped() {
         EntityLinearization entityLinearization = new EntityLinearization("true",
                 "fAlSE",
-                "unKnown",null,
-                "http://id.who.int/icd/release/11/pcl",null);
+                "unKnown", null,
+                "http://id.who.int/icd/release/11/pcl", null);
 
         EntityLinearizationWrapperDto dto = new EntityLinearizationWrapperDto(null,
                 "UnKnown",
@@ -30,7 +38,7 @@ public class EntityLinearizationMapperTest {
                 null,
                 new LinearizationTitle("test"), Collections.singletonList(entityLinearization));
 
-        WhoficEntityLinearizationSpecification spec = LinearizationMapper.mapFromDto("http://id.who.int/icd/entity/694903163", dto);
+        WhoficEntityLinearizationSpecification spec = LinearizationMapper.mapFromDto("http://id.who.int/icd/entity/694903163", dto, definitionList);
 
         assertNotNull(spec);
         assertNotNull(spec.linearizationResiduals());

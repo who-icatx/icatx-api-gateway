@@ -1,6 +1,8 @@
 package edu.stanford.protege.gateway.linearization;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.EntityLinearization;
 import edu.stanford.protege.gateway.dto.EntityLinearizationWrapperDto;
@@ -47,10 +49,18 @@ public class EntityLinearizationServiceTest {
         projectId = ProjectId.generate().id();
         entityIri = "http://id.who.int/icd/entity/257068234";
 
+        ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
+
         File initialFile = new File("src/test/resources/dummyLinearizationResponse.json");
-        GetEntityLinearizationsResponse response = new ApplicationBeans().objectMapper().readValue(initialFile, GetEntityLinearizationsResponse.class);
+        GetEntityLinearizationsResponse response = objectMapper.readValue(initialFile, GetEntityLinearizationsResponse.class);
         when(entityLinearizationCommandMock.execute(eq(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId))), any()))
                 .thenReturn(CompletableFuture.supplyAsync(() -> response));
+
+        File defFile = new File("src/test/resources/LinearizationDefinitions.json");
+        List<LinearizationDefinition> definitionList = objectMapper.readValue(defFile, new TypeReference<>() {
+        });
+        when(definitionExecutor.execute(eq(new LinearizationDefinitionRequest()), any()))
+                .thenReturn(CompletableFuture.supplyAsync(() -> new LinearizationDefinitionResponse(definitionList)));
 
         service = new EntityLinearizationService(entityLinearizationCommandMock, definitionExecutor, saveLinearizationCommand);
     }
