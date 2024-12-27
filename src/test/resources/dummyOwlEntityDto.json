@@ -1,5 +1,5 @@
 {
-  "entityIRI": "http://id.who.int/icd/entity/1855860109",
+  "entityUri": "http://id.who.int/icd/entity/1855860109",
   "languageTerms": {
     "title": {
       "label": "Classical sporadic Creutzfeldt-Jakob Disease",

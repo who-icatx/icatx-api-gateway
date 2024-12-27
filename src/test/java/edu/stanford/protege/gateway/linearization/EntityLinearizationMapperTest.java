@@ -30,7 +30,7 @@ public class EntityLinearizationMapperTest {
         EntityLinearization entityLinearization = new EntityLinearization("true",
                 "fAlSE",
                 "unKnown", null,
-                "http://id.who.int/icd/release/11/pcl", null);
+                "PCL", null);
 
         EntityLinearizationWrapperDto dto = new EntityLinearizationWrapperDto(null,
                 "UnKnown",
