@@ -4,7 +4,6 @@ package edu.stanford.protege.gateway.controllers;
 import com.google.common.hash.Hashing;
 import edu.stanford.protege.gateway.OwlEntityService;
 import edu.stanford.protege.gateway.dto.*;
-import edu.stanford.protege.gateway.ontology.validators.CreateEntityValidatorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
@@ -24,11 +23,9 @@ import java.util.List;
 public class ProjectsController {
 
     private final OwlEntityService owlEntityService;
-    private final CreateEntityValidatorService createEntityValidator;
 
-    public ProjectsController(OwlEntityService owlEntityService, CreateEntityValidatorService createEntityValidator) {
+    public ProjectsController(OwlEntityService owlEntityService) {
         this.owlEntityService = owlEntityService;
-        this.createEntityValidator = createEntityValidator;
     }
 
 
@@ -63,7 +60,6 @@ public class ProjectsController {
                                                            @NotNull(message = "Project ID cannot be null")
                                                            String projectId,
                                                            @RequestBody CreateEntityDto createEntityDto) {
-        createEntityValidator.validateCreateEntityRequest(projectId, createEntityDto);
         var newCreatedIri = owlEntityService.createClassEntity(projectId, createEntityDto);
         OWLEntityDto result = owlEntityService.getEntityInfo(newCreatedIri, projectId);
         return getOwlEntityDtoResponseEntity(result);
