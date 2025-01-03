@@ -7,7 +7,8 @@ import edu.stanford.protege.gateway.dto.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,26 +41,26 @@ public class ProjectsController {
 
     @GetMapping(value = "/{projectId}")
     @Operation(summary = "Reading an entity", operationId = "2_getEntity")
-    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable @javax.annotation.Nonnull String projectId, @RequestParam String entityIRI){
+    public ResponseEntity<OWLEntityDto> getEntity(@PathVariable @javax.annotation.Nonnull String projectId, @RequestParam String entityIRI) {
         OWLEntityDto dto = owlEntityService.getEntityInfo(entityIRI, projectId);
         return getOwlEntityDtoResponseEntity(dto);
     }
 
     @PutMapping(value = "/{projectId}/entities")
     @Operation(summary = "Updating an entity", operationId = "3_updateEntity")
-    public ResponseEntity<OWLEntityDto> updateEntity( @RequestHeader(value = "If-Match", required = false) String ifMatch,
-                                                      @PathVariable @Nonnull String projectId,
-                                                      @RequestBody OWLEntityDto owlEntityDto){
-        OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId,ifMatch);
+    public ResponseEntity<OWLEntityDto> updateEntity(@RequestHeader(value = "If-Match", required = false) String ifMatch,
+                                                     @PathVariable @Nonnull String projectId,
+                                                     @RequestBody OWLEntityDto owlEntityDto) {
+        OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId, ifMatch);
         return getOwlEntityDtoResponseEntity(response);
     }
 
     @PostMapping(value = "/{projectId}/entities")
     @Operation(summary = "Adding a new entity", operationId = "4_createEntity")
     public ResponseEntity<OWLEntityDto> createEntity(@PathVariable("projectId")
-                                                           @NotNull(message = "Project ID cannot be null")
-                                                           String projectId,
-                                                           @RequestBody CreateEntityDto createEntityDto) {
+                                                     @NotNull(message = "Project ID cannot be null")
+                                                     String projectId,
+                                                     @RequestBody CreateEntityDto createEntityDto) {
         var newCreatedIri = owlEntityService.createClassEntity(projectId, createEntityDto);
         OWLEntityDto result = owlEntityService.getEntityInfo(newCreatedIri, projectId);
         return getOwlEntityDtoResponseEntity(result);
@@ -72,7 +73,7 @@ public class ProjectsController {
         List<String> children = owlEntityService.getEntityChildren(entityIRI, projectId);
 
         return ResponseEntity.ok()
-                .body(EntityChildren.create(children));
+                .body(EntityChildren.create(entityIRI, projectId, children));
     }
 
 
