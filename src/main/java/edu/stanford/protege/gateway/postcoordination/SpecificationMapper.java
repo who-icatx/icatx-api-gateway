@@ -1,6 +1,5 @@
 package edu.stanford.protege.gateway.postcoordination;
 
-import edu.stanford.protege.gateway.dto.EntityPostCoordinationCustomScalesDto;
 import edu.stanford.protege.gateway.dto.EntityPostCoordinationSpecificationDto;
 import edu.stanford.protege.gateway.linearization.commands.LinearizationDefinition;
 import edu.stanford.protege.gateway.postcoordination.commands.*;
@@ -15,7 +14,7 @@ public class SpecificationMapper {
         List<EntityPostCoordinationSpecificationDto> resp = new ArrayList<>();
         for (PostCoordinationSpecification specification : response.postCoordinationSpecification().postcoordinationSpecifications()) {
             LinearizationDefinition definition = gedDefinitionByView(specification.getLinearizationView(), definitions);
-            EntityPostCoordinationSpecificationDto dto = new EntityPostCoordinationSpecificationDto(definition.getId(),
+            EntityPostCoordinationSpecificationDto dto = new EntityPostCoordinationSpecificationDto(definition.getLinearizationId(),
                     new ArrayList<>(),
                     new ArrayList<>(),
                     new ArrayList<>(),
@@ -48,7 +47,7 @@ public class SpecificationMapper {
 
         List<PostCoordinationSpecification> specifications = dtos.stream().map(dto -> {
             LinearizationDefinition definition = getDefinitionByLinearizationId(dto.linearizationId(), definitions);
-            PostCoordinationSpecification spec = new PostCoordinationSpecification(definition.getWhoficEntityIri(),
+            PostCoordinationSpecification spec = new PostCoordinationSpecification(definition.getLinearizationUri(),
                     new ArrayList<>(),
                     new ArrayList<>(),
                     new ArrayList<>(),
@@ -98,13 +97,13 @@ public class SpecificationMapper {
     }
 
     private static LinearizationDefinition getDefinitionByLinearizationId(String linearizationId, List<LinearizationDefinition> definitions) {
-        return definitions.stream().filter(def -> def.getId().equalsIgnoreCase(linearizationId))
+        return definitions.stream().filter(def -> def.getLinearizationId().equalsIgnoreCase(linearizationId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Error finding definition with id " + linearizationId));
     }
 
     private static LinearizationDefinition gedDefinitionByView(String linearizationView, List<LinearizationDefinition> definitions) {
-        return definitions.stream().filter(def -> def.getWhoficEntityIri().equalsIgnoreCase(linearizationView))
+        return definitions.stream().filter(def -> def.getLinearizationUri().equalsIgnoreCase(linearizationView))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Error finding definition with id " + linearizationView));
     }
