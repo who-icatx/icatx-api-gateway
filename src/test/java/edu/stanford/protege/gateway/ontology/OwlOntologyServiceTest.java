@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
+import edu.stanford.protege.gateway.validators.ValidatorService;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import org.junit.jupiter.api.*;
@@ -61,6 +62,9 @@ public class OwlOntologyServiceTest {
     private CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
     private GetLogicalDefinitionsResponse response;
 
+    @Mock
+    private ValidatorService validatorService;
+
     private ProjectId projectId;
 
     private String entityIri;
@@ -72,12 +76,11 @@ public class OwlOntologyServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyLogicalDefinitionResponse.json");
         response = objectMapper.readValue(specFile, GetLogicalDefinitionsResponse.class);
-        service = new OntologyService(ancestorsExecutor,
+        service = new OntologyService(validatorService,
+                ancestorsExecutor,
                 logicalDefinitionExecutor,
                 formDataExecutor,
                 entityChildrenExecutor,
-                isExistingProjectExecutor,
-                filterExistingEntitiesExecutor,
                 createClassEntityExecutor,
                 getAvailableProjectsExecutor,
                 entityDiscussionExecutor,
