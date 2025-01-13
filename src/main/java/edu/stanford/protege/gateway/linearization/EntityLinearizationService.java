@@ -45,8 +45,9 @@ public class EntityLinearizationService {
     @Async
     public CompletableFuture<EntityLinearizationWrapperDto> getEntityLinearizationDto(String entityIri, String projectId, ExecutionContext executionContext) {
         try {
+            List<LinearizationDefinition> linDef = this.getDefinitionList(executionContext);
             return entityLinearizationCommand.execute(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId)), executionContext)
-                    .thenApply(response -> LinearizationMapper.mapFromResponse(response.linearizationSpecification(), response.lastRevisionDate()));
+                    .thenApply(response -> LinearizationMapper.mapFromResponse(response.linearizationSpecification(), response.lastRevisionDate(), linDef));
         } catch (Exception e) {
             LOGGER.error("Error fetching linearization of entity " + entityIri, e);
             throw new ApplicationException("Error fetching linearization of entity " + entityIri);
@@ -60,7 +61,8 @@ public class EntityLinearizationService {
 
     public void updateEntityLinearization(OWLEntityDto owlEntityDto, ProjectId projectId, ChangeRequestId changeRequestId) {
         try {
-            WhoficEntityLinearizationSpecification linearizationSpecification = LinearizationMapper.mapFromDto(owlEntityDto.entityIRI(), owlEntityDto.entityLinearizations());
+            List<LinearizationDefinition> linDef = this.getDefinitionList(SecurityContextHelper.getExecutionContext());
+            WhoficEntityLinearizationSpecification linearizationSpecification = LinearizationMapper.mapFromDto(owlEntityDto.entityIRI(), owlEntityDto.entityLinearizations(), linDef);
             saveLinearizationCommand.execute(new SaveEntityLinearizationRequest(projectId, linearizationSpecification, changeRequestId), SecurityContextHelper.getExecutionContext()).get();
         } catch (Exception e) {
             LOGGER.error("Error updating linearization for entity " + owlEntityDto.entityIRI(), e);

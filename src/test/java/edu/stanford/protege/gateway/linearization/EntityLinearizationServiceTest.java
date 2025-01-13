@@ -1,6 +1,8 @@
 package edu.stanford.protege.gateway.linearization;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.EntityLinearization;
 import edu.stanford.protege.gateway.dto.EntityLinearizationWrapperDto;
@@ -47,10 +49,18 @@ public class EntityLinearizationServiceTest {
         projectId = ProjectId.generate().id();
         entityIri = "http://id.who.int/icd/entity/257068234";
 
+        ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
+
         File initialFile = new File("src/test/resources/dummyLinearizationResponse.json");
-        GetEntityLinearizationsResponse response = new ApplicationBeans().objectMapper().readValue(initialFile, GetEntityLinearizationsResponse.class);
+        GetEntityLinearizationsResponse response = objectMapper.readValue(initialFile, GetEntityLinearizationsResponse.class);
         when(entityLinearizationCommandMock.execute(eq(new GetEntityLinearizationsRequest(entityIri, ProjectId.valueOf(projectId))), any()))
                 .thenReturn(CompletableFuture.supplyAsync(() -> response));
+
+        File defFile = new File("src/test/resources/LinearizationDefinitions.json");
+        List<LinearizationDefinition> definitionList = objectMapper.readValue(defFile, new TypeReference<>() {
+        });
+        when(definitionExecutor.execute(eq(new LinearizationDefinitionRequest()), any()))
+                .thenReturn(CompletableFuture.supplyAsync(() -> new LinearizationDefinitionResponse(definitionList)));
 
         service = new EntityLinearizationService(entityLinearizationCommandMock, definitionExecutor, saveLinearizationCommand);
     }
@@ -65,14 +75,14 @@ public class EntityLinearizationServiceTest {
         assertEquals("This is a parent title", dto.otherSpecifiedResidualTitle().label());
         assertNotNull(dto.linearizations());
         assertEquals(2, dto.linearizations().size());
-        Optional<EntityLinearization> mms = getLinearizationById(dto.linearizations(), "http://id.who.int/icd/release/11/mms");
+        Optional<EntityLinearization> mms = getLinearizationById(dto.linearizations(), "MMS");
         assertTrue(mms.isPresent());
         assertEquals("unknown", mms.get().isAuxiliaryAxisChild().toLowerCase());
         assertEquals("false", mms.get().isGrouping().toLowerCase());
         assertEquals("true", mms.get().isIncludedInLinearization().toLowerCase());
         assertEquals("http://id.who.int/icd/entity/135352227", mms.get().linearizationPathParent());
 
-        Optional<EntityLinearization> der = getLinearizationById(dto.linearizations(), "http://id.who.int/icd/release/11/der");
+        Optional<EntityLinearization> der = getLinearizationById(dto.linearizations(), "DER");
         assertTrue(der.isPresent());
         assertEquals("unknown", der.get().isAuxiliaryAxisChild().toLowerCase());
         assertEquals("false", der.get().isGrouping().toLowerCase());

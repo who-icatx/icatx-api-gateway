@@ -10,7 +10,7 @@
     </parent>
     <groupId>edu.stanford.protege</groupId>
     <artifactId>icatx-api-gateway</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.5</version>
     <name>icatx-api-gateway</name>
     <description>This microservice is the api gateway for the iCAT-X project.</description>
     <url/>
@@ -99,6 +99,21 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <spring.profiles.active>test</spring.profiles.active>
+                    </systemPropertyVariables>
+                    <includes>
+                        <include>**/*TestCase.java</include>
+                        <include>**/*Test.java</include>
+                        <include>**/*IT.java</include>
+                    </includes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

@@ -12,20 +12,17 @@ import edu.stanford.protege.webprotege.common.EventId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.EventDispatcher;
 import edu.stanford.protege.webprotege.ipc.ExecutionContext;
-import edu.stanford.protege.webprotege.ipc.ExecutionContext;
-import org.slf4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import javax.annotation.Nonnull;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 
 @Service
@@ -113,7 +110,7 @@ public class OwlEntityService {
         CompletableFuture<String> newCreatedEntityIri = ontologyService.createClassEntity(projectId, createEntityDto);
         try {
             return newCreatedEntityIri.get();
-        } catch (Exception e) {
+        } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error creating new class entity " + createEntityDto.title(), e);
             /*
             ToDo:

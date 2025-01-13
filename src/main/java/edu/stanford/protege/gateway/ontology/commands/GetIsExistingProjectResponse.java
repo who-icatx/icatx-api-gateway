@@ -9,4 +9,8 @@ import static edu.stanford.protege.gateway.ontology.commands.GetIsExistingProjec
 public record GetIsExistingProjectResponse(
         @JsonProperty("isExistingProject") boolean isExistingProject
 ) implements Response {
+
+    public static GetIsExistingProjectResponse create(boolean isExistingProject){
+        return new GetIsExistingProjectResponse(isExistingProject);
+    }
 }

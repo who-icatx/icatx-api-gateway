@@ -1,22 +1,30 @@
 package edu.stanford.protege.gateway.ontology;
 
 
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
-import edu.stanford.protege.gateway.*;
+import edu.stanford.protege.gateway.ApplicationException;
+import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
-import edu.stanford.protege.webprotege.common.*;
+import edu.stanford.protege.gateway.validators.ValidatorService;
+import edu.stanford.protege.webprotege.common.ChangeRequestId;
+import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import edu.stanford.protege.webprotege.ipc.ExecutionContext;
-import org.semanticweb.owlapi.model.*;
-import org.slf4j.*;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -24,6 +32,8 @@ import java.util.stream.Collectors;
 public class OntologyService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(OntologyService.class);
+
+    private final ValidatorService validatorService;
     private final CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor;
     private final CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor;
     private final CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor;
@@ -32,25 +42,22 @@ public class OntologyService {
     private final CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor;
 
     private final CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
-    private final CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor;
-    private final CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor;
     private final CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor;
     private final CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getProjectsExecutor;
     private final CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
 
 
-    public OntologyService(CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
+    public OntologyService(ValidatorService validatorService, CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
                            CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
                            CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor,
                            CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor,
-                           CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor,
-                           CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor,
                            CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor,
                            CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getProjectsExecutor,
                            CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor,
                            CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor,
                            CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor,
                            CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor) {
+        this.validatorService = validatorService;
         this.ancestorsExecutor = ancestorsExecutor;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
@@ -58,8 +65,6 @@ public class OntologyService {
         this.updateParentsExecutor = updateParentsExecutor;
         this.updateLanguageTermsExecutor = updateLanguageTermsExecutor;
         this.entityChildrenExecutor = entityChildrenExecutor;
-        this.isExistingProjectExecutor = isExistingProjectExecutor;
-        this.filterExistingEntitiesExecutor = filterExistingEntitiesExecutor;
         this.createClassEntityExecutor = createClassEntityExecutor;
         this.getProjectsExecutor = getProjectsExecutor;
         this.entityDiscussionExecutor = entityDiscussionExecutor;
@@ -74,7 +79,8 @@ public class OntologyService {
 
     @Async
     public CompletableFuture<List<String>> getEntityParents(String entityIri, String projectId, ExecutionContext executionContext) {
-
+        validatorService.validateProjectId(projectId);
+        validatorService.validateEntityExists(projectId,entityIri);
         return ancestorsExecutor.execute(new GetClassAncestorsRequest(IRI.create(entityIri), ProjectId.valueOf(projectId)),executionContext)
                 .thenApply(response ->
                         response.getAncestorClassHierarchy().getChildren().stream().map(child -> child.getNode().getEntity().getIRI().toString())
@@ -163,6 +169,8 @@ public class OntologyService {
     }
 
     public CompletableFuture<List<String>> getEntityChildren(String entityIri, String projectId) {
+        validatorService.validateProjectId(projectId);
+        validatorService.validateEntityExists(projectId, entityIri);
         return entityChildrenExecutor.execute(GetEntityChildrenRequest.create(IRI.create(entityIri), ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
                 .thenApply(
                         response -> response.childrenIris()
@@ -172,23 +180,10 @@ public class OntologyService {
                 );
     }
 
-    public CompletableFuture<Boolean> isExistingProject(String projectId) {
-        return isExistingProjectExecutor.execute(GetIsExistingProjectRequest.create(ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
-                .thenApply(GetIsExistingProjectResponse::isExistingProject);
-    }
 
-    public CompletableFuture<Set<String>> getExistingEntities(String projectId, String parent) {
-        var parentIri = IRI.create(parent);
-        return filterExistingEntitiesExecutor.execute(FilterExistingEntitiesRequest.create(ProjectId.valueOf(projectId), ImmutableSet.of(parentIri)), SecurityContextHelper.getExecutionContext())
-                .thenApply(
-                        response -> response.existingEntities()
-                                .stream()
-                                .map(IRI::toString)
-                                .collect(Collectors.toSet())
-                );
-    }
 
     public CompletableFuture<String> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
+        validatorService.validateCreateEntityRequest(projectId, createEntityDto);
         return createClassEntityExecutor.execute(
                 CreateClassesFromApiRequest.create(
                         ChangeRequestId.generate(),
@@ -216,4 +211,7 @@ public class OntologyService {
         return entityDiscussionExecutor.execute(GetEntityCommentsRequest.create(ProjectId.valueOf(projectId), entityIri), SecurityContextHelper.getExecutionContext())
                 .thenApply(GetEntityCommentsResponse::comments);
     }
+
+
+
 }
