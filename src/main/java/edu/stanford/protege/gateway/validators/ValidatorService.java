@@ -14,6 +14,7 @@ import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
@@ -43,11 +44,13 @@ public class ValidatorService {
         validateEntityParents(projectId, createEntityDto.parent());
     }
 
+    @Async
     private CompletableFuture<Boolean> isExistingProject(String projectId) {
         return isExistingProjectExecutor.execute(GetIsExistingProjectRequest.create(ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
                 .thenApply(GetIsExistingProjectResponse::isExistingProject);
     }
 
+    @Async
     private CompletableFuture<Set<String>> getExistingEntities(String projectId, String entity) {
         var entityIri = IRI.create(entity);
         return filterExistingEntitiesExecutor.execute(FilterExistingEntitiesRequest.create(ProjectId.valueOf(projectId), ImmutableSet.of(entityIri)), SecurityContextHelper.getExecutionContext())
