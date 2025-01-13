@@ -14,10 +14,7 @@ import org.semanticweb.owlapi.model.IRI;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 import uk.ac.manchester.cs.owl.owlapi.OWLObjectPropertyImpl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class LogicalDefinitionMapper {
@@ -26,7 +23,8 @@ public class LogicalDefinitionMapper {
         return logicalDefinitions.stream().map(definition -> {
             List<LogicalConditionRelationship> relationships = extractRelationshipsFromPropertyClassValue(definition.axis2filler());
             return new EntityLogicalDefinition(definition.logicalDefinitionParent().getEntity().getIRI().toString(), relationships);
-        }).collect(Collectors.toList());
+        })
+                .sorted(Comparator.comparing(EntityLogicalDefinition::logicalDefinitionSuperclass)).collect(Collectors.toList());
     }
 
     public static List<LogicalConditionRelationship> extractRelationshipsFromPropertyClassValue(List<PropertyClassValue> values) {
@@ -43,7 +41,7 @@ public class LogicalDefinitionMapper {
         axisFillerMap.keySet().forEach(key -> relationships.addAll(axisFillerMap.get(key).stream()
                 .map(filler -> new LogicalConditionRelationship(key, filler)).toList())
         );
-        return relationships;
+        return relationships.stream().sorted(Comparator.comparing(LogicalConditionRelationship::axis)).toList();
     }
 
 

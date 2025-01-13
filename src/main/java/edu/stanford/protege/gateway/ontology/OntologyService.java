@@ -78,6 +78,7 @@ public class OntologyService {
         return ancestorsExecutor.execute(new GetClassAncestorsRequest(IRI.create(entityIri), ProjectId.valueOf(projectId)),executionContext)
                 .thenApply(response ->
                         response.getAncestorClassHierarchy().getChildren().stream().map(child -> child.getNode().getEntity().getIRI().toString())
+                                .sorted()
                                 .collect(Collectors.toList()));
 
     }
