@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record EntityChildren(
-        @JsonProperty("entityUri") String entityUri,
         @JsonProperty("projectId") String projectId,
+        @JsonProperty("entityUri") String entityUri,
         @JsonProperty("children") List<String> children
 ) {
     public static EntityChildren create(

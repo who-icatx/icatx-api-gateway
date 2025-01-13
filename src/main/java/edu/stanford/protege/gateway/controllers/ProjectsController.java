@@ -73,7 +73,7 @@ public class ProjectsController {
         List<String> children = owlEntityService.getEntityChildren(entityIRI, projectId);
 
         return ResponseEntity.ok()
-                .body(EntityChildren.create(entityIRI, projectId, children));
+                .body(EntityChildren.create(projectId, entityIRI, children));
     }
 
 
