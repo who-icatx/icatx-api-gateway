@@ -10,9 +10,9 @@ public record EntityChildren(
         @JsonProperty("children") List<String> children
 ) {
     public static EntityChildren create(
-            String entityUri,
             String projectId,
+            String entityUri,
             List<String> children) {
-        return new EntityChildren(entityUri, projectId, children);
+        return new EntityChildren(projectId, entityUri, children);
     }
 }
