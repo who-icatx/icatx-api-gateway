@@ -1,12 +1,11 @@
 package edu.stanford.protege.gateway.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
-public record OWLEntityDto(String entityIRI,
+public record OWLEntityDto(@JsonProperty("entityUri") String entityIRI,
 
                            EntityLanguageTerms languageTerms,
                            EntityLinearizationWrapperDto entityLinearizations,
