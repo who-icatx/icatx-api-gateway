@@ -7,6 +7,7 @@ import edu.stanford.protege.gateway.history.EntityHistoryService;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
+import edu.stanford.protege.gateway.validators.ValidatorService;
 import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.EventId;
 import edu.stanford.protege.webprotege.common.ProjectId;
@@ -41,20 +42,26 @@ public class OwlEntityService {
     @Value("${icatx.formId}")
     private String formId;
 
+    private final ValidatorService validatorService;
+
 
     public OwlEntityService(EntityLinearizationService entityLinearizationService,
                             EntityPostCoordinationService entityPostCoordinationService,
                             EntityHistoryService entityHistoryService,
                             @Nonnull EventDispatcher eventDispatcher,
-                            OntologyService ontologyService) {
+                            OntologyService ontologyService,
+                            ValidatorService validatorService) {
         this.entityLinearizationService = entityLinearizationService;
         this.entityPostCoordinationService = entityPostCoordinationService;
         this.ontologyService = ontologyService;
         this.eventDispatcher = eventDispatcher;
         this.entityHistoryService = entityHistoryService;
+        this.validatorService = validatorService;
     }
 
     public OWLEntityDto getEntityInfo(String entityIri, String projectId) {
+        validatorService.validateProjectId(projectId);
+        validatorService.validateEntityExists(projectId, entityIri);
         return getEntityInfo(entityIri, projectId, SecurityContextHelper.getExecutionContext());
     }
 
@@ -96,6 +103,8 @@ public class OwlEntityService {
     }
 
     public List<String> getEntityChildren(String entityIRI, String projectId) {
+        validatorService.validateProjectId(projectId);
+        validatorService.validateEntityExists(projectId, entityIRI);
         CompletableFuture<List<String>> entityChildren = ontologyService.getEntityChildren(entityIRI, projectId);
 
         try {
@@ -107,6 +116,7 @@ public class OwlEntityService {
     }
 
     public String createClassEntity(String projectId, CreateEntityDto createEntityDto) {
+        validatorService.validateCreateEntityRequest(projectId, createEntityDto);
         CompletableFuture<String> newCreatedEntityIri = ontologyService.createClassEntity(projectId, createEntityDto);
         try {
             return newCreatedEntityIri.get();
@@ -162,6 +172,7 @@ public class OwlEntityService {
     }
 
     private void validateEntityUpdate(OWLEntityDto owlEntityDto, String existingProjectId, String callerHash) {
+
         callerVersionMatchesLatestVersion(owlEntityDto, existingProjectId, callerHash);
         entityIsNotItsOwnParent(owlEntityDto);
         linearizationParentsAreOnlyDirectParents(owlEntityDto, existingProjectId);
