@@ -79,8 +79,15 @@ public class EntityHistoryService {
         return entityHistorySummaryExecutor.execute(new GetEntityHistorySummaryRequest(projectId, entityIri), executionContext)
                 .thenApply(response -> {
                     if (response.entityHistorySummary() != null && response.entityHistorySummary().changes() != null && response.entityHistorySummary().changes().size() > 0) {
-                        response.entityHistorySummary().changes().sort(Comparator.comparing(EntityChange::timestamp).reversed());
-                        return response.entityHistorySummary().changes().get(0).timestamp();
+                        var sortedHistory = response.entityHistorySummary().changes()
+                                .stream()
+                                .filter(entityChange -> entityChange.timestamp() != null)
+                                .sorted(Comparator.comparing(EntityChange::timestamp).reversed())
+                                .toList();
+                        if(sortedHistory.isEmpty()){
+                            return LocalDateTime.MIN;
+                        }
+                        return sortedHistory.get(0).timestamp();
                     }
                     return LocalDateTime.MIN;
                 });

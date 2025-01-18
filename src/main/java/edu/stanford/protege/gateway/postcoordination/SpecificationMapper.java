@@ -104,7 +104,7 @@ public class SpecificationMapper {
     }
 
     private static LinearizationDefinition gedDefinitionByView(String linearizationView, List<LinearizationDefinition> definitions) {
-        return definitions.stream().filter(def -> def.getLinearizationUri().equalsIgnoreCase(linearizationView))
+        return definitions.stream().filter(def -> def.getLinearizationUri() != null &&  def.getLinearizationUri().equalsIgnoreCase(linearizationView))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Error finding definition with id " + linearizationView));
     }
