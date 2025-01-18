@@ -9,7 +9,6 @@ import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
-import edu.stanford.protege.gateway.validators.ValidatorService;
 import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
@@ -33,7 +32,6 @@ public class OntologyService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(OntologyService.class);
 
-    private final ValidatorService validatorService;
     private final CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor;
     private final CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor;
     private final CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor;
@@ -47,7 +45,7 @@ public class OntologyService {
     private final CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
 
 
-    public OntologyService(ValidatorService validatorService, CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
+    public OntologyService(CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
                            CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
                            CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor,
                            CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor,
@@ -57,7 +55,6 @@ public class OntologyService {
                            CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor,
                            CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor,
                            CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor) {
-        this.validatorService = validatorService;
         this.ancestorsExecutor = ancestorsExecutor;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
@@ -71,7 +68,6 @@ public class OntologyService {
     }
 
 
-
     @Async
     public CompletableFuture<List<String>> getEntityParents(String entityIri, String projectId) {
         return getEntityParents(entityIri, projectId, SecurityContextHelper.getExecutionContext());
@@ -79,9 +75,7 @@ public class OntologyService {
 
     @Async
     public CompletableFuture<List<String>> getEntityParents(String entityIri, String projectId, ExecutionContext executionContext) {
-        validatorService.validateProjectId(projectId);
-        validatorService.validateEntityExists(projectId,entityIri);
-        return ancestorsExecutor.execute(new GetClassAncestorsRequest(IRI.create(entityIri), ProjectId.valueOf(projectId)),executionContext)
+        return ancestorsExecutor.execute(new GetClassAncestorsRequest(IRI.create(entityIri), ProjectId.valueOf(projectId)), executionContext)
                 .thenApply(response ->
                         response.getAncestorClassHierarchy().getChildren().stream().map(child -> child.getNode().getEntity().getIRI().toString())
                                 .sorted()
@@ -93,6 +87,7 @@ public class OntologyService {
     public CompletableFuture<EntityLogicalConditionsWrapper> getEntityLogicalConditions(String entityIri, String projectId) {
         return getEntityLogicalConditions(entityIri, projectId, SecurityContextHelper.getExecutionContext());
     }
+
     @Async
     public CompletableFuture<EntityLogicalConditionsWrapper> getEntityLogicalConditions(String entityIri, String projectId, ExecutionContext executionContext) {
         return logicalDefinitionExecutor.execute(new GetLogicalDefinitionsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), executionContext)
@@ -105,7 +100,7 @@ public class OntologyService {
     }
 
     @Async
-    public CompletableFuture<EntityLanguageTerms> getEntityLanguageTerms(String entityIri, String projectId, String formId){
+    public CompletableFuture<EntityLanguageTerms> getEntityLanguageTerms(String entityIri, String projectId, String formId) {
         return getEntityLanguageTerms(entityIri, projectId, formId, SecurityContextHelper.getExecutionContext());
     }
 
@@ -169,8 +164,6 @@ public class OntologyService {
     }
 
     public CompletableFuture<List<String>> getEntityChildren(String entityIri, String projectId) {
-        validatorService.validateProjectId(projectId);
-        validatorService.validateEntityExists(projectId, entityIri);
         return entityChildrenExecutor.execute(GetEntityChildrenRequest.create(IRI.create(entityIri), ProjectId.valueOf(projectId)), SecurityContextHelper.getExecutionContext())
                 .thenApply(
                         response -> response.childrenIris()
@@ -181,9 +174,7 @@ public class OntologyService {
     }
 
 
-
     public CompletableFuture<String> createClassEntity(String projectId, CreateEntityDto createEntityDto) {
-        validatorService.validateCreateEntityRequest(projectId, createEntityDto);
         return createClassEntityExecutor.execute(
                 CreateClassesFromApiRequest.create(
                         ChangeRequestId.generate(),
@@ -211,7 +202,6 @@ public class OntologyService {
         return entityDiscussionExecutor.execute(GetEntityCommentsRequest.create(ProjectId.valueOf(projectId), entityIri), SecurityContextHelper.getExecutionContext())
                 .thenApply(GetEntityCommentsResponse::comments);
     }
-
 
 
 }

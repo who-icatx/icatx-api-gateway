@@ -74,8 +74,6 @@ public class EntityHistoryService {
 
     @Async
     public CompletableFuture<LocalDateTime> getEntityLatestChangeTime(String projectId, String entityIri, ExecutionContext executionContext) {
-        validatorService.validateProjectId(projectId);
-        validatorService.validateEntityExists(projectId, entityIri);
         return entityHistorySummaryExecutor.execute(new GetEntityHistorySummaryRequest(projectId, entityIri), executionContext)
                 .thenApply(response -> {
                     if (response.entityHistorySummary() != null && response.entityHistorySummary().changes() != null && response.entityHistorySummary().changes().size() > 0) {

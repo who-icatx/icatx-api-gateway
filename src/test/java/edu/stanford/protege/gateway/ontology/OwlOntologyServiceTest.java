@@ -1,20 +1,26 @@
 package edu.stanford.protege.gateway.ontology;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
-import edu.stanford.protege.gateway.dto.*;
+import edu.stanford.protege.gateway.dto.EntityLogicalConditionsWrapper;
+import edu.stanford.protege.gateway.dto.EntityLogicalDefinition;
 import edu.stanford.protege.gateway.ontology.commands.*;
-import edu.stanford.protege.gateway.validators.ValidatorService;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.*;
-import java.util.concurrent.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,10 +55,6 @@ public class OwlOntologyServiceTest {
     private CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
 
     @Mock
-    private CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor;
-    @Mock
-    private CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor;
-    @Mock
     private CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor;
 
     @Mock
@@ -61,9 +63,6 @@ public class OwlOntologyServiceTest {
     @Mock
     private CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
     private GetLogicalDefinitionsResponse response;
-
-    @Mock
-    private ValidatorService validatorService;
 
     private ProjectId projectId;
 
@@ -76,8 +75,7 @@ public class OwlOntologyServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyLogicalDefinitionResponse.json");
         response = objectMapper.readValue(specFile, GetLogicalDefinitionsResponse.class);
-        service = new OntologyService(validatorService,
-                ancestorsExecutor,
+        service = new OntologyService(ancestorsExecutor,
                 logicalDefinitionExecutor,
                 formDataExecutor,
                 entityChildrenExecutor,

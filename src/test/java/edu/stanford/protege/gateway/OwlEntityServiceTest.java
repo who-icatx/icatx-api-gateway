@@ -10,9 +10,9 @@ import edu.stanford.protege.gateway.history.EntityHistoryService;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
+import edu.stanford.protege.gateway.validators.ValidatorService;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.EventDispatcher;
-import edu.stanford.protege.webprotege.ipc.ExecutionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,14 +53,16 @@ public class OwlEntityServiceTest {
     private EventDispatcher eventDispatcher;
     @Mock
     EntityLogicalConditionsWrapper entityLogicalDefinition;
+    @Mock
+    ValidatorService validatorService;
 
     private OwlEntityService service;
 
     private final String existingProjectId = "b717d9a3-f265-46f5-bd15-9f1cf4b132c8";
 
-    private final LocalDateTime latestUpdate =  LocalDateTime.of(2024, 1, 1, 1, 1);
+    private final LocalDateTime latestUpdate = LocalDateTime.of(2024, 1, 1, 1, 1);
 
-    private final String eTag =  Hashing.sha256().hashString(latestUpdate.toString(), StandardCharsets.UTF_8).toString();
+    private final String eTag = Hashing.sha256().hashString(latestUpdate.toString(), StandardCharsets.UTF_8).toString();
 
     @BeforeEach
     public void setUp() throws IOException {
@@ -69,7 +71,7 @@ public class OwlEntityServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyOwlEntityDto.json");
         dto = objectMapper.readValue(specFile, OWLEntityDto.class);
-        service = new OwlEntityService(entityLinearizationService, entityPostCoordinationService,entityHistoryService,eventDispatcher, entityOntologyService);
+        service = new OwlEntityService(entityLinearizationService, entityPostCoordinationService, entityHistoryService, eventDispatcher, entityOntologyService, validatorService);
 
     }
 
@@ -86,7 +88,7 @@ public class OwlEntityServiceTest {
 
 
     @Test
-    public void GIVEN_entityWithLinearizationParentDifferentThanExistingParents_WHEN_update_THEN_validationIsThrown(){
+    public void GIVEN_entityWithLinearizationParentDifferentThanExistingParents_WHEN_update_THEN_validationIsThrown() {
         when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
                 CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
         );
@@ -100,9 +102,9 @@ public class OwlEntityServiceTest {
                 "UNKNOWN",
                 "potatoParent",
                 "http://id.who.int/icd/release/11/ocu",
-                        null));
+                null));
 
-        ValidationException exception  = assertThrows(ValidationException.class, () -> service.updateEntity(dto, existingProjectId, eTag));
+        ValidationException exception = assertThrows(ValidationException.class, () -> service.updateEntity(dto, existingProjectId, eTag));
 
         assertEquals("Entity has a linearization with parent potatoParent that is not in the available parents [http://id.who.int/icd/entity/1553463690]", exception.getMessage());
     }
@@ -114,35 +116,35 @@ public class OwlEntityServiceTest {
         );
 
         dto.parents().add(dto.entityIRI());
-        ValidationException exception  = assertThrows(ValidationException.class, () -> service.updateEntity(dto, existingProjectId, eTag));
+        ValidationException exception = assertThrows(ValidationException.class, () -> service.updateEntity(dto, existingProjectId, eTag));
 
         assertEquals("Entity contains in the parents its own parents", exception.getMessage());
     }
 
     @Test
-    public void GIVEN_callWithDifferentHash_WHEN_update_THEN_versionDoesNotMatchExceptionIsThrown(){
+    public void GIVEN_callWithDifferentHash_WHEN_update_THEN_versionDoesNotMatchExceptionIsThrown() {
         when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
                 CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
         );
 
-        VersionDoesNotMatchException exception  = assertThrows(VersionDoesNotMatchException.class, () -> service.updateEntity(dto, existingProjectId, "PotatoTag"));
+        VersionDoesNotMatchException exception = assertThrows(VersionDoesNotMatchException.class, () -> service.updateEntity(dto, existingProjectId, "PotatoTag"));
 
         assertEquals("Received version out of date : Received hash PotatoTag is different from cd78e6f5802bff1df5f43103eb17e1b2cf17a3f4cf9b182e7d0194eb112ab3df", exception.getMessage());
 
     }
 
     @Test
-    public void GIVEN_getCall_WHEN_titleIsMissing_THEN_exceptionIsThrown(){
+    public void GIVEN_getCall_WHEN_titleIsMissing_THEN_exceptionIsThrown() {
         initializeGetMocks();
         when(entityLanguageTerms.title()).thenReturn(new LanguageTerm(null, null));
-        EntityIsMissingException exception  = assertThrows(EntityIsMissingException.class, () -> service.getEntityInfo(dto.entityIRI(), existingProjectId));
+        EntityIsMissingException exception = assertThrows(EntityIsMissingException.class, () -> service.getEntityInfo(dto.entityIRI(), existingProjectId));
 
         assertEquals("Entity with iri http://id.who.int/icd/entity/1855860109 is missing", exception.getMessage());
 
     }
 
     @Test
-    public void GIVEN_aValidUpdateRequest_WHEN_update_THEN_serviceIsCalled(){
+    public void GIVEN_aValidUpdateRequest_WHEN_update_THEN_serviceIsCalled() {
         initializeGetMocks();
 
         when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
@@ -163,7 +165,7 @@ public class OwlEntityServiceTest {
     }
 
     @Test
-    public void GIVEN_validRequest_WHEN_callUpdate_THEN_entityUpdatedSuccessfullyIsEmitted(){
+    public void GIVEN_validRequest_WHEN_callUpdate_THEN_entityUpdatedSuccessfullyIsEmitted() {
         initializeGetMocks();
 
         when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
@@ -179,7 +181,7 @@ public class OwlEntityServiceTest {
     }
 
     @Test
-    public void GIVEN_applicationExceptionFromLinearization_WHEN_callUpdate_THEN_entityUpdateFailedEventIsEmitted(){
+    public void GIVEN_applicationExceptionFromLinearization_WHEN_callUpdate_THEN_entityUpdateFailedEventIsEmitted() {
 
         when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
                 CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
