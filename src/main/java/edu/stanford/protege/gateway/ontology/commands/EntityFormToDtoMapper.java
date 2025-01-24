@@ -5,9 +5,7 @@ import edu.stanford.protege.gateway.dto.BaseIndexTerm;
 import edu.stanford.protege.gateway.dto.EntityLanguageTerms;
 import edu.stanford.protege.gateway.dto.LanguageTerm;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class EntityFormToDtoMapper {
@@ -105,11 +103,13 @@ public class EntityFormToDtoMapper {
             }
 
             return new BaseIndexTerm(formBaseIndexTerm.label(), indexType, getBooleanOutOfStringArray(formBaseIndexTerm.isInclusion()), formBaseIndexTerm.id());
-        }).collect(Collectors.toList());
+        })
+                .sorted(Comparator.comparing(BaseIndexTerm::label))
+                .collect(Collectors.toList());
     }
 
     private static List<String> extractSubclassBaseInclusions(List<EntityForm.EntityFormSubclassBaseInclusion> subclassBaseInclusions) {
-        return subclassBaseInclusions.stream().map(EntityForm.EntityFormSubclassBaseInclusion::id).collect(Collectors.toList());
+        return subclassBaseInclusions.stream().map(EntityForm.EntityFormSubclassBaseInclusion::id).filter(Objects::nonNull).sorted().collect(Collectors.toList());
     }
 
     private static List<BaseExclusionTerm> mapBaseExclusionTerms(List<EntityForm.EntityFormBaseExclusionTerm> baseExclusionTerms) {
@@ -119,7 +119,20 @@ public class EntityFormToDtoMapper {
                 id =  baseExclusionTerm.foundationReference().id();
             }
             return new BaseExclusionTerm(baseExclusionTerm.label(),id, baseExclusionTerm.id());
-        }).collect(Collectors.toList());
+        })
+                .sorted((p , q) -> {
+                    if(p.termId() != null && q.termId() != null) {
+                        return p.termId().compareTo(q.termId());
+                    }
+                    if(p.label() != null && q.label() != null) {
+                        return p.label().compareTo(q.label());
+                    }
+                    if(p.foundationReference() != null && q.foundationReference() != null){
+                        return p.foundationReference().compareTo(q.foundationReference());
+                    }
+                    return -1;
+                })
+                .collect(Collectors.toList());
     }
 
     private static boolean getBooleanOutOfStringArray(List<String> stringArray) {

@@ -4,6 +4,9 @@ import edu.stanford.protege.gateway.dto.*;
 import org.semanticweb.owlapi.model.IRI;
 
 import java.util.*;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 
 public class LinearizationMapper {
 
@@ -12,6 +15,7 @@ public class LinearizationMapper {
         List<EntityLinearization> linearizations = whoficSpecification.linearizationSpecifications()
                 .stream()
                 .map(specification -> LinearizationMapper.mapFromSpecification(specification, linDef))
+                .sorted(Comparator.comparing(EntityLinearization::linearizationId))
                 .toList();
         if (whoficSpecification.linearizationResiduals() != null) {
             String suppressOtherResiduals = whoficSpecification.linearizationResiduals().suppressOtherSpecifiedResiduals() == null ? null : whoficSpecification.linearizationResiduals().suppressOtherSpecifiedResiduals().toString();

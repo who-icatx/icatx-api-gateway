@@ -76,9 +76,16 @@ public class EntityHistoryService {
     public CompletableFuture<LocalDateTime> getEntityLatestChangeTime(String projectId, String entityIri, ExecutionContext executionContext) {
         return entityHistorySummaryExecutor.execute(new GetEntityHistorySummaryRequest(projectId, entityIri), executionContext)
                 .thenApply(response -> {
-                    if (response.entityHistorySummary() != null && response.entityHistorySummary().changes() != null && !response.entityHistorySummary().changes().isEmpty()) {
-                        response.entityHistorySummary().changes().sort(Comparator.comparing(EntityChange::timestamp).reversed());
-                        return response.entityHistorySummary().changes().get(0).timestamp();
+                    if (response.entityHistorySummary() != null && response.entityHistorySummary().changes() != null && response.entityHistorySummary().changes().size() > 0) {
+                        var sortedHistory = response.entityHistorySummary().changes()
+                                .stream()
+                                .filter(entityChange -> entityChange.timestamp() != null)
+                                .sorted(Comparator.comparing(EntityChange::timestamp).reversed())
+                                .toList();
+                        if(sortedHistory.isEmpty()){
+                            return LocalDateTime.MIN;
+                        }
+                        return sortedHistory.get(0).timestamp();
                     }
                     return LocalDateTime.MIN;
                 });

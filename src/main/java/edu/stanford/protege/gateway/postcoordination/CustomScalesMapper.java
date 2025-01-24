@@ -7,6 +7,7 @@ import edu.stanford.protege.gateway.postcoordination.commands.WhoficCustomScales
 
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ public class CustomScalesMapper {
 
     public static List<EntityPostCoordinationCustomScalesDto> mapFromResponse(GetEntityCustomScaleValueResponse response) {
         return response.whoficCustomScalesValues().scaleCustomizations().stream()
+                .sorted(Comparator.comparing(PostCoordinationScaleCustomization::getPostcoordinationAxis))
                 .map(scale -> new EntityPostCoordinationCustomScalesDto(new ArrayList<>(scale.getPostcoordinationScaleValues()), scale.getPostcoordinationAxis()))
                 .collect(Collectors.toList());
     }

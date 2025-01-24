@@ -5,6 +5,7 @@ import edu.stanford.protege.gateway.linearization.commands.LinearizationDefiniti
 import edu.stanford.protege.gateway.postcoordination.commands.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,7 @@ public class SpecificationMapper {
             }
         }
 
-        return resp;
+        return resp.stream().sorted(Comparator.comparing(EntityPostCoordinationSpecificationDto::linearizationId)).toList();
     }
 
     public static WhoficEntityPostCoordinationSpecification mapFromDtoList(String entityIri,
@@ -81,15 +82,15 @@ public class SpecificationMapper {
 
 
     private static void mapAsTelescopic(PostCoordinationSpecification specification, EntityPostCoordinationSpecificationDto dto) {
-        dto.overwrittenAllowedAxes().addAll(specification.getAllowedAxes());
-        dto.overwrittenRequiredAxes().addAll(specification.getRequiredAxes());
-        dto.overwrittenNotAllowedAxes().addAll(specification.getNotAllowedAxes());
+        dto.overwrittenAllowedAxes().addAll(specification.getAllowedAxes().stream().sorted().toList());
+        dto.overwrittenRequiredAxes().addAll(specification.getRequiredAxes().stream().sorted().toList());
+        dto.overwrittenNotAllowedAxes().addAll(specification.getNotAllowedAxes().stream().sorted().toList());
     }
 
     private static void mapAsPrimary(PostCoordinationSpecification specification, EntityPostCoordinationSpecificationDto dto) {
-        dto.allowedAxes().addAll(specification.getAllowedAxes());
-        dto.notAllowedAxes().addAll(specification.getNotAllowedAxes());
-        dto.requiredAxes().addAll(specification.getRequiredAxes());
+        dto.allowedAxes().addAll(specification.getAllowedAxes().stream().sorted().toList());
+        dto.notAllowedAxes().addAll(specification.getNotAllowedAxes().stream().sorted().toList());
+        dto.requiredAxes().addAll(specification.getRequiredAxes().stream().sorted().toList());
     }
 
     private static boolean isMainAxis(LinearizationDefinition linearizationDefinition) {
@@ -103,7 +104,7 @@ public class SpecificationMapper {
     }
 
     private static LinearizationDefinition gedDefinitionByView(String linearizationView, List<LinearizationDefinition> definitions) {
-        return definitions.stream().filter(def -> def.getLinearizationUri().equalsIgnoreCase(linearizationView))
+        return definitions.stream().filter(def -> def.getLinearizationUri() != null &&  def.getLinearizationUri().equalsIgnoreCase(linearizationView))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Error finding definition with id " + linearizationView));
     }
