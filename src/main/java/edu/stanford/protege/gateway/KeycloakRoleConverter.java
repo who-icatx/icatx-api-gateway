@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class KeycloakRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
@@ -17,14 +18,19 @@ public class KeycloakRoleConverter implements Converter<Jwt, Collection<GrantedA
         var authoritiesConverter = new JwtGrantedAuthoritiesConverter();
         var authorities = authoritiesConverter.convert(jwt);
 
-        var realmRoles = (Collection<String>) jwt.getClaimAsMap("realm_access")
-                .getOrDefault("roles", List.of());
-
-        authorities.addAll(realmRoles.stream()
-                .map(role -> "ROLE_" + role.toUpperCase()) // Prefix roles with "ROLE_" to match Spring Security conventions
-                .map(SimpleGrantedAuthority::new)
-                .toList()
-        );
+        // Extract roles from resource_access.webprotege.roles
+        Map<String, Object> resourceAccess = jwt.getClaimAsMap("resource_access");
+        if (resourceAccess == null || !resourceAccess.containsKey("webprotege")) {
+            return authorities;
+        }
+        Map<String, Object> webprotegeAccess = (Map<String, Object>) resourceAccess.get("webprotege");
+        if (webprotegeAccess != null && webprotegeAccess.containsKey("roles")) {
+            List<String> webprotegeRoles = (List<String>) webprotegeAccess.get("roles");
+            authorities.addAll(webprotegeRoles.stream()
+                    .map(role -> "ROLE_" + role.toUpperCase())
+                    .map(SimpleGrantedAuthority::new)
+                    .toList());
+        }
 
         return authorities;
     }
