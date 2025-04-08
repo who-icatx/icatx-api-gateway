@@ -28,6 +28,7 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ github.head_ref }}
+
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v3
         with:
@@ -36,13 +37,17 @@ jobs:
           server-id: docker.io
           server-username: DOCKER_USERNAME
           server-password: DOCKER_PASSWORD
+
       - name: Bump version
         id: bump
         uses: mickem/gh-action-bump-maven-version@v1
+
       - name: Build package
         run: mvn --batch-mode clean package
+
       - name: Build and push image
         run: mvn --batch-mode package install
+
       - name: Release
         uses: softprops/action-gh-release@v1
         env:
@@ -51,11 +56,24 @@ jobs:
           tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
 
-      - name: Notify Compose Repo with GitHub App Token
+      - name: Generate OAuth Access Token
+        id: oauth-token
+        run: |
+          RESPONSE=$(curl -X POST \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}" \
+            -d "client_secret=${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}" \
+            -d "grant_type=client_credentials" \
+            https://github.com/login/oauth/access_token)
+          
+          OAUTH_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+          echo "OAUTH_TOKEN=$OAUTH_TOKEN" >> $GITHUB_ENV
+
+      - name: Notify Compose Repo with OAuth Token
         if: success()
         run: |
           curl -X POST \
-            -H "Authorization: Bearer ${{ steps.app-token.outputs.token }}" \
+            -H "Authorization: Bearer ${{ env.OAUTH_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/protegeproject/webprotege-deploy/dispatches \
             -d '{
@@ -70,6 +88,8 @@ jobs:
 env:
   DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
   DOCKER_TOKEN: ${{secrets.DOCKER_PASSWORD}}
+  PROTEGE_PROJECT_CLIENT_ID: ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}
+  PROTEGE_PROJECT_CLIENT_SECRET: ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}
 
 permissions:
   contents: write
