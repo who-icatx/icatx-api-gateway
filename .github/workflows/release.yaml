@@ -47,24 +47,18 @@ jobs:
           tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
 
-      - name: Generate OAuth Access Token
-        id: oauth-token
-        run: |
-          RESPONSE=$(curl -X POST \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "client_id=${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}" \
-            -d "client_secret=${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}" \
-            -d "grant_type=client_credentials" \
-            https://github.com/login/oauth/access_token)
-          
-          OAUTH_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
-          echo "OAUTH_TOKEN=$OAUTH_TOKEN" >> $GITHUB_ENV
+      - name: Create GitHub App Token
+        id: create-github-app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}
+          private-key: ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}
 
-      - name: Notify Compose Repo with OAuth Token
-        if: success()
+      - name: Notify Compose Repo using GitHub App Token
         run: |
+          # Use the GitHub App token to make an API call
           curl -X POST \
-            -H "Authorization: Bearer ${{ env.OAUTH_TOKEN }}" \
+            -H "Authorization: Bearer ${{ steps.create-github-app-token.outputs.token }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/protegeproject/webprotege-deploy/dispatches \
             -d '{
