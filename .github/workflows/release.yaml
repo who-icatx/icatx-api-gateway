@@ -46,6 +46,10 @@ jobs:
         with:
           tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
+      - name: Debug Logging
+        run: |
+          set -x  # Enable shell debugging
+          echo "ALEX ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }} si  ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}"
 
       - name: Create GitHub App Token
         id: create-github-app-token
