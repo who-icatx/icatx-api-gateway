@@ -57,7 +57,8 @@ jobs:
               "event_type": "update_compose",
               "client_payload": {
                 "service": "'${GITHUB_REPOSITORY##*/}'",
-                "version": "${{ steps.bump.outputs.tag }}"
+                "version": "${{ steps.bump.outputs.tag }}",
+                "branch": "master-who"
               }
             }'
 
