@@ -60,7 +60,7 @@ public class OwlEntityService {
     }
 
     public OWLEntityDto getEntityInfo(String entityIri, String projectId) {
-        LOGGER.info("THIS is a test 7");
+        LOGGER.info("THIS is a test 8");
         validatorService.validateProjectId(projectId);
         validatorService.validateEntityExists(projectId, entityIri);
         return getEntityInfo(entityIri, projectId, SecurityContextHelper.getExecutionContext());
