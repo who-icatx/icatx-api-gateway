@@ -50,7 +50,7 @@ jobs:
         if: success()
         run: |
           curl -X POST \
-            -H "Authorization: token ${{ secrets.BUMP_VERSION_TOKEN }}" \
+            -H "Authorization: token ${{ steps.app-token.outputs.token }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/protegeproject/webprotege-deploy/dispatches \
             -d '{
