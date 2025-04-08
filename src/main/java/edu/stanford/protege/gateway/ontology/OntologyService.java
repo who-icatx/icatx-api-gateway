@@ -38,7 +38,6 @@ public class OntologyService {
     private final CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor;
     private final CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor;
     private final CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor;
-
     private final CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
     private final CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor;
     private final CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getProjectsExecutor;
@@ -97,11 +96,6 @@ public class OntologyService {
                                 new LogicalConditionsFunctionalOwl("OWLFunctionalSyntax", response.functionalAxioms()))
                 );
 
-    }
-
-    @Async
-    public CompletableFuture<EntityLanguageTerms> getEntityLanguageTerms(String entityIri, String projectId, String formId) {
-        return getEntityLanguageTerms(entityIri, projectId, formId, SecurityContextHelper.getExecutionContext());
     }
 
     @Async

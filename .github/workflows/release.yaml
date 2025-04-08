@@ -50,7 +50,7 @@ jobs:
         if: success()
         run: |
           curl -X POST \
-            -H "Authorization: token ${{ secrets.DISPATCH_PAT }}" \
+            -H "Authorization: token ${{ secrets.BUMP_VERSION_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/protegeproject/webprotege-deploy/dispatches \
             -d '{
@@ -58,7 +58,7 @@ jobs:
               "client_payload": {
                 "service": "'${GITHUB_REPOSITORY##*/}'",
                 "version": "${{ steps.bump.outputs.tag }}",
-                "branch": "${{ github.ref_name }}"
+                "branch": "master-who"
               }
             }'
 
