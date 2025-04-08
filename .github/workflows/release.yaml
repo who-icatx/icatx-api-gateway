@@ -15,20 +15,15 @@ jobs:
         with:
           username: ${{secrets.DOCKER_USERNAME}}
           password: ${{secrets.DOCKER_PASSWORD}}
-
-      - name: Create GitHub App Token
+      - uses: actions/create-github-app-token@v1
         id: app-token
-        uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.ICATX_BOT_APP_ID }}
+          app-id: ${{ vars.ICATX_BOT_APP_ID }}
           private-key: ${{ secrets.ICATX_BOT_APP_PRIVATE_KEY }}
-
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ github.head_ref }}
-
       - name: Set up Maven Central Repository
         uses: actions/setup-java@v3
         with:
@@ -37,17 +32,13 @@ jobs:
           server-id: docker.io
           server-username: DOCKER_USERNAME
           server-password: DOCKER_PASSWORD
-
       - name: Bump version
         id: bump
         uses: mickem/gh-action-bump-maven-version@v1
-
       - name: Build package
         run: mvn --batch-mode clean package
-
       - name: Build and push image
         run: mvn --batch-mode package install
-
       - name: Release
         uses: softprops/action-gh-release@v1
         env:
