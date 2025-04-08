@@ -15,12 +15,16 @@ jobs:
         with:
           username: ${{secrets.DOCKER_USERNAME}}
           password: ${{secrets.DOCKER_PASSWORD}}
-      - uses: actions/create-github-app-token@v1
+
+      - name: Create GitHub App Token
         id: app-token
+        uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ vars.ICATX_BOT_APP_ID }}
+          app-id: ${{ secrets.ICATX_BOT_APP_ID }}
           private-key: ${{ secrets.ICATX_BOT_APP_PRIVATE_KEY }}
-      - uses: actions/checkout@v4
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
           token: ${{ steps.app-token.outputs.token }}
           ref: ${{ github.head_ref }}
@@ -46,11 +50,12 @@ jobs:
         with:
           tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
-      - name: Notify Compose Repo
+
+      - name: Notify Compose Repo with GitHub App Token
         if: success()
         run: |
           curl -X POST \
-            -H "Authorization: token ${{ secrets.BUMP_VERSION_TOKEN }}" \
+            -H "Authorization: Bearer ${{ steps.app-token.outputs.token }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/protegeproject/webprotege-deploy/dispatches \
             -d '{
@@ -62,10 +67,10 @@ jobs:
               }
             }'
 
-
 env:
   DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
   DOCKER_TOKEN: ${{secrets.DOCKER_PASSWORD}}
 
 permissions:
   contents: write
+  actions: write
