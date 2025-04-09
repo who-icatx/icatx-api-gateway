@@ -28,7 +28,7 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/protegeproject/webprotege-deploy/dispatches \
             -d '{
-              "event_type": "update_compose",
+              "event_type": "update-compose",
               "client_payload": {
                 "service": "icatx-gateway",
                 "version": "latest",
