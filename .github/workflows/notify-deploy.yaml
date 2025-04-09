@@ -25,8 +25,8 @@ jobs:
         id: trigger-workflow
         run: |
           # Retrieve the output values from the previous workflow
-          SERVICE="${{ github.event.workflow_run.output.service }}"
-          VERSION="${{ github.event.workflow_run.output.version }}"
+          SERVICE="${{ github.event.workflow_run.outputs.service }}"
+          VERSION="${{ github.event.workflow_run.outputs.version }}"
           
           # Echo the parameters
           echo "Service: $SERVICE"
