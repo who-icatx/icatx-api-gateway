@@ -49,6 +49,10 @@ jobs:
         with:
           tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
+      - name: Set outputs
+        run: |
+          echo "version=${{ steps.bump.outputs.tag }}" >> $GITHUB_OUTPUT
+          echo "service=icatx-api-gateway" >> $GITHUB_OUTPUT
 
 env:
   DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
