@@ -20,7 +20,6 @@ jobs:
           private-key: ${{ secrets.PROTEGE_PROJECT_PRIVATE_KEY }}
           owner: protegeproject
           repositories: webprotege-deploy
-
       - name: Notify WebProtege Deploy via repository_dispatch
         run: |
           curl -X POST \
