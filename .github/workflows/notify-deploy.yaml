@@ -22,17 +22,27 @@ jobs:
           repositories: webprotege-deploy
       
       - name: Trigger workflow_call in webprotege-deploy via GitHub API
+        id: trigger-workflow
         run: |
-          curl -X POST \
+          response=$(curl -s -w "%{http_code}" -X POST \
             -H "Authorization: token ${{ steps.app-token.outputs.token }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/protegeproject/webprotege-deploy/actions/workflows/update-compose.yml/dispatches \
             -d '{
-                  "ref": "master",
+                  "ref": "master-who",
                   "inputs": {
                     "service": "icatx-gateway",
                     "version": "latest",
                     "branch": "master-who"
                   }
-                }'
+                }')
+          
+          http_code=$(echo "$response" | tail -n1)
 
+          # Check if the HTTP status code is between 200 and 299 (inclusive)
+          if [[ "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
+            echo "Error: API call failed with status code $http_code"
+            exit 1
+          else
+            echo "API call successful, status code: $http_code"
+          fi
