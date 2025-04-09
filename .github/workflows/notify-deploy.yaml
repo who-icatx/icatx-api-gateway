@@ -21,17 +21,17 @@ jobs:
           owner: protegeproject
           repositories: webprotege-deploy
 
-      - name: Notify WebProtege Deploy via repository_dispatch
+      - name: Trigger workflow_call in webprotege-deploy via GitHub API
         run: |
-          curl -i -X POST \
+          curl -X POST \
             -H "Authorization: token ${{ steps.app-token.outputs.token }}" \
             -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/protegeproject/webprotege-deploy/dispatches \
+            https://api.github.com/repos/protegeproject/webprotege-deploy/actions/workflows/update-compose.yml/dispatches \
             -d '{
-              "event_type": "update-compose",
-              "client_payload": {
-                "service": "icatx-gateway",
-                "version": "latest",
-                "branch": "master-who"
-              }
-            }'
+                  "ref": "master",  # or the branch you want to trigger
+                  "inputs": {
+                    "service": "icatx-gateway",
+                    "version": "latest",
+                    "branch": "master-who"
+                  }
+                }'
