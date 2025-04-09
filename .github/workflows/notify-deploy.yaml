@@ -16,10 +16,11 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.PROTEGE_PROJECT_APP_ID }}
-          private-key: ${{ secrets.PROTEGE_PROJECT_PRIVATE_KEY }}
+          app-id: ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}
+          private-key: ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}
           owner: protegeproject
           repositories: webprotege-deploy
+
       - name: Notify WebProtege Deploy via repository_dispatch
         run: |
           curl -X POST \
@@ -34,7 +35,3 @@ jobs:
                 "branch": "master-who"
               }
             }'
-
-env:
-  PROTEGE_PROJECT_APP_ID: ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}
-  PROTEGE_PROJECT_PRIVATE_KEY: ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}
