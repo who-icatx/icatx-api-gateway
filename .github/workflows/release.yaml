@@ -53,8 +53,8 @@ jobs:
       - name: Set outputs
         id: release-outputs
         run: |
-          echo "version=${{ steps.bump.outputs.tag }}" >> $GITHUB_ENV
-          echo "service=icatx-api-gateway" >> $GITHUB_ENV
+          echo "version=${{ steps.bump.outputs.tag }}" >> $GITHUB_OUTPUT
+          echo "service=icatx-api-gateway" >> $GITHUB_OUTPUT
 
     outputs:
       version: ${{ steps.release-outputs.outputs.version }}
