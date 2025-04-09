@@ -46,40 +46,10 @@ jobs:
         with:
           tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
-      - name: Debug Logging
-        run: |
-          set -x  # Enable shell debugging
-          echo "ALEX ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }} si  ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}"
-
-      - name: Create GitHub App Token
-        id: create-github-app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}
-          private-key: ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}
-
-      - name: Notify Compose Repo using GitHub App Token
-        run: |
-          # Use the GitHub App token to make an API call
-          curl -X POST \
-            -H "Authorization: Bearer ${{ steps.create-github-app-token.outputs.token }}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/protegeproject/webprotege-deploy/dispatches \
-            -d '{
-              "event_type": "update_compose",
-              "client_payload": {
-                "service": "'${GITHUB_REPOSITORY##*/}'",
-                "version": "${{ steps.bump.outputs.tag }}",
-                "branch": "master-who"
-              }
-            }'
 
 env:
   DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
   DOCKER_TOKEN: ${{secrets.DOCKER_PASSWORD}}
-  PROTEGE_PROJECT_CLIENT_ID: ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}
-  PROTEGE_PROJECT_CLIENT_SECRET: ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}
 
 permissions:
   contents: write
-  actions: write
