@@ -36,8 +36,14 @@ jobs:
                     "branch": "master-who"
                   }
                 }')
-          
+
+          # Extract the HTTP status code and body
           http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')  # Remove the last line to get the body
+
+          # Log the status code and the response body
+          echo "HTTP Status Code: $http_code"
+          echo "Response Body: $body"
 
           # Check if the HTTP status code is between 200 and 299 (inclusive)
           if [[ "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
