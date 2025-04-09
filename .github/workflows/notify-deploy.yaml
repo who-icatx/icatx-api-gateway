@@ -26,7 +26,9 @@ jobs:
 
       - name: Trigger workflow_call in webprotege-deploy
         run: |
-          echo "Triggering webprotege-deploy with service=${{ inputs.service }} and version=${{ inputs.version }}"
+          SERVICE="${{ inputs.service }}"
+          VERSION="${{ inputs.version }}"
+          echo "Triggering webprotege-deploy with service=$SERVICE and version=$VERSION"
 
           response=$(curl -s -w "%{http_code}" -X POST \
             -H "Authorization: token ${{ steps.app-token.outputs.token }}" \
@@ -35,8 +37,8 @@ jobs:
             -d '{
               "ref": "master-who",
               "inputs": {
-                "service": "${{ inputs.service }}",
-                "version": "${{ inputs.version }}",
+                "service": "'"$SERVICE"'",
+                "version": "'"$VERSION"'",
                 "branch": "master-who"
               }
             }')

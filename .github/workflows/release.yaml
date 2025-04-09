@@ -65,10 +65,11 @@ jobs:
           echo "service=icatx-api-gateway" >> $GITHUB_OUTPUT
 
   notify:
+    needs: build
     uses: ./.github/workflows/notify-deploy.yaml
     with:
-      version: ${{ steps.release-outputs.outputs.version }}
-      service: ${{ steps.release-outputs.outputs.service }}
+      version: ${{ needs.build.outputs.version }}
+      service: ${{ needs.build.outputs.service }}
 
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
