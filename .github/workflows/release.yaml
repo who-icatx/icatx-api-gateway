@@ -35,10 +35,13 @@ jobs:
       - name: Bump version
         id: bump
         uses: mickem/gh-action-bump-maven-version@v1
+
       - name: Build package
         run: mvn --batch-mode clean package
+
       - name: Build and push image
         run: mvn --batch-mode package install
+
       - name: Release
         uses: softprops/action-gh-release@v1
         env:
@@ -46,18 +49,20 @@ jobs:
         with:
           tag_name: ${{ steps.bump.outputs.tag }}
           generate_release_notes: true
+
       - name: Set outputs
         id: release-outputs
         run: |
-          echo "version=${{ steps.bump.outputs.tag }}" >> $GITHUB_OUTPUT
-          echo "service=icatx-api-gateway" >> $GITHUB_OUTPUT
+          echo "version=${{ steps.bump.outputs.tag }}" >> $GITHUB_ENV
+          echo "service=icatx-api-gateway" >> $GITHUB_ENV
 
     outputs:
-      version: ${{ steps.release-outputs.version }}
-      service: ${{ steps.release-outputs.service }}
+      version: ${{ steps.release-outputs.outputs.version }}
+      service: ${{ steps.release-outputs.outputs.service }}
+
 env:
-  DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-  DOCKER_TOKEN: ${{secrets.DOCKER_PASSWORD}}
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_TOKEN: ${{ secrets.DOCKER_PASSWORD }}
 
 permissions:
   contents: write
