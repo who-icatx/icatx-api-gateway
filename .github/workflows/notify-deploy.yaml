@@ -31,8 +31,8 @@ jobs:
             -d '{
                   "ref": "master-who",
                   "inputs": {
-                    "service": "icatx-gateway",
-                    "version": "latest",
+                    "service": "${{ github.event.workflow_run.outputs.service }}",
+                    "version": "${{ github.event.workflow_run.outputs.version }}",
                     "branch": "master-who"
                   }
                 }')
@@ -41,11 +41,9 @@ jobs:
           http_code=$(echo "$response" | tail -n1)
           body=$(echo "$response" | sed '$d')  # Remove the last line to get the body
 
-          # Log the status code and the response body
           echo "HTTP Status Code: $http_code"
           echo "Response Body: $body"
 
-          # Check if the HTTP status code is between 200 and 299 (inclusive)
           if [[ "$http_code" -lt 200 || "$http_code" -ge 300 ]]; then
             echo "Error: API call failed with status code $http_code"
             exit 1
