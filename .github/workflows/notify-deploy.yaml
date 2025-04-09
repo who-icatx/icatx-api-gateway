@@ -21,6 +21,11 @@ jobs:
           owner: protegeproject
           repositories: webprotege-deploy
       
+      # Debugging Step: Print the event data to see if outputs are passed correctly
+      - name: Print event data
+        run: |
+          echo "Event data: ${{ toJson(github.event.workflow_run) }}"
+
       - name: Trigger workflow_call in webprotege-deploy via GitHub API
         id: trigger-workflow
         run: |
