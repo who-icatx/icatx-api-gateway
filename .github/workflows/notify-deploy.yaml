@@ -16,7 +16,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v1
         with:
-          app-id: ${{ secrets.PROTEGE_PROJECT_APP_ID }}
+          app-id: ${{ vars.PROTEGE_PROJECT_APP_ID }}
           private-key: ${{ secrets.PROTEGE_PROJECT_PRIVATE_KEY }}
           owner: protegeproject
           repositories: webprotege-deploy
