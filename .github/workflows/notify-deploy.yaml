@@ -24,15 +24,14 @@ jobs:
       - name: Trigger workflow_call in webprotege-deploy via GitHub API
         id: trigger-workflow
         run: |
-          # Capture the values of 'service' and 'version' into shell variables
-          SERVICE="${{ github.event.workflow_run.outputs.service }}"
-          VERSION="${{ github.event.workflow_run.outputs.version }}"
+          # Retrieve the output values from the previous workflow
+          SERVICE="${{ needs.release.outputs.service }}"
+          VERSION="${{ needs.release.outputs.version }}"
           
-          # Echo the parameters for debugging
+          # Echo the parameters
           echo "Service: $SERVICE"
           echo "Version: $VERSION"
       
-          # Make the API call with the correct values
           response=$(curl -s -w "%{http_code}" -X POST \
             -H "Authorization: token ${{ steps.app-token.outputs.token }}" \
             -H "Accept: application/vnd.github+json" \
