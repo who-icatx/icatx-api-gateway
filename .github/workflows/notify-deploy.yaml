@@ -9,6 +9,11 @@ on:
       version:
         required: true
         type: string
+    secrets:
+      PROTEGE_PROJECT_CLIENT_ID:
+        required: true
+      PROTEGE_PROJECT_CLIENT_SECRET:
+        required: true
 
 jobs:
   notify:

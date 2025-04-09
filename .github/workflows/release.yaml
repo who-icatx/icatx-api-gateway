@@ -70,6 +70,9 @@ jobs:
     with:
       version: ${{ needs.build.outputs.version }}
       service: ${{ needs.build.outputs.service }}
+    secrets:
+      PROTEGE_PROJECT_CLIENT_ID: ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}
+      PROTEGE_PROJECT_CLIENT_SECRET: ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}
 
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
