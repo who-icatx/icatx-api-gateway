@@ -1,5 +1,7 @@
 package edu.stanford.protege.gateway;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,6 +14,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class KeycloakRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(KeycloakRoleConverter.class);
 
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
@@ -31,7 +35,7 @@ public class KeycloakRoleConverter implements Converter<Jwt, Collection<GrantedA
                     .map(SimpleGrantedAuthority::new)
                     .toList());
         }
-
+        LOGGER.info("ALEX extrag din jwt " + jwt.getTokenValue() + " si intorc " + authorities);
         return authorities;
     }
 }
