@@ -131,7 +131,7 @@ public class OwlEntityService {
     }
 
     public Set<ProjectSummaryDto> getProjects() {
-        LOGGER.info("ALEX deployed in get projects 2");
+        LOGGER.info("ALEX deployed in get projects 3");
         CompletableFuture<Set<ProjectSummaryDto>> availableProjects = ontologyService.getProjects();
         try {
             return availableProjects.get();
