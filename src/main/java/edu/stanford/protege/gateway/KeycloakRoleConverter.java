@@ -35,7 +35,6 @@ public class KeycloakRoleConverter implements Converter<Jwt, Collection<GrantedA
                     .map(SimpleGrantedAuthority::new)
                     .toList());
         }
-        LOGGER.info("ALEX extrag din jwt " + jwt.getTokenValue() + " si intorc " + authorities);
         return authorities;
     }
 }
