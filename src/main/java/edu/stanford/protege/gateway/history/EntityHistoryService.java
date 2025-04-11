@@ -55,7 +55,7 @@ public class EntityHistoryService {
     }
 
     public EntityHistorySummary getEntityHistorySummary(String projectId, String entityIri) {
-        System.out.println("ALEX new release test");
+        System.out.println("ALEX new release test 2");
         validatorService.validateProjectId(projectId);
         validatorService.validateEntityExists(projectId, entityIri);
         try {
