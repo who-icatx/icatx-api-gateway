@@ -33,7 +33,7 @@ jobs:
         run: |
           SERVICE="${{ inputs.service }}"
           VERSION="${{ inputs.version }}"
-          BRANCH="${{ vars.DEPLOY_BRANCH }}"
+          BRANCH="${{ vars.BUMP_BRANCH }}"
           echo "Triggering webprotege-deploy with service=$SERVICE and version=$VERSION"
 
           response=$(curl -s -w "%{http_code}" -X POST \

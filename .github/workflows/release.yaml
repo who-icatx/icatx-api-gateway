@@ -64,9 +64,9 @@ jobs:
           echo "version=${{ steps.bump.outputs.tag }}" >> $GITHUB_OUTPUT
           echo "service=icatx-api-gateway" >> $GITHUB_OUTPUT
 
-  notify:
+  notify-bump:
     needs: build
-    uses: ./.github/workflows/notify-deploy.yaml
+    uses: ./.github/workflows/notify-bump.yaml
     with:
       version: ${{ needs.build.outputs.version }}
       service: ${{ needs.build.outputs.service }}
@@ -74,6 +74,16 @@ jobs:
       PROTEGE_PROJECT_CLIENT_ID: ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}
       PROTEGE_PROJECT_CLIENT_SECRET: ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}
 
+  notify-deploy:
+    needs: build
+    if: ${{ vars.IS_ICATX_DEPLOYABLE == 'true'}}
+    uses: ./.github/workflows/notify-deploy.yaml
+    with:
+      version: ${{ needs.build.outputs.version }}
+      service: ${{ needs.build.outputs.service }}
+    secrets:
+      PROTEGE_PROJECT_CLIENT_ID: ${{ secrets.PROTEGE_PROJECT_CLIENT_ID }}
+      PROTEGE_PROJECT_CLIENT_SECRET: ${{ secrets.PROTEGE_PROJECT_CLIENT_SECRET }}
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_TOKEN: ${{ secrets.DOCKER_PASSWORD }}
