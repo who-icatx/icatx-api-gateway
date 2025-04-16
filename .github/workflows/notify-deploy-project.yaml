@@ -9,6 +9,9 @@ on:
       version:
         required: true
         type: string
+      branch_var:
+        required: true
+        type: string
     secrets:
       PROTEGE_PROJECT_CLIENT_ID:
         required: true
@@ -33,7 +36,7 @@ jobs:
         run: |
           SERVICE="${{ inputs.service }}"
           VERSION="${{ inputs.version }}"
-          BRANCH="${{ vars.DEPLOY_BRANCH }}"
+          BRANCH="${{ inputs.branch_var }}"
           echo "Triggering webprotege-deploy with service=$SERVICE and version=$VERSION"
 
           response=$(curl -s -w "%{http_code}" -X POST \
