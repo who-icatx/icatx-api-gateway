@@ -19,6 +19,7 @@ class EntityLanguageTermsDtoTest {
                 new BaseIndexTerm("indexTermLabel",
                         "someIndexType",
                         true,
+                        false,
                         "indexTermId")
         );
         List<String> subclassBaseInclusions = List.of("inclusionA", "inclusionB");

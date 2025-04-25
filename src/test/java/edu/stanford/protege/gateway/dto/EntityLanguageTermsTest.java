@@ -16,7 +16,7 @@ class EntityLanguageTermsTest {
         LanguageTerm fullySpecifiedName = new LanguageTerm("FSN Label", "fsnId");
 
         List<BaseIndexTerm> baseIndexTerms = List.of(
-                new BaseIndexTerm("indexLabel", "indexTypeA", true, "indexTermId")
+                new BaseIndexTerm("indexLabel", "indexTypeA", true, false,"indexTermId")
         );
         List<String> subclassBaseInclusions = List.of("incA", "incB");
         List<BaseExclusionTerm> baseExclusionTerms = List.of(
