@@ -84,11 +84,13 @@ public class OwlEntityService {
 
         try {
             EntityLanguageTerms terms = entityLanguageTerms.get();
+            EntityLanguageTermsDto termsDto = EntityLanguageTermsDto.getFromTerms(terms);
             if (terms == null || terms.title() == null || terms.title().label() == null || terms.title().label().isEmpty()) {
                 throw new EntityIsMissingException("Entity with iri " + entityIri + " is missing");
             }
             return new OWLEntityDto(entityIri,
-                    entityLanguageTerms.get(),
+                    terms.isObsolete(),
+                    termsDto,
                     linearizationDto.get(),
                     new EntityPostCoordinationWrapperDto(specList.get(), new Date(), customScalesDtos.get()),
                     latestChange.get(),
@@ -160,7 +162,7 @@ public class OwlEntityService {
             entityPostCoordinationService.updateEntityPostCoordination(owlEntityDto.postcoordination(), projectId, owlEntityDto.entityIRI(), changeRequestId);
             ontologyService.updateLogicalDefinition(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.logicalConditions(), changeRequestId);
             ontologyService.updateEntityParents(owlEntityDto.entityIRI(), existingProjectId, owlEntityDto.parents(), changeRequestId);
-            ontologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto.languageTerms(), changeRequestId);
+            ontologyService.updateLanguageTerms(owlEntityDto.entityIRI(), existingProjectId, this.formId, owlEntityDto, changeRequestId);
             eventDispatcher.dispatchEvent(new EntityUpdatedSuccessfullyEvent(projectId, EventId.generate(), owlEntityDto.entityIRI(), changeRequestId), SecurityContextHelper.getExecutionContext());
             return getEntityInfo(owlEntityDto.entityIRI(), existingProjectId);
 

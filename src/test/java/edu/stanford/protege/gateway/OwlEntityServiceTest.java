@@ -27,9 +27,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,89 +70,122 @@ public class OwlEntityServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyOwlEntityDto.json");
         dto = objectMapper.readValue(specFile, OWLEntityDto.class);
-        service = new OwlEntityService(entityLinearizationService, entityPostCoordinationService, entityHistoryService, eventDispatcher, entityOntologyService, validatorService);
 
+        service = new OwlEntityService(
+                entityLinearizationService,
+                entityPostCoordinationService,
+                entityHistoryService,
+                eventDispatcher,
+                entityOntologyService,
+                validatorService);
     }
 
     private void initializeGetMocks() {
         when(entityLanguageTerms.title()).thenReturn(dto.languageTerms().title());
-        when(entityLinearizationService.getEntityLinearizationDto(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> linearizationWrapperDto));
-        when(entityPostCoordinationService.getPostCoordinationSpecifications(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
-        when(entityPostCoordinationService.getEntityCustomScales(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
-        when(entityOntologyService.getEntityLanguageTerms(any(), any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> entityLanguageTerms));
-        when(entityOntologyService.getEntityLogicalConditions(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> entityLogicalDefinition));
-        when(entityOntologyService.getEntityParents(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
-        when(entityHistoryService.getEntityLatestChangeTime(any(), any(), any())).thenReturn(CompletableFuture.supplyAsync(() -> this.latestUpdate));
+
+        when(entityLinearizationService.getEntityLinearizationDto(any(), any(), any()))
+                .thenReturn(CompletableFuture.supplyAsync(() -> linearizationWrapperDto));
+        when(entityPostCoordinationService.getPostCoordinationSpecifications(any(), any(), any()))
+                .thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
+        when(entityPostCoordinationService.getEntityCustomScales(any(), any(), any()))
+                .thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
+        when(entityOntologyService.getEntityLanguageTerms(any(), any(), any(), any()))
+                .thenReturn(CompletableFuture.supplyAsync(() -> entityLanguageTerms));
+        when(entityOntologyService.getEntityLogicalConditions(any(), any(), any()))
+                .thenReturn(CompletableFuture.supplyAsync(() -> entityLogicalDefinition));
+        when(entityOntologyService.getEntityParents(any(), any(), any()))
+                .thenReturn(CompletableFuture.supplyAsync(ArrayList::new));
+        when(entityHistoryService.getEntityLatestChangeTime(any(), any(), any()))
+                .thenReturn(CompletableFuture.supplyAsync(() -> this.latestUpdate));
     }
 
+    @Test
+    public void GIVEN_validEntity_WHEN_getEntityInfo_THEN_returnsCorrectDto() {
+        initializeGetMocks();
+
+        OWLEntityDto result = service.getEntityInfo(dto.entityIRI(), existingProjectId);
+        EntityLanguageTermsDto termDto = EntityLanguageTermsDto.getFromTerms(entityLanguageTerms);
+        assertNotNull(result);
+        assertEquals(dto.entityIRI(), result.entityIRI());
+        assertEquals(dto.languageTerms().title().label(), result.languageTerms().title().label());
+        assertEquals(dto.isObsolete(), result.isObsolete());
+        assertSame(linearizationWrapperDto, result.entityLinearizations());
+        assertEquals(termDto,      result.languageTerms());
+        assertSame(entityLogicalDefinition,  result.logicalConditions());
+        assertEquals(latestUpdate, result.lastChangeDate());
+
+        verify(validatorService, times(1)).validateProjectId(existingProjectId);
+        verify(validatorService, times(1)).validateEntityExists(existingProjectId, dto.entityIRI());
+    }
+
+    @Test
+    public void GIVEN_missingTitle_WHEN_getEntityInfo_THEN_throwsEntityIsMissingException() {
+        initializeGetMocks();
+        when(entityLanguageTerms.title()).thenReturn(new LanguageTerm(null, ""));
+
+        EntityIsMissingException ex = assertThrows(EntityIsMissingException.class,
+                () -> service.getEntityInfo(dto.entityIRI(), existingProjectId));
+
+        assertEquals("Entity with iri " + dto.entityIRI() + " is missing", ex.getMessage());
+    }
 
     @Test
     public void GIVEN_entityWithLinearizationParentDifferentThanExistingParents_WHEN_update_THEN_validationIsThrown() {
-        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
-                CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
-        );
+        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI())))
+                .thenReturn(CompletableFuture.supplyAsync(() -> latestUpdate));
 
-        when(entityOntologyService.getEntityParents(eq(dto.entityIRI()), eq(existingProjectId))).thenReturn(
-                CompletableFuture.supplyAsync(() -> Arrays.asList("http://id.who.int/icd/entity/1553463690"))
-        );
+        when(entityOntologyService.getEntityParents(eq(dto.entityIRI()), eq(existingProjectId)))
+                .thenReturn(CompletableFuture.supplyAsync(() -> Arrays.asList("http://id.who.int/icd/entity/1553463690")));
 
-        dto.entityLinearizations().linearizations().add(new EntityLinearization("UNKNOWN",
-                "FALSE",
-                "UNKNOWN",
-                "potatoParent",
-                "http://id.who.int/icd/release/11/ocu",
-                null));
+        dto.entityLinearizations().linearizations().add(new EntityLinearization("UNKNOWN", "FALSE", "UNKNOWN", "potatoParent", "http://id.who.int/icd/release/11/ocu", null));
 
-        ValidationException exception = assertThrows(ValidationException.class, () -> service.updateEntity(dto, existingProjectId, eTag));
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> service.updateEntity(dto, existingProjectId, eTag));
 
         assertEquals("Entity has a linearization with parent potatoParent that is not in the available parents [http://id.who.int/icd/entity/1553463690]", exception.getMessage());
     }
 
     @Test
     public void GIVEN_entityThatIsPresentAsOwnParent_WHEN_update_THEN_validationExceptionIsThrown() {
-        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
-                CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
-        );
+        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI())))
+                .thenReturn(CompletableFuture.supplyAsync(() -> latestUpdate));
 
         dto.parents().add(dto.entityIRI());
-        ValidationException exception = assertThrows(ValidationException.class, () -> service.updateEntity(dto, existingProjectId, eTag));
+        ValidationException exception = assertThrows(ValidationException.class,
+                () -> service.updateEntity(dto, existingProjectId, eTag));
 
         assertEquals("Entity contains in the parents its own parents", exception.getMessage());
     }
 
     @Test
     public void GIVEN_callWithDifferentHash_WHEN_update_THEN_versionDoesNotMatchExceptionIsThrown() {
-        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
-                CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
-        );
+        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI())))
+                .thenReturn(CompletableFuture.supplyAsync(() -> latestUpdate));
 
-        VersionDoesNotMatchException exception = assertThrows(VersionDoesNotMatchException.class, () -> service.updateEntity(dto, existingProjectId, "PotatoTag"));
+        VersionDoesNotMatchException exception = assertThrows(VersionDoesNotMatchException.class,
+                () -> service.updateEntity(dto, existingProjectId, "PotatoTag"));
 
-        assertEquals("Received version out of date : Received hash PotatoTag is different from cd78e6f5802bff1df5f43103eb17e1b2cf17a3f4cf9b182e7d0194eb112ab3df", exception.getMessage());
-
+        assertEquals("Received version out of date : Received hash PotatoTag is different from " + eTag, exception.getMessage());
     }
 
     @Test
     public void GIVEN_getCall_WHEN_titleIsMissing_THEN_exceptionIsThrown() {
         initializeGetMocks();
         when(entityLanguageTerms.title()).thenReturn(new LanguageTerm(null, null));
-        EntityIsMissingException exception = assertThrows(EntityIsMissingException.class, () -> service.getEntityInfo(dto.entityIRI(), existingProjectId));
 
-        assertEquals("Entity with iri http://id.who.int/icd/entity/1855860109 is missing", exception.getMessage());
+        EntityIsMissingException exception = assertThrows(EntityIsMissingException.class,
+                () -> service.getEntityInfo(dto.entityIRI(), existingProjectId));
 
+        assertEquals("Entity with iri " + dto.entityIRI() + " is missing", exception.getMessage());
     }
 
     @Test
     public void GIVEN_aValidUpdateRequest_WHEN_update_THEN_serviceIsCalled() {
         initializeGetMocks();
-
-        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
-                CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
-        );
-
-        when(entityOntologyService.getEntityParents(eq(dto.entityIRI()), eq(existingProjectId))).thenReturn(
-                CompletableFuture.supplyAsync(() -> Arrays.asList("http://id.who.int/icd/entity/1553463690"))
-        );
+        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI())))
+                .thenReturn(CompletableFuture.supplyAsync(() -> latestUpdate));
+        when(entityOntologyService.getEntityParents(eq(dto.entityIRI()), eq(existingProjectId)))
+                .thenReturn(CompletableFuture.supplyAsync(() -> Arrays.asList("http://id.who.int/icd/entity/1553463690")));
 
         service.updateEntity(dto, existingProjectId, eTag);
 
@@ -167,14 +199,10 @@ public class OwlEntityServiceTest {
     @Test
     public void GIVEN_validRequest_WHEN_callUpdate_THEN_entityUpdatedSuccessfullyIsEmitted() {
         initializeGetMocks();
-
-        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
-                CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
-        );
-
-        when(entityOntologyService.getEntityParents(eq(dto.entityIRI()), eq(existingProjectId))).thenReturn(
-                CompletableFuture.supplyAsync(() -> Arrays.asList("http://id.who.int/icd/entity/1553463690"))
-        );
+        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI())))
+                .thenReturn(CompletableFuture.supplyAsync(() -> latestUpdate));
+        when(entityOntologyService.getEntityParents(eq(dto.entityIRI()), eq(existingProjectId)))
+                .thenReturn(CompletableFuture.supplyAsync(() -> Arrays.asList("http://id.who.int/icd/entity/1553463690")));
 
         service.updateEntity(dto, existingProjectId, eTag);
         verify(eventDispatcher, times(1)).dispatchEvent(any(EntityUpdatedSuccessfullyEvent.class), any());
@@ -182,20 +210,15 @@ public class OwlEntityServiceTest {
 
     @Test
     public void GIVEN_applicationExceptionFromLinearization_WHEN_callUpdate_THEN_entityUpdateFailedEventIsEmitted() {
-
-        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI()))).thenReturn(
-                CompletableFuture.supplyAsync(() -> LocalDateTime.of(2024, 1, 1, 1, 1))
-        );
-        when(entityOntologyService.getEntityParents(eq(dto.entityIRI()), eq(existingProjectId))).thenReturn(
-                CompletableFuture.supplyAsync(() -> Arrays.asList("http://id.who.int/icd/entity/1553463690"))
-        );
+        when(entityHistoryService.getEntityLatestChangeTime(eq(existingProjectId), eq(dto.entityIRI())))
+                .thenReturn(CompletableFuture.supplyAsync(() -> latestUpdate));
+        when(entityOntologyService.getEntityParents(eq(dto.entityIRI()), eq(existingProjectId)))
+                .thenReturn(CompletableFuture.supplyAsync(() -> Arrays.asList("http://id.who.int/icd/entity/1553463690")));
 
         doThrow(new ApplicationException("Error"))
                 .when(entityLinearizationService).updateEntityLinearization(any(), eq(ProjectId.valueOf(existingProjectId)), any());
-        assertThrows(ApplicationException.class, () ->
-                service.updateEntity(dto, existingProjectId, eTag)
-        );
-        verify(eventDispatcher, times(1)).dispatchEvent(any(EntityUpdateFailedEvent.class), any());
 
+        assertThrows(ApplicationException.class, () -> service.updateEntity(dto, existingProjectId, eTag));
+        verify(eventDispatcher, times(1)).dispatchEvent(any(EntityUpdateFailedEvent.class), any());
     }
 }
