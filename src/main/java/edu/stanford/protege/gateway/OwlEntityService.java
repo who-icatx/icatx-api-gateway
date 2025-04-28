@@ -91,9 +91,9 @@ public class OwlEntityService {
             return new OWLEntityDto(entityIri,
                     terms.isObsolete(),
                     termsDto,
+                    latestChange.get(),
                     linearizationDto.get(),
                     new EntityPostCoordinationWrapperDto(specList.get(), new Date(), customScalesDtos.get()),
-                    latestChange.get(),
                     logicalConditions.get(),
                     parents.get()
             );
