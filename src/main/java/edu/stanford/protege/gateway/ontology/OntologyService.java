@@ -1,29 +1,21 @@
 package edu.stanford.protege.gateway.ontology;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 import com.google.common.collect.ImmutableSet;
-import edu.stanford.protege.gateway.ApplicationException;
-import edu.stanford.protege.gateway.SecurityContextHelper;
+import edu.stanford.protege.gateway.*;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
-import edu.stanford.protege.webprotege.common.ChangeRequestId;
-import edu.stanford.protege.webprotege.common.ProjectId;
-import edu.stanford.protege.webprotege.ipc.CommandExecutor;
-import edu.stanford.protege.webprotege.ipc.ExecutionContext;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import edu.stanford.protege.webprotege.common.*;
+import edu.stanford.protege.webprotege.ipc.*;
+import org.semanticweb.owlapi.model.*;
+import org.slf4j.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -142,9 +134,10 @@ public class OntologyService {
         }
     }
 
-    public void updateLanguageTerms(String entityIri, String projectId, String formId, EntityLanguageTerms languageTerms, ChangeRequestId changeRequestId) {
+    public void updateLanguageTerms(String entityIri, String projectId, String formId, OWLEntityDto owlEntityDto, ChangeRequestId changeRequestId) {
         try {
             ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
+            EntityLanguageTerms languageTerms = EntityLanguageTerms.getFromLanguageTermDto(owlEntityDto.languageTerms(), owlEntityDto.isObsolete());
             updateLanguageTermsExecutor.execute(new SetEntityFormDataFromJsonRequest(changeRequestId,
                             ProjectId.valueOf(projectId),
                             new OWLClassImpl(IRI.create(entityIri)),
