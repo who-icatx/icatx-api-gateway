@@ -15,5 +15,4 @@ public record OWLEntityDto(@JsonProperty("entityUri") String entityIRI,
                            EntityLogicalConditionsWrapper logicalConditions,
                            List<String> parents) {
 
-
 }

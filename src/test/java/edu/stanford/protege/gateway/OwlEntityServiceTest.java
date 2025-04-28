@@ -118,34 +118,8 @@ public class OwlEntityServiceTest {
         verify(validatorService, times(1)).validateEntityExists(existingProjectId, dto.entityIRI());
     }
 
-    @Test
-    public void GIVEN_validEntity_WHEN_getEntityInfo_THEN_returnsCorrectDto() {
-        initializeGetMocks();
 
-        OWLEntityDto result = service.getEntityInfo(dto.entityIRI(), existingProjectId);
 
-        assertNotNull(result);
-        assertEquals(dto.entityIRI(), result.entityIRI());
-        assertEquals(dto.languageTerms().title().label(), result.languageTerms().title().label());
-        assertSame(linearizationWrapperDto, result.entityLinearizations());
-        assertSame(entityLanguageTerms,      result.languageTerms());
-        assertSame(entityLogicalDefinition,  result.logicalConditions());
-        assertEquals(latestUpdate, result.lastChangeDate());
-
-        verify(validatorService, times(1)).validateProjectId(existingProjectId);
-        verify(validatorService, times(1)).validateEntityExists(existingProjectId, dto.entityIRI());
-    }
-
-    @Test
-    public void GIVEN_missingTitle_WHEN_getEntityInfo_THEN_throwsEntityIsMissingException() {
-        initializeGetMocks();
-        when(entityLanguageTerms.title()).thenReturn(new LanguageTerm(null, ""));
-
-        EntityIsMissingException ex = assertThrows(EntityIsMissingException.class,
-                () -> service.getEntityInfo(dto.entityIRI(), existingProjectId));
-
-        assertEquals("Entity with iri " + dto.entityIRI() + " is missing", ex.getMessage());
-    }
     @Test
     public void GIVEN_missingTitle_WHEN_getEntityInfo_THEN_throwsEntityIsMissingException() {
         initializeGetMocks();

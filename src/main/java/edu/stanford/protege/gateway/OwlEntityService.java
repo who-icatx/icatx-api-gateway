@@ -89,9 +89,9 @@ public class OwlEntityService {
                 throw new EntityIsMissingException("Entity with iri " + entityIri + " is missing");
             }
             return new OWLEntityDto(entityIri,
-                    latestChange.get(),
                     terms.isObsolete(),
                     termsDto,
+                    latestChange.get(),
                     linearizationDto.get(),
                     new EntityPostCoordinationWrapperDto(specList.get(), new Date(), customScalesDtos.get()),
                     logicalConditions.get(),
