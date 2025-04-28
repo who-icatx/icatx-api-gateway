@@ -5,10 +5,11 @@ import com.fasterxml.jackson.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@JsonPropertyOrder({"entityUri", "lastModified", "languageTerms", "entityLinearizations", "postcoordination", "logicalConditions", "parents"})
+@JsonPropertyOrder({"entityUri","isObsolete", "lastModified", "languageTerms", "entityLinearizations", "postcoordination", "logicalConditions", "parents"})
 public record OWLEntityDto(@JsonProperty("entityUri") String entityIRI,
+                           boolean isObsolete,
+                           EntityLanguageTermsDto languageTerms,
                            @JsonProperty("lastModified") LocalDateTime lastChangeDate,
-                           EntityLanguageTerms languageTerms,
                            EntityLinearizationWrapperDto entityLinearizations,
                            EntityPostCoordinationWrapperDto postcoordination,
                            EntityLogicalConditionsWrapper logicalConditions,
