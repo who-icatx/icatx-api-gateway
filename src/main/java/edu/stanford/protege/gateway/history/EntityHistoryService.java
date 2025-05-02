@@ -8,7 +8,6 @@ import edu.stanford.protege.gateway.history.commands.GetChangedEntitiesRequest;
 import edu.stanford.protege.gateway.history.commands.GetChangedEntitiesResponse;
 import edu.stanford.protege.gateway.history.commands.GetEntityHistorySummaryRequest;
 import edu.stanford.protege.gateway.history.commands.GetEntityHistorySummaryResponse;
-import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.ontology.commands.GetAvailableProjectsForApiRequest;
 import edu.stanford.protege.gateway.ontology.commands.GetAvailableProjectsForApiResponse;
 import edu.stanford.protege.gateway.validators.ValidatorService;
@@ -53,7 +52,7 @@ public class EntityHistoryService {
         validatorService.validateProjectId(projectId);
 
         try {
-            return changedEntitiesExecutor.execute(GetChangedEntitiesRequest.create(ProjectId.valueOf(projectId), timestamp), SecurityContextHelper.getExecutionContext())
+            return changedEntitiesExecutor.execute(GetChangedEntitiesRequest.create(ProjectId.valueOf(projectId), timestamp.getTime()), SecurityContextHelper.getExecutionContext())
                     .thenApply(GetChangedEntitiesResponse::changedEntities)
                     .get();
         } catch (InterruptedException | ExecutionException e) {
@@ -85,7 +84,7 @@ public class EntityHistoryService {
     public CompletableFuture<LocalDateTime> getEntityLatestChangeTime(String projectId, String entityIri, ExecutionContext executionContext) {
         return entityHistorySummaryExecutor.execute(new GetEntityHistorySummaryRequest(projectId, entityIri), executionContext)
                 .thenApply(response -> {
-                    if (response.entityHistorySummary() != null && response.entityHistorySummary().changes() != null && response.entityHistorySummary().changes().size() > 0) {
+                    if (response.entityHistorySummary() != null && response.entityHistorySummary().changes() != null && !response.entityHistorySummary().changes().isEmpty()) {
                         var sortedHistory = response.entityHistorySummary().changes()
                                 .stream()
                                 .filter(entityChange -> entityChange.timestamp() != null)
