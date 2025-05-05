@@ -102,7 +102,7 @@ public class EntityFormToDtoMapper {
                                     formBaseIndexTerm.label(),
                                     indexType,
                                     getBooleanOutOfStringArray(formBaseIndexTerm.isInclusion()),
-                                    getBooleanOutOfStringArray(formBaseIndexTerm.isInclusion()),
+                                    getBooleanOutOfStringArray(formBaseIndexTerm.isDeprecated()),
                                     formBaseIndexTerm.id()
                             );
                         }
