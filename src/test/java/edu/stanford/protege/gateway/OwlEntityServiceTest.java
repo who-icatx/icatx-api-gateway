@@ -118,6 +118,8 @@ public class OwlEntityServiceTest {
         verify(validatorService, times(1)).validateEntityExists(existingProjectId, dto.entityIRI());
     }
 
+
+
     @Test
     public void GIVEN_missingTitle_WHEN_getEntityInfo_THEN_throwsEntityIsMissingException() {
         initializeGetMocks();
