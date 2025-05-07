@@ -15,4 +15,17 @@ public record EntityLanguageTerms(@JsonProperty("title") LanguageTerm title,
                                   @JsonProperty("isObsolete") boolean isObsolete
 
 ) {
+
+    public static EntityLanguageTerms getFromLanguageTermDto(EntityLanguageTermsDto termsDto, boolean isObsolete) {
+        return new EntityLanguageTerms(
+                termsDto.title(),
+                termsDto.definition(),
+                termsDto.longDefinition(),
+                termsDto.fullySpecifiedName(),
+                termsDto.baseIndexTerms(),
+                termsDto.subclassBaseInclusions(),
+                termsDto.baseExclusionTerms(),
+                isObsolete
+        );
+    }
 }

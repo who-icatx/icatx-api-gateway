@@ -29,6 +29,7 @@ public record EntityForm(
             @JsonProperty("label") String label,
             @JsonProperty("indexType") EntityFormIndexType indexType,
             @JsonProperty("isInclusion") List<String> isInclusion,
+            @JsonProperty("isDeprecated") List<String> isDeprecated,
             @JsonProperty("@id") String id
     ) {
         @JsonIgnoreProperties(ignoreUnknown = true)

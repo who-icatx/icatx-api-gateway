@@ -117,6 +117,11 @@ public class ApplicationBeans implements WebMvcConfigurer {
     }
 
     @Bean
+    CommandExecutor<GetIcatxEntityTypeRequest, GetIcatxEntityTypeResponse> executorForGetIcatxEntityType() {
+        return new CommandExecutorImpl<>(GetIcatxEntityTypeResponse.class);
+    }
+
+    @Bean
     CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> executorForUpdateLogicalDefinition(){
         return new CommandExecutorImpl<>(UpdateLogicalDefinitionsResponse.class);
     }
