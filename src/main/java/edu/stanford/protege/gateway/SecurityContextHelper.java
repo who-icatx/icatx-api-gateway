@@ -2,6 +2,7 @@ package edu.stanford.protege.gateway;
 
 import edu.stanford.protege.webprotege.common.UserId;
 import edu.stanford.protege.webprotege.ipc.ExecutionContext;
+import edu.stanford.protege.webprotege.ipc.util.CorrelationMDCUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -17,7 +18,7 @@ public class SecurityContextHelper {
 
             Jwt jwt = jwtAuthToken.getToken();
             String userId = jwt.getClaimAsString("preferred_username");
-            return new ExecutionContext(UserId.valueOf(userId), jwt.getTokenValue());
+            return new ExecutionContext(UserId.valueOf(userId), jwt.getTokenValue(), CorrelationMDCUtil.getCorrelationId());
         }
 
         return null;
