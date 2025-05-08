@@ -4,6 +4,7 @@ package edu.stanford.protege.gateway.controllers;
 import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.linearization.commands.LinearizationDefinition;
+import edu.stanford.protege.webprotege.ipc.util.CorrelationMDCUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -30,6 +32,8 @@ public class LinearizationDefinitionController {
     @GetMapping
     @Operation(summary = "Get linearization definitions", operationId = "9_getLinearizationDefinitions")
     public ResponseEntity<List<LinearizationDefinition>> getLinearizationDefinitions() throws ExecutionException, InterruptedException {
+        CorrelationMDCUtil.setCorrelationId(UUID.randomUUID().toString());
+
         return ResponseEntity.ok(entityLinearizationService.getDefinitionList(SecurityContextHelper.getExecutionContext()));
     }
 

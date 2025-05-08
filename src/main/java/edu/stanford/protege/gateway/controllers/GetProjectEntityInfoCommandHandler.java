@@ -4,6 +4,7 @@ package edu.stanford.protege.gateway.controllers;
 import edu.stanford.protege.gateway.*;
 import edu.stanford.protege.gateway.dto.OWLEntityDto;
 import edu.stanford.protege.webprotege.ipc.*;
+import edu.stanford.protege.webprotege.ipc.util.CorrelationMDCUtil;
 import org.slf4j.*;
 import reactor.core.publisher.Mono;
 
@@ -33,6 +34,8 @@ public class GetProjectEntityInfoCommandHandler implements CommandHandler<GetPro
 
     @Override
     public Mono<GetProjectEntityInfoResponse> handleRequest(GetProjectEntityInfoRequest request, ExecutionContext executionContext) {
+
+        CorrelationMDCUtil.setCorrelationId(executionContext.correlationId());
 
         OWLEntityDto dto = owlEntityService.getEntityInfo(request.entityIri().toString(), request.projectId().id(), executionContext);
 
