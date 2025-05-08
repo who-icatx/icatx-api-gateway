@@ -5,6 +5,7 @@ import edu.stanford.protege.gateway.dto.ChangedEntities;
 import edu.stanford.protege.gateway.dto.EntityHistorySummary;
 import edu.stanford.protege.gateway.dto.EntityHistorySummaryDto;
 import edu.stanford.protege.gateway.history.EntityHistoryService;
+import edu.stanford.protege.webprotege.ipc.util.CorrelationMDCUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,6 +19,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/history")
@@ -36,6 +38,8 @@ public class HistoryController {
                                                               @RequestParam("changedAfter")
                                                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                               ZonedDateTime changedAfter) {
+        CorrelationMDCUtil.setCorrelationId(UUID.randomUUID().toString());
+
         LocalDateTime utcDateTime = changedAfter.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime();
         Timestamp timestamp = Timestamp.valueOf(utcDateTime);
         ChangedEntities changedEntities = entityHistoryService.getChangedEntities(projectId, timestamp);
@@ -48,6 +52,8 @@ public class HistoryController {
     @Operation(summary = "Change history for a single entity", operationId = "8_getEntityHistory")
     public ResponseEntity<EntityHistorySummaryDto> getEntityHistorySummary(@RequestParam("projectId") String projectId,
                                                                            @RequestParam("entityIRI") String entityIRI) {
+        CorrelationMDCUtil.setCorrelationId(UUID.randomUUID().toString());
+
         EntityHistorySummary entityHistorySummary = entityHistoryService.getEntityHistorySummary(projectId, entityIRI);
         return ResponseEntity.ok()
                 .body(EntityHistorySummaryDto.create(

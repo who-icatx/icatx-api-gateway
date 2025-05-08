@@ -2,10 +2,6 @@ server:
   port: 7779
   servlet.context-path: /icat/
 
-logging:
-  level:
-    root: DEBUG
-
 icatx:
   formId: 013d9d4a-9dac-4d2f-aa52-2a40fad73b77
 
