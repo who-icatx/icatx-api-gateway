@@ -34,8 +34,6 @@ public class OwlOntologyServiceTest {
     OntologyService service;
 
     @Mock
-    private CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor;
-    @Mock
     private CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor;
 
     @Mock
@@ -50,6 +48,8 @@ public class OwlOntologyServiceTest {
     @Mock
     private CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor;
 
+    @Mock
+    private CommandExecutor<GetEntityDirectParentsRequest, GetEntityDirectParentsResponse> directParentsExecutor;
 
     @Mock
     private CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor;
@@ -75,8 +75,7 @@ public class OwlOntologyServiceTest {
                 .setSetterInfo(JsonSetter.Value.forValueNulls(Nulls.AS_EMPTY));
         File specFile = new File("src/test/resources/dummyLogicalDefinitionResponse.json");
         response = objectMapper.readValue(specFile, GetLogicalDefinitionsResponse.class);
-        service = new OntologyService(ancestorsExecutor,
-                logicalDefinitionExecutor,
+        service = new OntologyService(directParentsExecutor, logicalDefinitionExecutor,
                 formDataExecutor,
                 entityChildrenExecutor,
                 createClassEntityExecutor,
