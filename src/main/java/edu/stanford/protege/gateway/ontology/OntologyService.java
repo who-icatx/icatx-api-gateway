@@ -23,8 +23,7 @@ import java.util.stream.Collectors;
 public class OntologyService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(OntologyService.class);
-
-    private final CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor;
+    private final CommandExecutor<GetEntityDirectParentsRequest, GetEntityDirectParentsResponse> directParentsExecutor;
     private final CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor;
     private final CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor;
     private final CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor;
@@ -36,7 +35,7 @@ public class OntologyService {
     private final CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
 
 
-    public OntologyService(CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> ancestorsExecutor,
+    public OntologyService(CommandExecutor<GetEntityDirectParentsRequest, GetEntityDirectParentsResponse> directParentsExecutor,
                            CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
                            CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor,
                            CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor,
@@ -46,7 +45,7 @@ public class OntologyService {
                            CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor,
                            CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor,
                            CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor) {
-        this.ancestorsExecutor = ancestorsExecutor;
+        this.directParentsExecutor = directParentsExecutor;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
         this.updateLogicalDefinitionExecutor = updateLogicalDefinitionExecutor;
@@ -66,9 +65,9 @@ public class OntologyService {
 
     @Async
     public CompletableFuture<List<String>> getEntityParents(String entityIri, String projectId, ExecutionContext executionContext) {
-        return ancestorsExecutor.execute(new GetClassAncestorsRequest(IRI.create(entityIri), ProjectId.valueOf(projectId)), executionContext)
+        return directParentsExecutor.execute(new GetEntityDirectParentsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), executionContext)
                 .thenApply(response ->
-                        response.getAncestorClassHierarchy().getChildren().stream().map(child -> child.getNode().getEntity().getIRI().toString())
+                        response.directParents().stream().map(child -> child.getEntity().getIRI().toString())
                                 .sorted()
                                 .collect(Collectors.toList()));
 

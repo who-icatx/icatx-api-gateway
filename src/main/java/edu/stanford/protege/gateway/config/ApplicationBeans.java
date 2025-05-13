@@ -73,8 +73,8 @@ public class ApplicationBeans implements WebMvcConfigurer {
     }
 
     @Bean
-    CommandExecutor<GetClassAncestorsRequest, GetClassAncestorsResponse> executorForClassAncestors() {
-        return new CommandExecutorImpl<>(GetClassAncestorsResponse.class);
+    CommandExecutor<GetEntityDirectParentsRequest, GetEntityDirectParentsResponse> executorGetDirectParents(){
+        return new CommandExecutorImpl<>(GetEntityDirectParentsResponse.class);
     }
 
     @Bean
