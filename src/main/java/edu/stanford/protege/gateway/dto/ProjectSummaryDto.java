@@ -6,5 +6,6 @@ public record ProjectSummaryDto(@JsonProperty("projectId") String projectId,
                                 @JsonProperty("title") String title,
 
                                 @JsonProperty("createdAt") long createdAt,
-                                @JsonProperty("description") String description) {
+                                @JsonProperty("description") String description,
+                                @JsonProperty("gitRepoBranch") String gitRepoBranch) {
 }
