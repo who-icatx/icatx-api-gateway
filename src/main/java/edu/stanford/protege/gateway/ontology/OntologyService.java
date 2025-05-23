@@ -7,6 +7,9 @@ import edu.stanford.protege.gateway.*;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
+import edu.stanford.protege.gateway.projects.GetReproducibleProjectsRequest;
+import edu.stanford.protege.gateway.projects.GetReproducibleProjectsResponse;
+import edu.stanford.protege.gateway.projects.ReproducibleProject;
 import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotege.ipc.*;
 import org.semanticweb.owlapi.model.*;
@@ -34,6 +37,7 @@ public class OntologyService {
     private final CommandExecutor<GetAvailableProjectsForApiRequest, GetAvailableProjectsForApiResponse> getProjectsExecutor;
     private final CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
 
+    private final CommandExecutor<GetReproducibleProjectsRequest, GetReproducibleProjectsResponse> reproducibleProjectsExecutor;
 
     public OntologyService(CommandExecutor<GetEntityDirectParentsRequest, GetEntityDirectParentsResponse> directParentsExecutor,
                            CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
@@ -44,7 +48,7 @@ public class OntologyService {
                            CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor,
                            CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor,
                            CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor,
-                           CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor) {
+                           CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor, CommandExecutor<GetReproducibleProjectsRequest, GetReproducibleProjectsResponse> reproducibleProjectsExecutor) {
         this.directParentsExecutor = directParentsExecutor;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
@@ -55,6 +59,7 @@ public class OntologyService {
         this.createClassEntityExecutor = createClassEntityExecutor;
         this.getProjectsExecutor = getProjectsExecutor;
         this.entityDiscussionExecutor = entityDiscussionExecutor;
+        this.reproducibleProjectsExecutor = reproducibleProjectsExecutor;
     }
 
 
@@ -182,6 +187,11 @@ public class OntologyService {
         ).thenApply(
                 response -> new HashSet<>(response.availableProjects())
         );
+    }
+
+    public CompletableFuture<List<ReproducibleProject>> getReproducibleProjects(){
+        return reproducibleProjectsExecutor.execute(new GetReproducibleProjectsRequest(), SecurityContextHelper.getExecutionContext())
+                .thenApply(GetReproducibleProjectsResponse::reproducibleProjectList);
     }
 
     public CompletableFuture<EntityComments> getEntityDiscussionThreads(String entityIri, String projectId) {

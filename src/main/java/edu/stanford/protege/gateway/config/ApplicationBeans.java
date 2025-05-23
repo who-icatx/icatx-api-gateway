@@ -7,6 +7,8 @@ import edu.stanford.protege.gateway.history.commands.*;
 import edu.stanford.protege.gateway.linearization.commands.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
 import edu.stanford.protege.gateway.postcoordination.commands.*;
+import edu.stanford.protege.gateway.projects.GetReproducibleProjectsRequest;
+import edu.stanford.protege.gateway.projects.GetReproducibleProjectsResponse;
 import edu.stanford.protege.webprotege.common.UserId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import edu.stanford.protege.webprotege.ipc.impl.CommandExecutorImpl;
@@ -70,6 +72,10 @@ public class ApplicationBeans implements WebMvcConfigurer {
     @Bean
     CommandExecutor<LinearizationDefinitionRequest, LinearizationDefinitionResponse> executorForLinearizationDefinition() {
         return new CommandExecutorImpl<>(LinearizationDefinitionResponse.class);
+    }
+    @Bean
+    CommandExecutor<GetReproducibleProjectsRequest, GetReproducibleProjectsResponse> executorForReproducibleProjects() {
+        return new CommandExecutorImpl<>(GetReproducibleProjectsResponse.class);
     }
 
     @Bean
