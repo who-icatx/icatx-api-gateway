@@ -7,6 +7,8 @@ import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.EntityLogicalConditionsWrapper;
 import edu.stanford.protege.gateway.dto.EntityLogicalDefinition;
 import edu.stanford.protege.gateway.ontology.commands.*;
+import edu.stanford.protege.gateway.projects.GetReproducibleProjectsRequest;
+import edu.stanford.protege.gateway.projects.GetReproducibleProjectsResponse;
 import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +64,9 @@ public class OwlOntologyServiceTest {
 
     @Mock
     private CommandExecutor<GetEntityCommentsRequest, GetEntityCommentsResponse> entityDiscussionExecutor;
+
+    @Mock
+    private CommandExecutor<GetReproducibleProjectsRequest, GetReproducibleProjectsResponse> reproducibleProjectsExecutor;
     private GetLogicalDefinitionsResponse response;
 
     private ProjectId projectId;
@@ -83,7 +88,7 @@ public class OwlOntologyServiceTest {
                 entityDiscussionExecutor,
                 updateLogicalDefinitionExecutor,
                 updateParentsExecutor,
-                updateLanguageTermsExecutor);
+                updateLanguageTermsExecutor, reproducibleProjectsExecutor);
         projectId = ProjectId.generate();
         entityIri = "http://id.who.int/icd/entity/257068234";
         when(logicalDefinitionExecutor.execute(any(), any()))
