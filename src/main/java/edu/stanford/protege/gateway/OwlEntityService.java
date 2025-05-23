@@ -7,6 +7,7 @@ import edu.stanford.protege.gateway.history.EntityHistoryService;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
+import edu.stanford.protege.gateway.projects.ReproducibleProject;
 import edu.stanford.protege.gateway.validators.ValidatorService;
 import edu.stanford.protege.webprotege.common.ChangeRequestId;
 import edu.stanford.protege.webprotege.common.EventId;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -134,10 +136,20 @@ public class OwlEntityService {
 
     public Set<ProjectSummaryDto> getProjects() {
         CompletableFuture<Set<ProjectSummaryDto>> availableProjects = ontologyService.getProjects();
+        CompletableFuture<List<ReproducibleProject>> allReproducibleProjects = ontologyService.getReproducibleProjects();
+        CompletableFuture<Void> combinedFutures = CompletableFuture.allOf(availableProjects, allReproducibleProjects);
+        combinedFutures.join();
         try {
-            return availableProjects.get();
+            List<ReproducibleProject> reproducibleProjectList = allReproducibleProjects.get();
+            return availableProjects.get().stream().map(dto -> new ProjectSummaryDto(dto.projectId(),
+                    dto.title(),
+                    dto.createdAt(),
+                    dto.description(),
+                    getReproducibleProject(reproducibleProjectList, dto.projectId())
+                            .map(ReproducibleProject::associatedBranch).orElse("unknownBranch")
+                    )).collect(Collectors.toSet());
         } catch (Exception e) {
-            LOGGER.error("Error retrieving available projects!", e);
+            LOGGER.error("Error retrieving available projects !", e);
             throw new RuntimeException(e);
         }
     }
@@ -224,5 +236,9 @@ public class OwlEntityService {
             throw new ValidationException("Entity contains in the parents its own parents");
         }
 
+    }
+
+    private Optional<ReproducibleProject> getReproducibleProject(List<ReproducibleProject> availableProjects, String projectId){
+        return availableProjects.stream().filter(p -> p.projectId().equals(projectId)).findFirst();
     }
 }
