@@ -15,7 +15,8 @@ public record EntityForm(
         @JsonProperty("isObsolete") List<String> isObsolete,
         @JsonProperty("baseIndexTerms") List<EntityFormBaseIndexTerm> baseIndexTerms,
         @JsonProperty("subclassBaseInclusions") List<EntityFormSubclassBaseInclusion> subclassBaseInclusions,
-        @JsonProperty("baseExclusionTerms") List<EntityFormBaseExclusionTerm> baseExclusionTerms
+        @JsonProperty("baseExclusionTerms") List<EntityFormBaseExclusionTerm> baseExclusionTerms,
+        @JsonProperty("diagnosticCriteria") String diagnosticCriteria
 ) {
 
     public record EntityFormLanguageTerm(

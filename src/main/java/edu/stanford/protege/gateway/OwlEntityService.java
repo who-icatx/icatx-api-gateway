@@ -9,13 +9,9 @@ import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.postcoordination.EntityPostCoordinationService;
 import edu.stanford.protege.gateway.projects.ReproducibleProject;
 import edu.stanford.protege.gateway.validators.ValidatorService;
-import edu.stanford.protege.webprotege.common.ChangeRequestId;
-import edu.stanford.protege.webprotege.common.EventId;
-import edu.stanford.protege.webprotege.common.ProjectId;
-import edu.stanford.protege.webprotege.ipc.EventDispatcher;
-import edu.stanford.protege.webprotege.ipc.ExecutionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import edu.stanford.protege.webprotege.common.*;
+import edu.stanford.protege.webprotege.ipc.*;
+import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +19,7 @@ import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 
@@ -93,6 +88,7 @@ public class OwlEntityService {
             return new OWLEntityDto(entityIri,
                     terms.isObsolete(),
                     termsDto,
+                    terms.diagnosticCriteria(),
                     latestChange.get(),
                     linearizationDto.get(),
                     new EntityPostCoordinationWrapperDto(specList.get(), new Date(), customScalesDtos.get()),
@@ -147,7 +143,7 @@ public class OwlEntityService {
                     dto.description(),
                     getReproducibleProject(reproducibleProjectList, dto.projectId())
                             .map(ReproducibleProject::associatedBranch).orElse("unknownBranch")
-                    )).collect(Collectors.toSet());
+            )).collect(Collectors.toSet());
         } catch (Exception e) {
             LOGGER.error("Error retrieving available projects !", e);
             throw new RuntimeException(e);
@@ -238,7 +234,7 @@ public class OwlEntityService {
 
     }
 
-    private Optional<ReproducibleProject> getReproducibleProject(List<ReproducibleProject> availableProjects, String projectId){
+    private Optional<ReproducibleProject> getReproducibleProject(List<ReproducibleProject> availableProjects, String projectId) {
         return availableProjects.stream().filter(p -> p.projectId().equals(projectId)).findFirst();
     }
 }

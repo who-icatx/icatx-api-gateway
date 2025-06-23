@@ -33,7 +33,7 @@ class EntityLanguageTermsTest {
                 baseExclusionTerms
         );
 
-        EntityLanguageTerms entity1 = EntityLanguageTerms.getFromLanguageTermDto(dto, true);
+        EntityLanguageTerms entity1 = EntityLanguageTerms.getFromLanguageTermDto(dto, true, null);
 
         assertAll("mapping and obsolete flag",
                 () -> assertSame(title,                     entity1.title(),               "title instance"),
@@ -46,7 +46,7 @@ class EntityLanguageTermsTest {
                 () -> assertTrue(entity1.isObsolete(),       "should be marked obsolete")
         );
 
-        EntityLanguageTerms entity2 = EntityLanguageTerms.getFromLanguageTermDto(dto, false);
+        EntityLanguageTerms entity2 = EntityLanguageTerms.getFromLanguageTermDto(dto, false, null);
 
         assertFalse(entity2.isObsolete(),       "should not be marked obsolete");
     }
