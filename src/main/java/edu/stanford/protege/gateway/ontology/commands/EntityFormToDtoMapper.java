@@ -17,6 +17,7 @@ public class EntityFormToDtoMapper {
         List<String> subclassBaseInclusions = new ArrayList<>();
         List<BaseExclusionTerm> baseExclusionTerms = new ArrayList<>();
         boolean isObsolete = false;
+        String diagnosticCriteria = null;
 
         if (entityForm != null) {
             if (entityForm.label() != null) {
@@ -42,7 +43,7 @@ public class EntityFormToDtoMapper {
                 baseExclusionTerms = mapBaseExclusionTerms(entityForm.baseExclusionTerms());
             }
             isObsolete = getBooleanOutOfStringArray(entityForm.isObsolete());
-
+            diagnosticCriteria = entityForm.diagnosticCriteria();
         }
 
 
@@ -53,7 +54,8 @@ public class EntityFormToDtoMapper {
                 baseIndexTerms,
                 subclassBaseInclusions,
                 baseExclusionTerms,
-                isObsolete);
+                isObsolete,
+                diagnosticCriteria);
     }
 
     public static EntityForm mapFromDto(String entityIri, EntityLanguageTerms languageTerms) {
@@ -87,7 +89,8 @@ public class EntityFormToDtoMapper {
                 Collections.singletonList(String.valueOf(languageTerms.isObsolete())),
                 baseIndexTerms,
                 subclassBaseInclusions,
-                baseExclusionTerms
+                baseExclusionTerms,
+                languageTerms.diagnosticCriteria()
         );
     }
 

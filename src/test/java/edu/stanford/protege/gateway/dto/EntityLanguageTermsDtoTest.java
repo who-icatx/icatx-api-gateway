@@ -37,7 +37,8 @@ class EntityLanguageTermsDtoTest {
                 baseIndexTerms,
                 subclassBaseInclusions,
                 baseExclusionTerms,
-                false
+                false,
+                null
         );
 
         EntityLanguageTermsDto dto = EntityLanguageTermsDto.getFromTerms(entityLanguageTerms);

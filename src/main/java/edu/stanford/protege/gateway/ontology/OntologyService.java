@@ -7,9 +7,7 @@ import edu.stanford.protege.gateway.*;
 import edu.stanford.protege.gateway.config.ApplicationBeans;
 import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
-import edu.stanford.protege.gateway.projects.GetReproducibleProjectsRequest;
-import edu.stanford.protege.gateway.projects.GetReproducibleProjectsResponse;
-import edu.stanford.protege.gateway.projects.ReproducibleProject;
+import edu.stanford.protege.gateway.projects.*;
 import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotege.ipc.*;
 import org.semanticweb.owlapi.model.*;
@@ -141,13 +139,17 @@ public class OntologyService {
     public void updateLanguageTerms(String entityIri, String projectId, String formId, OWLEntityDto owlEntityDto, ChangeRequestId changeRequestId) {
         try {
             ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
-            EntityLanguageTerms languageTerms = EntityLanguageTerms.getFromLanguageTermDto(owlEntityDto.languageTerms(), owlEntityDto.isObsolete());
-            updateLanguageTermsExecutor.execute(new SetEntityFormDataFromJsonRequest(changeRequestId,
+            EntityLanguageTerms languageTerms = EntityLanguageTerms.getFromLanguageTermDto(owlEntityDto.languageTerms(), owlEntityDto.isObsolete(), owlEntityDto.diagnosticCriteria());
+            updateLanguageTermsExecutor.execute(
+                    new SetEntityFormDataFromJsonRequest(
+                            changeRequestId,
                             ProjectId.valueOf(projectId),
                             new OWLClassImpl(IRI.create(entityIri)),
                             formId,
-                            objectMapper.convertValue(EntityFormToDtoMapper.mapFromDto(entityIri, languageTerms), JsonNode.class)),
-                    SecurityContextHelper.getExecutionContext()).get();
+                            objectMapper.convertValue(EntityFormToDtoMapper.mapFromDto(entityIri, languageTerms), JsonNode.class)
+                    ),
+                    SecurityContextHelper.getExecutionContext()
+            ).get();
         } catch (Exception e) {
             LOGGER.error("Error updating updateLanguageTerms entity " + entityIri, e);
             throw new ApplicationException("Error updating updateLanguageTerms entity " + entityIri);
@@ -189,7 +191,7 @@ public class OntologyService {
         );
     }
 
-    public CompletableFuture<List<ReproducibleProject>> getReproducibleProjects(){
+    public CompletableFuture<List<ReproducibleProject>> getReproducibleProjects() {
         return reproducibleProjectsExecutor.execute(new GetReproducibleProjectsRequest(), SecurityContextHelper.getExecutionContext())
                 .thenApply(GetReproducibleProjectsResponse::reproducibleProjectList);
     }
