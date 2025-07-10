@@ -14,6 +14,7 @@ public record OWLEntityDto(@JsonProperty("entityUri") String entityIRI,
                            EntityLinearizationWrapperDto entityLinearizations,
                            EntityPostCoordinationWrapperDto postcoordination,
                            EntityLogicalConditionsWrapper logicalConditions,
-                           List<String> parents) {
+                           List<String> parents,
+                           @JsonProperty("relatedICFEntity") List<String> relatedIcfEntities) {
 
 }

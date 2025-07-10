@@ -93,7 +93,8 @@ public class OwlEntityService {
                     linearizationDto.get(),
                     new EntityPostCoordinationWrapperDto(specList.get(), new Date(), customScalesDtos.get()),
                     logicalConditions.get(),
-                    parents.get()
+                    parents.get(),
+                    entityLanguageTerms.get().relatedIcfEntities()
             );
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error fetching data for entity " + entityIri, e);

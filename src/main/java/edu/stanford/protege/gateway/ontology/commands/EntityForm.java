@@ -16,7 +16,8 @@ public record EntityForm(
         @JsonProperty("baseIndexTerms") List<EntityFormBaseIndexTerm> baseIndexTerms,
         @JsonProperty("subclassBaseInclusions") List<EntityFormSubclassBaseInclusion> subclassBaseInclusions,
         @JsonProperty("baseExclusionTerms") List<EntityFormBaseExclusionTerm> baseExclusionTerms,
-        @JsonProperty("diagnosticCriteria") String diagnosticCriteria
+        @JsonProperty("diagnosticCriteria") String diagnosticCriteria,
+        @JsonProperty("icfReferences") List<String> icfReferences
 ) {
 
     public record EntityFormLanguageTerm(

@@ -55,7 +55,8 @@ public class EntityFormToDtoMapper {
                 subclassBaseInclusions,
                 baseExclusionTerms,
                 isObsolete,
-                diagnosticCriteria);
+                diagnosticCriteria,
+                entityForm.icfReferences() == null ? new ArrayList<>() : entityForm.icfReferences());
     }
 
     public static EntityForm mapFromDto(String entityIri, EntityLanguageTerms languageTerms) {
@@ -90,7 +91,8 @@ public class EntityFormToDtoMapper {
                 baseIndexTerms,
                 subclassBaseInclusions,
                 baseExclusionTerms,
-                languageTerms.diagnosticCriteria()
+                languageTerms.diagnosticCriteria(),
+                languageTerms.relatedIcfEntities()
         );
     }
 

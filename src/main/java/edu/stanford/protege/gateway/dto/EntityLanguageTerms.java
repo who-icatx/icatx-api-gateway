@@ -13,11 +13,12 @@ public record EntityLanguageTerms(@JsonProperty("title") LanguageTerm title,
 
                                   @JsonProperty("baseExclusionTerms") List<BaseExclusionTerm> baseExclusionTerms,
                                   @JsonProperty("isObsolete") boolean isObsolete,
-                                  @JsonProperty("diagnosticCriteria") String diagnosticCriteria
+                                  @JsonProperty("diagnosticCriteria") String diagnosticCriteria,
+                                  @JsonProperty("relatedICFEntity") List<String> relatedIcfEntities
 
 ) {
 
-    public static EntityLanguageTerms getFromLanguageTermDto(EntityLanguageTermsDto termsDto, boolean isObsolete, String diagnosticCriteria) {
+    public static EntityLanguageTerms getFromLanguageTermDto(EntityLanguageTermsDto termsDto, boolean isObsolete, String diagnosticCriteria, List<String>relatedIcfEntities) {
         return new EntityLanguageTerms(
                 termsDto.title(),
                 termsDto.definition(),
@@ -27,7 +28,8 @@ public record EntityLanguageTerms(@JsonProperty("title") LanguageTerm title,
                 termsDto.subclassBaseInclusions(),
                 termsDto.baseExclusionTerms(),
                 isObsolete,
-                diagnosticCriteria
+                diagnosticCriteria,
+                relatedIcfEntities
         );
     }
 }
