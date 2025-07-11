@@ -1,9 +1,6 @@
 package edu.stanford.protege.gateway.ontology.commands;
 
 import edu.stanford.protege.gateway.dto.*;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLEntity;
-import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,16 +21,16 @@ public class EntityFormToDtoMapper {
 
         if (entityForm != null) {
             if (entityForm.label() != null) {
-                label = new LanguageTerm(entityForm.label().value(), entityForm.label().id());
+                label = new LanguageTerm(entityForm.label().value() != null ? entityForm.label().value() : "", entityForm.label().id());
             }
             if (entityForm.fullySpecifiedName() != null) {
-                fullySpecifiedName = new LanguageTerm(entityForm.fullySpecifiedName().value(), entityForm.fullySpecifiedName().id());
+                fullySpecifiedName = new LanguageTerm(entityForm.fullySpecifiedName().value() != null ? entityForm.fullySpecifiedName().value() : "", entityForm.fullySpecifiedName().id());
             }
             if (entityForm.definition() != null) {
-                definition = new LanguageTerm(entityForm.definition().value(), entityForm.definition().id());
+                definition = new LanguageTerm(entityForm.definition().value() != null ? entityForm.definition().value() : "", entityForm.definition().id());
             }
             if (entityForm.longDefinition() != null) {
-                longDefinition = new LanguageTerm(entityForm.longDefinition().value(), entityForm.longDefinition().id());
+                longDefinition = new LanguageTerm(entityForm.longDefinition().value() != null ? entityForm.longDefinition().value() : "", entityForm.longDefinition().id());
             }
 
             if (entityForm.baseIndexTerms() != null) {
@@ -50,7 +47,7 @@ public class EntityFormToDtoMapper {
 
 
             if(entityForm.icfReferences() != null) {
-                icfReferencesIris = entityForm.icfReferences().stream().map(entity -> entity.getIRI().toString()).toList();
+                icfReferencesIris = entityForm.icfReferences().stream().map(EntityForm.EntityFormIcfReference::id).toList();
             }
         }
 
@@ -85,7 +82,7 @@ public class EntityFormToDtoMapper {
                 .map(EntityFormToDtoMapper::mapFromDto)
                 .toList();
 
-        List<OWLClassImpl> icfRelatedEntities = languageTerms.relatedIcfEntities().stream().map(iri -> new OWLClassImpl(IRI.create(iri))).collect(Collectors.toList());
+        List<EntityForm.EntityFormIcfReference> icfRelatedEntities = languageTerms.relatedIcfEntities().stream().map(EntityForm.EntityFormIcfReference::new).collect(Collectors.toList());
 
         EntityForm.EntityFormLanguageTerm label = new EntityForm.EntityFormLanguageTerm(languageTerms.title().termId(), languageTerms.title().label());
         EntityForm.EntityFormLanguageTerm fullySpecifiedName = new EntityForm.EntityFormLanguageTerm(languageTerms.fullySpecifiedName().termId(), languageTerms.fullySpecifiedName().label());

@@ -2,8 +2,6 @@ package edu.stanford.protege.gateway.ontology.commands;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.semanticweb.owlapi.model.OWLEntity;
-import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
 import java.util.List;
 
@@ -19,7 +17,7 @@ public record EntityForm(
         @JsonProperty("subclassBaseInclusions") List<EntityFormSubclassBaseInclusion> subclassBaseInclusions,
         @JsonProperty("baseExclusionTerms") List<EntityFormBaseExclusionTerm> baseExclusionTerms,
         @JsonProperty("diagnosticCriteria") String diagnosticCriteria,
-        @JsonProperty("icfReferences") List<OWLClassImpl> icfReferences
+        @JsonProperty("icfReferences") List<EntityFormIcfReference> icfReferences
 ) {
 
     public record EntityFormLanguageTerm(
@@ -61,4 +59,9 @@ public record EntityForm(
                 @JsonProperty("@type") String type
         ) {}
     }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record EntityFormIcfReference(
+            @JsonProperty("@id") String id
+    ) {}
 }
