@@ -85,7 +85,7 @@ public class EntityFormToDtoMapper {
                 .map(EntityFormToDtoMapper::mapFromDto)
                 .toList();
 
-        List<OWLEntity> icfRelatedEntities = languageTerms.relatedIcfEntities().stream().map(iri -> new OWLClassImpl(IRI.create(iri))).collect(Collectors.toList());
+        List<OWLClassImpl> icfRelatedEntities = languageTerms.relatedIcfEntities().stream().map(iri -> new OWLClassImpl(IRI.create(iri))).collect(Collectors.toList());
 
         EntityForm.EntityFormLanguageTerm label = new EntityForm.EntityFormLanguageTerm(languageTerms.title().termId(), languageTerms.title().label());
         EntityForm.EntityFormLanguageTerm fullySpecifiedName = new EntityForm.EntityFormLanguageTerm(languageTerms.fullySpecifiedName().termId(), languageTerms.fullySpecifiedName().label());
