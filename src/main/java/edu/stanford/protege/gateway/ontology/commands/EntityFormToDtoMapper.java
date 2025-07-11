@@ -1,6 +1,9 @@
 package edu.stanford.protege.gateway.ontology.commands;
 
 import edu.stanford.protege.gateway.dto.*;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLEntity;
+import uk.ac.manchester.cs.owl.owlapi.OWLClassImpl;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,7 +15,7 @@ public class EntityFormToDtoMapper {
         LanguageTerm fullySpecifiedName = null;
         LanguageTerm definition = null;
         LanguageTerm longDefinition = null;
-
+        List<String> icfReferencesIris = new ArrayList<>();
         List<BaseIndexTerm> baseIndexTerms = new ArrayList<>();
         List<String> subclassBaseInclusions = new ArrayList<>();
         List<BaseExclusionTerm> baseExclusionTerms = new ArrayList<>();
@@ -44,7 +47,13 @@ public class EntityFormToDtoMapper {
             }
             isObsolete = getBooleanOutOfStringArray(entityForm.isObsolete());
             diagnosticCriteria = entityForm.diagnosticCriteria();
+
+
+            if(entityForm.icfReferences() != null) {
+                icfReferencesIris = entityForm.icfReferences().stream().map(entity -> entity.getIRI().toString()).toList();
+            }
         }
+
 
 
         return new EntityLanguageTerms(label,
@@ -56,7 +65,7 @@ public class EntityFormToDtoMapper {
                 baseExclusionTerms,
                 isObsolete,
                 diagnosticCriteria,
-                entityForm.icfReferences() == null ? new ArrayList<>() : entityForm.icfReferences());
+                icfReferencesIris);
     }
 
     public static EntityForm mapFromDto(String entityIri, EntityLanguageTerms languageTerms) {
@@ -76,6 +85,8 @@ public class EntityFormToDtoMapper {
                 .map(EntityFormToDtoMapper::mapFromDto)
                 .toList();
 
+        List<OWLEntity> icfRelatedEntities = languageTerms.relatedIcfEntities().stream().map(iri -> new OWLClassImpl(IRI.create(iri))).collect(Collectors.toList());
+
         EntityForm.EntityFormLanguageTerm label = new EntityForm.EntityFormLanguageTerm(languageTerms.title().termId(), languageTerms.title().label());
         EntityForm.EntityFormLanguageTerm fullySpecifiedName = new EntityForm.EntityFormLanguageTerm(languageTerms.fullySpecifiedName().termId(), languageTerms.fullySpecifiedName().label());
         EntityForm.EntityFormLanguageTerm definition = new EntityForm.EntityFormLanguageTerm(languageTerms.definition().termId(), languageTerms.definition().label());
@@ -92,7 +103,7 @@ public class EntityFormToDtoMapper {
                 subclassBaseInclusions,
                 baseExclusionTerms,
                 languageTerms.diagnosticCriteria(),
-                languageTerms.relatedIcfEntities()
+                icfRelatedEntities
         );
     }
 
