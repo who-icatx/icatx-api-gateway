@@ -85,13 +85,15 @@ public class OwlEntityService {
             if (terms == null || terms.title() == null || terms.title().label() == null || terms.title().label().isEmpty()) {
                 throw new EntityIsMissingException("Entity with iri " + entityIri + " is missing");
             }
+            List<EntityPostCoordinationCustomScalesDto> filteredScales = filterPostCoordinationCustomScales(specList.get(), customScalesDtos.get());
+
             return new OWLEntityDto(entityIri,
                     terms.isObsolete(),
                     termsDto,
                     terms.diagnosticCriteria(),
                     latestChange.get(),
                     linearizationDto.get(),
-                    new EntityPostCoordinationWrapperDto(specList.get(), new Date(), customScalesDtos.get()),
+                    new EntityPostCoordinationWrapperDto(specList.get(), new Date(), filteredScales),
                     logicalConditions.get(),
                     parents.get(),
                     entityLanguageTerms.get().relatedIcfEntities()
@@ -101,6 +103,16 @@ public class OwlEntityService {
             throw new ApplicationException("Error fetching data for entity " + entityIri);
         }
 
+    }
+
+    private List<EntityPostCoordinationCustomScalesDto> filterPostCoordinationCustomScales(List<EntityPostCoordinationSpecificationDto> postCoordSpecs,
+                                                                                           List<EntityPostCoordinationCustomScalesDto> customScales) {
+
+        return customScales.stream().filter(customScale -> postCoordSpecs.stream().anyMatch(postCoordSpec ->
+                postCoordSpec.allowedAxes().contains(customScale.postcoordinationAxis()) ||
+                        postCoordSpec.requiredAxes().contains(customScale.postcoordinationAxis()) ||
+                        postCoordSpec.overwrittenAllowedAxes().contains(customScale.postcoordinationAxis()) ||
+                        postCoordSpec.overwrittenRequiredAxes().contains(customScale.postcoordinationAxis()))).toList();
     }
 
     public List<String> getEntityChildren(String entityIRI, String projectId) {

@@ -95,10 +95,7 @@ public class OntologyService {
     @Async
     public CompletableFuture<EntityLanguageTerms> getEntityLanguageTerms(String entityIri, String projectId, String formId, ExecutionContext executionContext) {
         return formDataExecutor.execute(new GetEntityFormAsJsonRequest(ProjectId.valueOf(projectId), entityIri, formId), executionContext)
-                .thenApply(formResponse -> {
-                    LOGGER.info("ALEX am primit "  + formResponse);
-                    return EntityFormToDtoMapper.mapFormToTerms(formResponse.form());
-                });
+                .thenApply(formResponse -> EntityFormToDtoMapper.mapFormToTerms(formResponse.form()));
 
     }
 
