@@ -78,9 +78,10 @@ public class ApplicationBeans implements WebMvcConfigurer {
         return new CommandExecutorImpl<>(GetReproducibleProjectsResponse.class);
     }
 
+
     @Bean
-    CommandExecutor<GetEntityDirectParentsRequest, GetEntityDirectParentsResponse> executorGetDirectParents(){
-        return new CommandExecutorImpl<>(GetEntityDirectParentsResponse.class);
+    CommandExecutor<GetClassHierarchyParentsByAxiomTypeRequest, GetClassHierarchyParentsByAxiomTypeResponse> executorClassHierarchyParents(){
+        return new CommandExecutorImpl<>(GetClassHierarchyParentsByAxiomTypeResponse.class);
     }
 
     @Bean

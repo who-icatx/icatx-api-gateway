@@ -9,6 +9,7 @@ import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.gateway.ontology.commands.*;
 import edu.stanford.protege.gateway.projects.*;
 import edu.stanford.protege.webprotege.common.*;
+import edu.stanford.protege.webprotege.hierarchy.ClassHierarchyDescriptor;
 import edu.stanford.protege.webprotege.ipc.*;
 import org.semanticweb.owlapi.model.*;
 import org.slf4j.*;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 public class OntologyService {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(OntologyService.class);
-    private final CommandExecutor<GetEntityDirectParentsRequest, GetEntityDirectParentsResponse> directParentsExecutor;
+    private final CommandExecutor<GetClassHierarchyParentsByAxiomTypeRequest, GetClassHierarchyParentsByAxiomTypeResponse> classHierarchyParents;
     private final CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor;
     private final CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor;
     private final CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor;
@@ -37,8 +38,7 @@ public class OntologyService {
 
     private final CommandExecutor<GetReproducibleProjectsRequest, GetReproducibleProjectsResponse> reproducibleProjectsExecutor;
 
-    public OntologyService(CommandExecutor<GetEntityDirectParentsRequest, GetEntityDirectParentsResponse> directParentsExecutor,
-                           CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
+    public OntologyService(CommandExecutor<GetClassHierarchyParentsByAxiomTypeRequest, GetClassHierarchyParentsByAxiomTypeResponse> classHierarchyParents, CommandExecutor<GetLogicalDefinitionsRequest, GetLogicalDefinitionsResponse> logicalDefinitionExecutor,
                            CommandExecutor<GetEntityFormAsJsonRequest, GetEntityFormAsJsonResponse> formDataExecutor,
                            CommandExecutor<GetEntityChildrenRequest, GetEntityChildrenResponse> entityChildrenExecutor,
                            CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassEntityExecutor,
@@ -47,7 +47,7 @@ public class OntologyService {
                            CommandExecutor<UpdateLogicalDefinitionsRequest, UpdateLogicalDefinitionsResponse> updateLogicalDefinitionExecutor,
                            CommandExecutor<ChangeEntityParentsRequest, ChangeEntityParentsResponse> updateParentsExecutor,
                            CommandExecutor<SetEntityFormDataFromJsonRequest, SetEntityFormDataFromJsonResponse> updateLanguageTermsExecutor, CommandExecutor<GetReproducibleProjectsRequest, GetReproducibleProjectsResponse> reproducibleProjectsExecutor) {
-        this.directParentsExecutor = directParentsExecutor;
+        this.classHierarchyParents = classHierarchyParents;
         this.logicalDefinitionExecutor = logicalDefinitionExecutor;
         this.formDataExecutor = formDataExecutor;
         this.updateLogicalDefinitionExecutor = updateLogicalDefinitionExecutor;
@@ -68,9 +68,9 @@ public class OntologyService {
 
     @Async
     public CompletableFuture<List<String>> getEntityParents(String entityIri, String projectId, ExecutionContext executionContext) {
-        return directParentsExecutor.execute(new GetEntityDirectParentsRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri))), executionContext)
+        return classHierarchyParents.execute(new GetClassHierarchyParentsByAxiomTypeRequest(ProjectId.valueOf(projectId), new OWLClassImpl(IRI.create(entityIri)), ClassHierarchyDescriptor.create()), executionContext)
                 .thenApply(response ->
-                        response.directParents().stream().map(child -> child.getEntity().getIRI().toString())
+                        response.parentsBySubclassOf().stream().map(child -> child.getEntity().getIRI().toString())
                                 .sorted()
                                 .collect(Collectors.toList()));
 
