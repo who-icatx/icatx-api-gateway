@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import edu.stanford.protege.webprotege.common.Response;
 import edu.stanford.protege.webprotege.entity.OWLEntityData;
-import org.semanticweb.owlapi.model.OWLClass;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -14,7 +13,7 @@ import static edu.stanford.protege.webprotege.hierarchy.GetClassHierarchyParents
 
 
 @JsonTypeName(CHANNEL)
-public record GetClassHierarchyParentsByAxiomTypeResponse(@JsonProperty("owlClass") @Nullable OWLClass owlClass,
+public record GetClassHierarchyParentsByAxiomTypeResponse(@JsonProperty("owlClass") @Nullable OWLEntityData owlClass,
                                                           @JsonProperty("parentsBySubclassOf") @Nonnull Set<OWLEntityData> parentsBySubclassOf,
                                                           @JsonProperty("parentsByEquivalentClass") @Nonnull Set<OWLEntityData> parentsByEquivalentClass)
         implements Response {
