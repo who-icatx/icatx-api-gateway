@@ -9,7 +9,7 @@ import java.util.List;
 public record OWLEntityDto(@JsonProperty("entityUri") String entityIRI,
                            boolean isObsolete,
                            EntityLanguageTermsDto languageTerms,
-                           @JsonInclude(JsonInclude.Include.NON_NULL) String diagnosticCriteria,
+                           String diagnosticCriteria,
                            @JsonProperty("lastModified") LocalDateTime lastChangeDate,
                            EntityLinearizationWrapperDto entityLinearizations,
                            EntityPostCoordinationWrapperDto postcoordination,
