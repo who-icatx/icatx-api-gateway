@@ -77,17 +77,15 @@
 					]
 				},
 				"url": {
-					"raw": "http://icatx.northeurope.cloudapp.azure.com/keycloak-admin/realms/webprotege/protocol/openid-connect/token",
-					"protocol": "http",
+					"raw": "https://icd.who.int/kclk/realms/webprotege/protocol/openid-connect/token",
+					"protocol": "https",
 					"host": [
-						"icatx",
-						"northeurope",
-						"cloudapp",
-						"azure",
-						"com"
+						"icd",
+						"who",
+						"int"
 					],
 					"path": [
-						"keycloak-admin",
+						"kclk",
 						"realms",
 						"webprotege",
 						"protocol",
@@ -190,16 +188,15 @@
 					}
 				],
 				"url": {
-					"raw": "http://icatx.northeurope.cloudapp.azure.com/icat/projects/{{projectId}}?entityIRI=http://id.who.int/icd/entity/235542648",
-					"protocol": "http",
+					"raw": "https://icd.who.int/webprotege/icat/projects/{{projectId}}?entityIRI=http://id.who.int/icd/entity/257068234",
+					"protocol": "https",
 					"host": [
-						"icatx",
-						"northeurope",
-						"cloudapp",
-						"azure",
-						"com"
+						"icd",
+						"who",
+						"int"
 					],
 					"path": [
+						"webprotege",
 						"icat",
 						"projects",
 						"{{projectId}}"
@@ -207,7 +204,7 @@
 					"query": [
 						{
 							"key": "entityIRI",
-							"value": "http://id.who.int/icd/entity/235542648"
+							"value": "http://id.who.int/icd/entity/257068234"
 						}
 					]
 				}
@@ -250,16 +247,15 @@
 					}
 				},
 				"url": {
-					"raw": "http://icatx.northeurope.cloudapp.azure.com/icat/projects/{{projectId}}/entities",
-					"protocol": "http",
+					"raw": "https://icd.who.int/webprotege/icat/projects/{{projectId}}/entities",
+					"protocol": "https",
 					"host": [
-						"icatx",
-						"northeurope",
-						"cloudapp",
-						"azure",
-						"com"
+						"icd",
+						"who",
+						"int"
 					],
 					"path": [
+						"webprotege",
 						"icat",
 						"projects",
 						"{{projectId}}",
@@ -294,16 +290,15 @@
 					}
 				},
 				"url": {
-					"raw": "http://icatx.northeurope.cloudapp.azure.com/icat/projects/{{projectId}}/entities",
-					"protocol": "http",
+					"raw": "https://icd.who.int/webprotege/icat/projects/{{projectId}}/entities",
+					"protocol": "https",
 					"host": [
-						"icatx",
-						"northeurope",
-						"cloudapp",
-						"azure",
-						"com"
+						"icd",
+						"who",
+						"int"
 					],
 					"path": [
+						"webprotege",
 						"icat",
 						"projects",
 						"{{projectId}}",
@@ -329,16 +324,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://icatx.northeurope.cloudapp.azure.com/icat/projects/{{projectId}}/entities/children?entityIRI=http://id.who.int/icd/entity/921595235",
-					"protocol": "http",
+					"raw": "https://icd.who.int/webprotege/icat/projects/{{projectId}}/entities/children?entityIRI=http://id.who.int/icd/entity/455013390",
+					"protocol": "https",
 					"host": [
-						"icatx",
-						"northeurope",
-						"cloudapp",
-						"azure",
-						"com"
+						"icd",
+						"who",
+						"int"
 					],
 					"path": [
+						"webprotege",
 						"icat",
 						"projects",
 						"{{projectId}}",
@@ -348,7 +342,7 @@
 					"query": [
 						{
 							"key": "entityIRI",
-							"value": "http://id.who.int/icd/entity/921595235"
+							"value": "http://id.who.int/icd/entity/455013390"
 						}
 					]
 				}
@@ -371,16 +365,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://icatx.northeurope.cloudapp.azure.com/icat/projects/{{projectId}}/entities/comments?entityIRI=http://id.who.int/icd/entity/921595235",
-					"protocol": "http",
+					"raw": "https://icd.who.int/webprotege/icat/projects/{{projectId}}/entities/comments?entityIRI=http://id.who.int/icd/entity/921595235",
+					"protocol": "https",
 					"host": [
-						"icatx",
-						"northeurope",
-						"cloudapp",
-						"azure",
-						"com"
+						"icd",
+						"who",
+						"int"
 					],
 					"path": [
+						"webprotege",
 						"icat",
 						"projects",
 						"{{projectId}}",
@@ -431,16 +424,15 @@
 					}
 				],
 				"url": {
-					"raw": "http://icatx.northeurope.cloudapp.azure.com/icat/history/entities?projectId={{projectId}}&changedAfter=2024-11-22T10:00:50Z",
-					"protocol": "http",
+					"raw": "https://icd.who.int/webprotege/icat/history/entities?projectId={{projectId}}&changedAfter=2024-11-22T10:00:50Z",
+					"protocol": "https",
 					"host": [
-						"icatx",
-						"northeurope",
-						"cloudapp",
-						"azure",
-						"com"
+						"icd",
+						"who",
+						"int"
 					],
 					"path": [
+						"webprotege",
 						"icat",
 						"history",
 						"entities"
@@ -493,16 +485,15 @@
 					}
 				],
 				"url": {
-					"raw": "http://icatx.northeurope.cloudapp.azure.com/icat/history/entity-summary?projectId={{projectId}}&changedAfter=2024-11-22T10:00:50Z&entityIRI=http://id.who.int/icd/entity/921595235",
-					"protocol": "http",
+					"raw": "https://icd.who.int/webprotege/icat/history/entity-summary?projectId={{projectId}}&changedAfter=2024-11-22T10:00:50Z&entityIRI=http://id.who.int/icd/entity/257068234",
+					"protocol": "https",
 					"host": [
-						"icatx",
-						"northeurope",
-						"cloudapp",
-						"azure",
-						"com"
+						"icd",
+						"who",
+						"int"
 					],
 					"path": [
+						"webprotege",
 						"icat",
 						"history",
 						"entity-summary"
@@ -518,7 +509,7 @@
 						},
 						{
 							"key": "entityIRI",
-							"value": "http://id.who.int/icd/entity/921595235"
+							"value": "http://id.who.int/icd/entity/257068234"
 						}
 					]
 				}
@@ -632,16 +623,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://icatx.northeurope.cloudapp.azure.com/icat/linearization-definitions",
-					"protocol": "http",
+					"raw": "https://icd.who.int/webprotege/icat/linearization-definitions",
+					"protocol": "https",
 					"host": [
-						"icatx",
-						"northeurope",
-						"cloudapp",
-						"azure",
-						"com"
+						"icd",
+						"who",
+						"int"
 					],
 					"path": [
+						"webprotege",
 						"icat",
 						"linearization-definitions"
 					]
