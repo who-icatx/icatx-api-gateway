@@ -39,10 +39,10 @@ import java.util.stream.Collectors;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Value("${springdoc.swagger-ui.path:/icat/swagger-ui.html}")
+    @Value("${springdoc.swagger-ui.path:/api/swagger-ui.html}")
     private String swaggerUiPath;
 
-    @Value("${springdoc.api-docs.path:/icat/v3/api-docs}")
+    @Value("${springdoc.api-docs.path:/api/v3/api-docs}")
     private String apiDocsPath;
 
     @Bean
