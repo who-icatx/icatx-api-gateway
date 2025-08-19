@@ -54,7 +54,11 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html**",
                                 "/swagger-resources/**",
-                                "/webjars/**",
+                                "/icatx/v3/api-docs/**",
+                                "/icatx/swagger-ui/**",
+                                "/icatx/swagger-ui.html**",
+                                "/icatx/swagger-resources/**",
+                                "/icatx/webjars/**",
                                 apiDocsPath + "/**",
                                 swaggerUiPath + "/**",
                                 swaggerUiPath.replace(".html", "") + "/**"
