@@ -39,6 +39,12 @@ import java.util.stream.Collectors;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Value("${springdoc.swagger-ui.path:/icat/swagger-ui.html}")
+    private String swaggerUiPath;
+
+    @Value("${springdoc.api-docs.path:/icat/v3/api-docs}")
+    private String apiDocsPath;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -48,7 +54,10 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html**",
                                 "/swagger-resources/**",
-                                "/webjars/**"
+                                "/webjars/**",
+                                apiDocsPath + "/**",
+                                swaggerUiPath + "/**",
+                                swaggerUiPath.replace(".html", "") + "/**"
                         ).permitAll()
                         .requestMatchers("/entity/**").hasRole("ICAT_APPLICATION")
                         .anyRequest().authenticated()

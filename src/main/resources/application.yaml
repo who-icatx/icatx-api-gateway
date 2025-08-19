@@ -1,6 +1,6 @@
 server:
   port: 7779
-  servlet.context-path: /icat/
+  servlet.context-path: /api/
 
 icatx:
   formId: 013d9d4a-9dac-4d2f-aa52-2a40fad73b77
@@ -9,6 +9,9 @@ springdoc:
   swagger-ui:
     operations-sorter: alpha
     tags-sorter: alpha
+    path: ${SWAGGER_UI_PATH:/api/swagger-ui.html}
+  api-docs:
+    path: ${API_DOCS_PATH:/api/v3/api-docs}
 
 spring:
   application:
