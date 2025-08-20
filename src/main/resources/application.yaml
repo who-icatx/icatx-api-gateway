@@ -1,6 +1,11 @@
 server:
   port: 7779
-  servlet.context-path: /api/
+  servlet.context-path: /icatx/api/
+  forward-headers-strategy: framework
+  tomcat:
+    remote-ip-header: X-Forwarded-For
+    protocol-header: X-Forwarded-Proto
+    protocol-header-https-value: https
 
 icatx:
   formId: 013d9d4a-9dac-4d2f-aa52-2a40fad73b77
