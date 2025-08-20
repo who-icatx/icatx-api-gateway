@@ -51,9 +51,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(
                                 "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html**",
-                                "/swagger-resources/**",
+                                "/api/swagger-ui/**",
+                                "/api/swagger-ui.html**",
+                                "/api/swagger-resources/**",
                                 "/icatx/v3/api-docs/**",
                                 "/icatx/api/swagger-ui/**",
                                 "/icatx/api/swagger-ui.html**",
