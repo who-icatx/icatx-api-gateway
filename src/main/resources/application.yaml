@@ -9,9 +9,6 @@ springdoc:
   swagger-ui:
     operations-sorter: alpha
     tags-sorter: alpha
-    path: ${SWAGGER_UI_PATH:/api/swagger-ui.html}
-  api-docs:
-    path: ${API_DOCS_PATH:/api/v3/api-docs}
 
 spring:
   application:
