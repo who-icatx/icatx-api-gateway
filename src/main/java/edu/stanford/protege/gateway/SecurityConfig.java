@@ -54,6 +54,9 @@ public class SecurityConfig {
                                 "/api/swagger-ui/**",
                                 "/api/swagger-ui.html**",
                                 "/api/swagger-resources/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html**",
+                                "/swagger-resources/**",
                                 "/icatx/v3/api-docs/**",
                                 "/icatx/api/swagger-ui/**",
                                 "/icatx/api/swagger-ui.html**",
@@ -61,10 +64,7 @@ public class SecurityConfig {
                                 "/icatx/swagger-ui.html**",
                                 "/icatx/swagger-resources/**",
                                 "/icatx/webjars/**",
-                                "/icatx/api/v3/api-docs/**",
-                                apiDocsPath + "/**",
-                                swaggerUiPath + "/**",
-                                swaggerUiPath.replace(".html", "") + "/**"
+                                "/icatx/api/v3/api-docs/**"
                         ).permitAll()
                         .requestMatchers("/entity/**").hasRole("ICAT_APPLICATION")
                         .anyRequest().authenticated()
