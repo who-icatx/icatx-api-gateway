@@ -7,6 +7,7 @@ import edu.stanford.protege.gateway.dto.*;
 import edu.stanford.protege.webprotege.ipc.util.CorrelationMDCUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +57,7 @@ public class ProjectsController {
     @Operation(summary = "Updating an entity", operationId = "3_updateEntity")
     public ResponseEntity<OWLEntityDto> updateEntity(@RequestHeader(value = "If-Match", required = false) String ifMatch,
                                                      @PathVariable @Nonnull String projectId,
-                                                     @RequestBody OWLEntityDto owlEntityDto) {
+                                                     @RequestBody @Valid OWLEntityDto owlEntityDto) {
         CorrelationMDCUtil.setCorrelationId(UUID.randomUUID().toString());
 
         OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId, ifMatch);

@@ -1,6 +1,7 @@
 package edu.stanford.protege.gateway.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public record EntityLanguageTermsDto(@JsonProperty("title") LanguageTerm title,
                                      @JsonProperty("fullySpecifiedName") LanguageTerm fullySpecifiedName,
                                      @JsonProperty("baseIndexTerms") List<BaseIndexTerm> baseIndexTerms,
                                      @JsonProperty("subclassBaseInclusions") List<String> subclassBaseInclusions,
-                                     @JsonProperty("baseExclusionTerms") List<BaseExclusionTerm> baseExclusionTerms) {
+                                     @JsonProperty("baseExclusionTerms") @Valid List<BaseExclusionTerm> baseExclusionTerms) {
     public static EntityLanguageTermsDto getFromTerms(EntityLanguageTerms entityLanguageTerms) {
         return new EntityLanguageTermsDto(
                 entityLanguageTerms.title(),
