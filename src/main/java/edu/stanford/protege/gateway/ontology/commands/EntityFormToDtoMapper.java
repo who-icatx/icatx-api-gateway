@@ -134,6 +134,12 @@ public class EntityFormToDtoMapper {
                     if (baseExclusionTerm.foundationReference() != null) {
                         id = baseExclusionTerm.foundationReference().id();
                     }
+                    
+                    // Validate foundationReference before creating BaseExclusionTerm
+                    if (id == null || id.trim().isEmpty()) {
+                        throw new IllegalArgumentException("BaseExclusionTerm foundationReference cannot be null, empty, or blank");
+                    }
+                    
                     return new BaseExclusionTerm(baseExclusionTerm.label(), id, baseExclusionTerm.id());
                 })
                 .sorted((p, q) -> {

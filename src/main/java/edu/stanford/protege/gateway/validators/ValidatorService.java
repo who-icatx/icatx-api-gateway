@@ -3,7 +3,9 @@ package edu.stanford.protege.gateway.validators;
 import com.google.common.collect.ImmutableSet;
 import edu.stanford.protege.gateway.EntityIsMissingException;
 import edu.stanford.protege.gateway.SecurityContextHelper;
+import edu.stanford.protege.gateway.dto.BaseExclusionTerm;
 import edu.stanford.protege.gateway.dto.CreateEntityDto;
+import edu.stanford.protege.gateway.dto.OWLEntityDto;
 import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.ontology.commands.FilterExistingEntitiesRequest;
 import edu.stanford.protege.gateway.ontology.commands.FilterExistingEntitiesResponse;
@@ -18,6 +20,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -115,6 +118,34 @@ public class ValidatorService {
         boolean isValid = existingEntities.stream().anyMatch(existingParent -> existingParent.equals(entity));
         if (!isValid) {
             throw new EntityIsMissingException("Invalid Entity IRI: " + entity);
+        }
+    }
+
+    public void validateBaseExclusionTerms(List<BaseExclusionTerm> baseExclusionTerms) {
+        if (baseExclusionTerms != null) {
+            for (BaseExclusionTerm term : baseExclusionTerms) {
+                validateBaseExclusionTerm(term);
+            }
+        }
+    }
+
+    private void validateBaseExclusionTerm(BaseExclusionTerm term) {
+        if (term == null) {
+            throw new IllegalArgumentException("BaseExclusionTerm cannot be null");
+        }
+        
+        if (term.foundationReference() == null || term.foundationReference().trim().isEmpty()) {
+            throw new IllegalArgumentException("BaseExclusionTerm has invalid foundationReference: cannot be null, empty, or blank");
+        }
+    }
+
+    public void validateOWLEntityDto(OWLEntityDto owlEntityDto) {
+        if (owlEntityDto == null) {
+            throw new IllegalArgumentException("OWLEntityDto cannot be null");
+        }
+        
+        if (owlEntityDto.languageTerms() != null && owlEntityDto.languageTerms().baseExclusionTerms() != null) {
+            validateBaseExclusionTerms(owlEntityDto.languageTerms().baseExclusionTerms());
         }
     }
 
