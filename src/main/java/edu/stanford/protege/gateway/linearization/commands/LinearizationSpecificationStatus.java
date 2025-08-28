@@ -16,7 +16,7 @@ public enum LinearizationSpecificationStatus {
         if("false".equalsIgnoreCase(input)){
             return FALSE;
         }
-        if("follow_base_linearization".equalsIgnoreCase(input)){
+        if("FOLLOW_BASE_LINEARIZATION".equalsIgnoreCase(input)){
             return FOLLOW_BASE_LINEARIZATION;
         }
         return UNKNOWN;
