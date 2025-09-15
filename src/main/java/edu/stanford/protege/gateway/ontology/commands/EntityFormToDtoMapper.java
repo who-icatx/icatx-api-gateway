@@ -16,8 +16,9 @@ public class EntityFormToDtoMapper {
         List<BaseIndexTerm> baseIndexTerms = new ArrayList<>();
         List<String> subclassBaseInclusions = new ArrayList<>();
         List<BaseExclusionTerm> baseExclusionTerms = new ArrayList<>();
+        List<LanguageTerm> relatedImpairments = new ArrayList<>();
         boolean isObsolete = false;
-        String diagnosticCriteria = null;
+        LanguageTerm diagnosticCriteria = null;
 
         if (entityForm != null) {
             if (entityForm.label() != null) {
@@ -43,11 +44,17 @@ public class EntityFormToDtoMapper {
                 baseExclusionTerms = mapBaseExclusionTerms(entityForm.baseExclusionTerms());
             }
             isObsolete = getBooleanOutOfStringArray(entityForm.isObsolete());
-            diagnosticCriteria = entityForm.diagnosticCriteria();
+            diagnosticCriteria = new LanguageTerm(entityForm.diagnosticCriteria().id(), entityForm.diagnosticCriteria().value());
 
 
             if(entityForm.icfReferences() != null) {
                 icfReferencesIris = entityForm.icfReferences().stream().map(EntityForm.EntityFormIcfReference::id).toList();
+            }
+
+            if(entityForm.relatedImpairments() != null) {
+                relatedImpairments = entityForm.relatedImpairments().stream()
+                        .map(relatedImpairment -> new LanguageTerm(relatedImpairment.id(), relatedImpairment.value()))
+                        .toList();
             }
         }
 
@@ -62,6 +69,7 @@ public class EntityFormToDtoMapper {
                 baseExclusionTerms,
                 isObsolete,
                 diagnosticCriteria,
+                relatedImpairments,
                 icfReferencesIris);
     }
 
@@ -82,12 +90,17 @@ public class EntityFormToDtoMapper {
                 .map(EntityFormToDtoMapper::mapFromDto)
                 .toList();
 
+        List<EntityForm.EntityFormLanguageTerm> relatedImpairments = languageTerms.relatedImpairments().stream()
+                .map(relatedImpairment -> new EntityForm.EntityFormLanguageTerm(relatedImpairment.termId(), relatedImpairment.label())).
+                toList();
+
         List<EntityForm.EntityFormIcfReference> icfRelatedEntities = languageTerms.relatedIcfEntities().stream().map(EntityForm.EntityFormIcfReference::new).collect(Collectors.toList());
 
         EntityForm.EntityFormLanguageTerm label = new EntityForm.EntityFormLanguageTerm(languageTerms.title().termId(), languageTerms.title().label());
         EntityForm.EntityFormLanguageTerm fullySpecifiedName = new EntityForm.EntityFormLanguageTerm(languageTerms.fullySpecifiedName().termId(), languageTerms.fullySpecifiedName().label());
         EntityForm.EntityFormLanguageTerm definition = new EntityForm.EntityFormLanguageTerm(languageTerms.definition().termId(), languageTerms.definition().label());
         EntityForm.EntityFormLanguageTerm longDefinition = new EntityForm.EntityFormLanguageTerm(languageTerms.longDefinition().termId(), languageTerms.longDefinition().label());
+        EntityForm.EntityFormLanguageTerm diagnosticCriteria = new EntityForm.EntityFormLanguageTerm(languageTerms.diagnosticCriteria().termId(), languageTerms.diagnosticCriteria().label());
 
 
         return new EntityForm(entityIri,
@@ -99,7 +112,8 @@ public class EntityFormToDtoMapper {
                 baseIndexTerms,
                 subclassBaseInclusions,
                 baseExclusionTerms,
-                languageTerms.diagnosticCriteria(),
+                diagnosticCriteria,
+                relatedImpairments,
                 icfRelatedEntities
         );
     }

@@ -2,6 +2,7 @@ package edu.stanford.protege.gateway.dto;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,7 +40,9 @@ class EntityLanguageTermsDtoTest {
                 subclassBaseInclusions,
                 baseExclusionTerms,
                 false,
-                null, Arrays.asList("http://id.who.int/icd/entity/474644915")
+                null,
+                new ArrayList<>(),
+                Arrays.asList("http://id.who.int/icd/entity/474644915")
         );
 
         EntityLanguageTermsDto dto = EntityLanguageTermsDto.getFromTerms(entityLanguageTerms);

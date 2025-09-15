@@ -91,6 +91,7 @@ public class OwlEntityService {
                     terms.isObsolete(),
                     termsDto,
                     terms.diagnosticCriteria(),
+                    terms.relatedImpairments(),
                     latestChange.get(),
                     linearizationDto.get(),
                     new EntityPostCoordinationWrapperDto(specList.get(), new Date(), filteredScales),

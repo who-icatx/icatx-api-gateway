@@ -140,7 +140,7 @@ public class OntologyService {
         try {
             ObjectMapper objectMapper = new ApplicationBeans().objectMapper();
             EntityLanguageTerms languageTerms = EntityLanguageTerms.getFromLanguageTermDto(owlEntityDto.languageTerms(),
-                    owlEntityDto.isObsolete(), owlEntityDto.diagnosticCriteria(), owlEntityDto.relatedIcfEntities());
+                    owlEntityDto.isObsolete(), owlEntityDto.diagnosticCriteria(), owlEntityDto.relatedIcfEntities(), owlEntityDto.relatedImpairments());
             updateLanguageTermsExecutor.execute(
                     new SetEntityFormDataFromJsonRequest(
                             changeRequestId,

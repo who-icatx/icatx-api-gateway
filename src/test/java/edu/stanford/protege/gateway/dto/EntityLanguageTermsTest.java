@@ -2,6 +2,7 @@ package edu.stanford.protege.gateway.dto;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,7 +35,9 @@ class EntityLanguageTermsTest {
                 baseExclusionTerms
         );
 
-        EntityLanguageTerms entity1 = EntityLanguageTerms.getFromLanguageTermDto(dto, true, null, Arrays.asList("http://id.who.int/icd/entity/474644915"));
+        EntityLanguageTerms entity1 = EntityLanguageTerms.getFromLanguageTermDto(dto, true, null,
+                Arrays.asList("http://id.who.int/icd/entity/474644915"),
+                new ArrayList<>());
 
         assertAll("mapping and obsolete flag",
                 () -> assertSame(title,                     entity1.title(),               "title instance"),
@@ -48,7 +51,8 @@ class EntityLanguageTermsTest {
         );
 
         EntityLanguageTerms entity2 = EntityLanguageTerms.getFromLanguageTermDto(dto, false, null,
-                Arrays.asList("http://id.who.int/icd/entity/474644915"));
+                Arrays.asList("http://id.who.int/icd/entity/474644915"),
+                new ArrayList<>());
 
         assertFalse(entity2.isObsolete(),       "should not be marked obsolete");
     }
