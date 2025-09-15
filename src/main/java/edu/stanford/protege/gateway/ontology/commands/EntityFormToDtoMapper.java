@@ -44,7 +44,7 @@ public class EntityFormToDtoMapper {
                 baseExclusionTerms = mapBaseExclusionTerms(entityForm.baseExclusionTerms());
             }
             isObsolete = getBooleanOutOfStringArray(entityForm.isObsolete());
-            diagnosticCriteria = new LanguageTerm(entityForm.diagnosticCriteria().id(), entityForm.diagnosticCriteria().value());
+            diagnosticCriteria = new LanguageTerm(entityForm.diagnosticCriteria().value(),entityForm.diagnosticCriteria().id());
 
 
             if(entityForm.icfReferences() != null) {
