@@ -10,7 +10,7 @@
     </parent>
     <groupId>edu.stanford.protege</groupId>
     <artifactId>icatx-api-gateway</artifactId>
-    <version>0.0.104</version>
+    <version>0.0.105</version>
     <name>icatx-api-gateway</name>
     <description>This microservice is the api gateway for the iCAT-X project.</description>
     <url/>
