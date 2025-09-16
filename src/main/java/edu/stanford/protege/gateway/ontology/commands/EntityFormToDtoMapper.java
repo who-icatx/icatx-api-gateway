@@ -55,6 +55,7 @@ public class EntityFormToDtoMapper {
 
             if(entityForm.relatedImpairments() != null) {
                 relatedImpairments = entityForm.relatedImpairments().stream()
+                        .filter(relatedImpairment -> relatedImpairment.value() != null && !relatedImpairment.value().isEmpty())
                         .map(relatedImpairment -> new LanguageTerm(relatedImpairment.value(), relatedImpairment.id()))
                         .toList();
             }
