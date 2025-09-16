@@ -44,7 +44,7 @@ public class EntityFormToDtoMapper {
                 baseExclusionTerms = mapBaseExclusionTerms(entityForm.baseExclusionTerms());
             }
             isObsolete = getBooleanOutOfStringArray(entityForm.isObsolete());
-            if (entityForm.diagnosticCriteria() != null) {
+            if (entityForm.diagnosticCriteria() != null && entityForm.diagnosticCriteria().value() != null && !entityForm.diagnosticCriteria().value().isEmpty()) {
                 diagnosticCriteria = new LanguageTerm(entityForm.diagnosticCriteria().value(), entityForm.diagnosticCriteria().id());
             }
 
@@ -110,7 +110,7 @@ public class EntityFormToDtoMapper {
         EntityForm.EntityFormLanguageTerm definition = new EntityForm.EntityFormLanguageTerm(languageTerms.definition().termId(), languageTerms.definition().label());
         EntityForm.EntityFormLanguageTerm longDefinition = new EntityForm.EntityFormLanguageTerm(languageTerms.longDefinition().termId(), languageTerms.longDefinition().label());
         EntityForm.EntityFormLanguageTerm diagnosticCriteria = null;
-        if (languageTerms.diagnosticCriteria() != null) {
+        if (languageTerms.diagnosticCriteria() != null && languageTerms.diagnosticCriteria().label() != null && !languageTerms.diagnosticCriteria().label().isEmpty()) {
             diagnosticCriteria = new EntityForm.EntityFormLanguageTerm(languageTerms.diagnosticCriteria().termId(), languageTerms.diagnosticCriteria().label());
         }
 
