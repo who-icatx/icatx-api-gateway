@@ -21,18 +21,10 @@ public class EntityFormToDtoMapper {
         LanguageTerm diagnosticCriteria = null;
 
         if (entityForm != null) {
-            if (entityForm.label() != null) {
-                label = new LanguageTerm(entityForm.label().value() != null ? entityForm.label().value() : "", entityForm.label().id());
-            }
-            if (entityForm.fullySpecifiedName() != null) {
-                fullySpecifiedName = new LanguageTerm(entityForm.fullySpecifiedName().value() != null ? entityForm.fullySpecifiedName().value() : "", entityForm.fullySpecifiedName().id());
-            }
-            if (entityForm.definition() != null) {
-                definition = new LanguageTerm(entityForm.definition().value() != null ? entityForm.definition().value() : "", entityForm.definition().id());
-            }
-            if (entityForm.longDefinition() != null) {
-                longDefinition = new LanguageTerm(entityForm.longDefinition().value() != null ? entityForm.longDefinition().value() : "", entityForm.longDefinition().id());
-            }
+            label = createLanguageTerm(entityForm.label());
+            fullySpecifiedName = createLanguageTerm(entityForm.fullySpecifiedName());
+            definition = createLanguageTerm(entityForm.definition());
+            longDefinition = createLanguageTerm(entityForm.longDefinition());
 
             if (entityForm.baseIndexTerms() != null) {
                 baseIndexTerms = mapBaseIndexTerms(entityForm.baseIndexTerms());
@@ -43,10 +35,10 @@ public class EntityFormToDtoMapper {
             if (entityForm.baseExclusionTerms() != null) {
                 baseExclusionTerms = mapBaseExclusionTerms(entityForm.baseExclusionTerms());
             }
+
             isObsolete = getBooleanOutOfStringArray(entityForm.isObsolete());
-            if (entityForm.diagnosticCriteria() != null && entityForm.diagnosticCriteria().value() != null && !entityForm.diagnosticCriteria().value().isEmpty()) {
-                diagnosticCriteria = new LanguageTerm(entityForm.diagnosticCriteria().value(), entityForm.diagnosticCriteria().id());
-            }
+
+            diagnosticCriteria = createLanguageTerm(entityForm.diagnosticCriteria());
 
 
             if(entityForm.icfReferences() != null) {
@@ -96,8 +88,8 @@ public class EntityFormToDtoMapper {
         List<EntityForm.EntityFormLanguageTerm> relatedImpairments = new ArrayList<>();
         if (languageTerms.relatedImpairments() != null) {
             relatedImpairments = languageTerms.relatedImpairments().stream()
-                    .map(relatedImpairment -> new EntityForm.EntityFormLanguageTerm(relatedImpairment.termId(), relatedImpairment.label())).
-                    toList();
+                    .map(EntityFormToDtoMapper::mapLanguageTermFromDto)
+                    .toList();
         }
 
         List<EntityForm.EntityFormIcfReference> icfRelatedEntities = new ArrayList<>();
@@ -105,15 +97,12 @@ public class EntityFormToDtoMapper {
             icfRelatedEntities = languageTerms.relatedIcfEntities().stream().map(EntityForm.EntityFormIcfReference::new).collect(Collectors.toList());
         }
 
-        EntityForm.EntityFormLanguageTerm label = new EntityForm.EntityFormLanguageTerm(languageTerms.title().termId(), languageTerms.title().label());
-        EntityForm.EntityFormLanguageTerm fullySpecifiedName = new EntityForm.EntityFormLanguageTerm(languageTerms.fullySpecifiedName().termId(), languageTerms.fullySpecifiedName().label());
-        EntityForm.EntityFormLanguageTerm definition = new EntityForm.EntityFormLanguageTerm(languageTerms.definition().termId(), languageTerms.definition().label());
-        EntityForm.EntityFormLanguageTerm longDefinition = new EntityForm.EntityFormLanguageTerm(languageTerms.longDefinition().termId(), languageTerms.longDefinition().label());
-        EntityForm.EntityFormLanguageTerm diagnosticCriteria = null;
-        if (languageTerms.diagnosticCriteria() != null && languageTerms.diagnosticCriteria().label() != null && !languageTerms.diagnosticCriteria().label().isEmpty()) {
-            diagnosticCriteria = new EntityForm.EntityFormLanguageTerm(languageTerms.diagnosticCriteria().termId(), languageTerms.diagnosticCriteria().label());
-        }
-
+        EntityForm.EntityFormLanguageTerm label = mapLanguageTermFromDto(languageTerms.title());
+        EntityForm.EntityFormLanguageTerm fullySpecifiedName = mapLanguageTermFromDto(languageTerms.fullySpecifiedName());
+        EntityForm.EntityFormLanguageTerm definition = mapLanguageTermFromDto(languageTerms.definition());
+        EntityForm.EntityFormLanguageTerm longDefinition = mapLanguageTermFromDto(languageTerms.longDefinition());
+        EntityForm.EntityFormLanguageTerm diagnosticCriteria = mapLanguageTermFromDto(languageTerms.diagnosticCriteria());;
+ 
 
         return new EntityForm(entityIri,
                 label,
@@ -175,6 +164,26 @@ public class EntityFormToDtoMapper {
                     return -1;
                 })
                 .collect(Collectors.toList());
+    }
+
+    private static EntityForm.EntityFormLanguageTerm mapLanguageTermFromDto(LanguageTerm languageTerm) {
+        if(languageTerm == null || (languageTerm.label() == null || languageTerm.label().isEmpty())) {
+            return new EntityForm.EntityFormLanguageTerm(null, null);
+        }
+        return new EntityForm.EntityFormLanguageTerm(languageTerm.termId(), languageTerm.label());
+    }
+
+    private static LanguageTerm createLanguageTerm(EntityForm.EntityFormLanguageTerm formLanguageTerm) {
+        if (formLanguageTerm != null && (formLanguageTerm.value() != null && !formLanguageTerm.value().isEmpty())) {
+            return new LanguageTerm(
+                formLanguageTerm.value(), 
+                formLanguageTerm.id()
+            );
+        }
+        return new LanguageTerm(
+                null, 
+                null
+            );
     }
 
     private static boolean getBooleanOutOfStringArray(List<String> stringArray) {
