@@ -125,11 +125,14 @@ public class OntologyService {
         ImmutableSet<OWLClass> parentsAsClass = ImmutableSet.copyOf(parents.stream().map(p -> new OWLClassImpl(IRI.create(p))).collect(Collectors.toList()));
 
         try {
-            updateParentsExecutor.execute(new ChangeEntityParentsRequest(changeRequestId,
+            ChangeEntityParentsResponse response = updateParentsExecutor.execute(new ChangeEntityParentsRequest(changeRequestId,
                     ProjectId.valueOf(projectId),
                     parentsAsClass,
                     new OWLClassImpl(IRI.create(entityIri)),
                     "Update parents through API"), SecurityContextHelper.getExecutionContext()).get();
+            if(response.releasedChildrenValidationMessage() != null && !response.releasedChildrenValidationMessage().isEmpty()) {
+                LOGGER.warn("Couldn't update parents due to " + response.releasedChildrenValidationMessage());
+            }
         } catch (Exception e) {
             LOGGER.error("Error updating entity parents for entity " + entityIri, e);
             throw new ApplicationException("Error updating entity parents for entity " + entityIri);

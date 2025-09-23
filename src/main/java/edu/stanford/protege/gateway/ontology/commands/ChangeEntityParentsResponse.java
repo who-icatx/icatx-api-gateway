@@ -11,5 +11,7 @@ import java.util.Set;
 
 @JsonTypeName(ChangeEntityParentsRequest.CHANNEL)
 public record ChangeEntityParentsResponse(@JsonProperty("classesWithCycle") @Nonnull Set<OWLEntityData> classesWithCycle,
-                                          @JsonProperty("classesWithRetiredParents") @Nonnull Set<OWLEntityData> classesWithRetiredParents) implements Response {
+                                          @JsonProperty("classesWithRetiredParents") @Nonnull Set<OWLEntityData> classesWithRetiredParents,
+                                          @JsonProperty("releasedChildrenValidationMessage") String releasedChildrenValidationMessage,
+                                          @JsonProperty("oldParentsThatArelinearizationPathParents") @Nonnull Set<OWLEntityData> oldParentsThatArelinearizationPathParents) implements Response {
 }
