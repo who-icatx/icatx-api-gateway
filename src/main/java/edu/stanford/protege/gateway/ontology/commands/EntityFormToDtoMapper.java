@@ -94,7 +94,7 @@ public class EntityFormToDtoMapper {
 
         List<EntityForm.EntityFormIcfReference> icfRelatedEntities = new ArrayList<>();
         if (languageTerms.relatedIcfEntities() != null) {
-            icfRelatedEntities = languageTerms.relatedIcfEntities().stream().map(EntityForm.EntityFormIcfReference::new).collect(Collectors.toList());
+            icfRelatedEntities = languageTerms.relatedIcfEntities().stream().map(entity -> new EntityForm.EntityFormIcfReference(entity, "Class")).collect(Collectors.toList());
         }
 
         EntityForm.EntityFormLanguageTerm label = mapLanguageTermFromDto(languageTerms.title());

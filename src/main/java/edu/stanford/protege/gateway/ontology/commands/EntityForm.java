@@ -64,6 +64,8 @@ public record EntityForm(
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record EntityFormIcfReference(
-            @JsonProperty("@id") String id
+            @JsonProperty("@id") String id,
+
+            @JsonProperty("@type") String type
     ) {}
 }
