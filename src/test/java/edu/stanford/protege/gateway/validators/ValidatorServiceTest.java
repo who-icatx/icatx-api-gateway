@@ -2,10 +2,8 @@ package edu.stanford.protege.gateway.validators;
 
 import edu.stanford.protege.gateway.EntityIsMissingException;
 import edu.stanford.protege.gateway.dto.CreateEntityDto;
-import edu.stanford.protege.gateway.ontology.commands.FilterExistingEntitiesRequest;
-import edu.stanford.protege.gateway.ontology.commands.FilterExistingEntitiesResponse;
-import edu.stanford.protege.gateway.ontology.commands.GetIsExistingProjectRequest;
-import edu.stanford.protege.gateway.ontology.commands.GetIsExistingProjectResponse;
+import edu.stanford.protege.gateway.ontology.commands.*;
+import edu.stanford.protege.webprotege.common.Page;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,13 +26,16 @@ class ValidatorServiceTest {
 
     @Mock
     private CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor;
+    @Mock
+    private CommandExecutor<GetExistingClassesForApiRequest, GetExistingClassesForApiResponse> getEntitySearchExecutor;
 
     private ValidatorService validatorService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        validatorService = new ValidatorService(isExistingProjectExecutor, filterExistingEntitiesExecutor);
+        validatorService = new ValidatorService(isExistingProjectExecutor, filterExistingEntitiesExecutor, getEntitySearchExecutor);
+        when(getEntitySearchExecutor.execute(any(),any())).thenReturn(CompletableFuture.supplyAsync(() -> new GetExistingClassesForApiResponse(Page.emptyPage())));
     }
 
     @Test
