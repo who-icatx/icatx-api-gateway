@@ -1,5 +1,6 @@
 package edu.stanford.protege.gateway.validators;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import edu.stanford.protege.gateway.EntityIsMissingException;
 import edu.stanford.protege.gateway.SecurityContextHelper;
@@ -7,12 +8,15 @@ import edu.stanford.protege.gateway.dto.BaseExclusionTerm;
 import edu.stanford.protege.gateway.dto.CreateEntityDto;
 import edu.stanford.protege.gateway.dto.OWLEntityDto;
 import edu.stanford.protege.gateway.ontology.OntologyService;
-import edu.stanford.protege.gateway.ontology.commands.FilterExistingEntitiesRequest;
-import edu.stanford.protege.gateway.ontology.commands.FilterExistingEntitiesResponse;
-import edu.stanford.protege.gateway.ontology.commands.GetIsExistingProjectRequest;
-import edu.stanford.protege.gateway.ontology.commands.GetIsExistingProjectResponse;
-import edu.stanford.protege.webprotege.common.ProjectId;
+import edu.stanford.protege.gateway.ontology.commands.*;
+import edu.stanford.protege.webprotege.common.*;
+import edu.stanford.protege.webprotege.criteria.EntityTypeIsOneOfCriteria;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
+import edu.stanford.protege.webprotege.search.DeprecatedEntitiesTreatment;
+import edu.stanford.protege.webprotege.search.EntitySearchResult;
+import edu.stanford.protege.webprotege.search.PerformEntitySearchAction;
+import edu.stanford.protege.webprotege.search.PerformEntitySearchResult;
+import org.semanticweb.owlapi.model.EntityType;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +24,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,10 +39,15 @@ public class ValidatorService {
     private final CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor;
     private final CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor;
 
+    private final CommandExecutor<GetExistingClassesForApiRequest, GetExistingClassesForApiResponse> getEntitySearchExecutor;
 
-    public ValidatorService(CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor, CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor) {
+
+    public ValidatorService(CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor,
+                            CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor,
+                            CommandExecutor<GetExistingClassesForApiRequest, GetExistingClassesForApiResponse> getEntitySearchExecutor) {
         this.isExistingProjectExecutor = isExistingProjectExecutor;
         this.filterExistingEntitiesExecutor = filterExistingEntitiesExecutor;
+        this.getEntitySearchExecutor = getEntitySearchExecutor;
     }
 
 

@@ -153,6 +153,12 @@ public class ApplicationBeans implements WebMvcConfigurer {
     }
 
     @Bean
+    CommandExecutor<GetExistingClassesForApiRequest, GetExistingClassesForApiResponse> getExistingClassesForApiExecutor () {
+        return new CommandExecutorImpl<>(GetExistingClassesForApiResponse.class);
+    }
+
+
+    @Bean
     CommandExecutor<CreateClassesFromApiRequest, CreateClassesFromApiResponse> createClassesExecutor() {
         return new CommandExecutorImpl<>(CreateClassesFromApiResponse.class);
     }
