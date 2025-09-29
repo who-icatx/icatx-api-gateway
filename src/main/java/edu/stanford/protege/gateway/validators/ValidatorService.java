@@ -55,6 +55,29 @@ public class ValidatorService {
         validateTitle(createEntityDto.title());
         validateProjectId(projectId);
         validateEntityParents(projectId, createEntityDto.parent());
+        validateExistingEntityName(createEntityDto.title(), projectId);
+    }
+
+    private void validateExistingEntityName(String entityName, String projectId) {
+        try {
+            Page<GetExistingClassesForApiResponse.ExistingClasses> resultPage = getEntitySearchExecutor.execute(new GetExistingClassesForApiRequest(ProjectId.valueOf(projectId),
+                    entityName,
+                    new HashSet<>(List.of(EntityType.CLASS)),
+                    LangTagFilter.get(ImmutableSet.of(LangTag.get("en"))),
+                    ImmutableList.of(),
+                    PageRequest.requestFirstPage(), EntityTypeIsOneOfCriteria.get(ImmutableSet.of(EntityType.CLASS)),
+
+                            DeprecatedEntitiesTreatment.INCLUDE_DEPRECATED_ENTITIES),
+                    SecurityContextHelper.getExecutionContext()).get(5, TimeUnit.SECONDS).existingClassesList();
+
+            if(resultPage.getPageElements().stream().anyMatch(element -> element.browserText().equals(entityName))){
+                throw new IllegalArgumentException("An entity with the same name already exists. Please choose a different name");
+            }
+
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     @Async
