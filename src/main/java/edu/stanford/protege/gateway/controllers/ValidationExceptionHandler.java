@@ -1,5 +1,6 @@
 package edu.stanford.protege.gateway.controllers;
 
+import edu.stanford.protege.gateway.maintenance.ProjectUnderMaintenanceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -7,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.ConstraintViolationException;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 @RestControllerAdvice
 public class ValidationExceptionHandler {
@@ -33,5 +36,11 @@ public class ValidationExceptionHandler {
                 .collect(Collectors.joining(", "));
         Map<String, String> error = Map.of("error", errorMessage);
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(ProjectUnderMaintenanceException.class)
+    public ResponseEntity<Map<String, String>> handleProjectUnderMaintenanceException(ProjectUnderMaintenanceException ex) {
+        Map<String, String> error = Map.of("error", ex.getMessage());
+        return ResponseEntity.status(SERVICE_UNAVAILABLE).body(error);
     }
 }

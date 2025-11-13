@@ -33,6 +33,7 @@ webprotege:
     requestqueue: icatx-api-gateway-queue
     responsequeue: icatx-api-gateway-response-queue
     eventsqueue: icatx-api-gateway-event-queue
+    event-subscribe: true
     timeout: 120000
   allowedOrigin: webprotege-local.edu
 
