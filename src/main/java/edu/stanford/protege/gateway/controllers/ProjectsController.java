@@ -3,7 +3,11 @@ package edu.stanford.protege.gateway.controllers;
 
 import com.google.common.hash.Hashing;
 import edu.stanford.protege.gateway.OwlEntityService;
+import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.dto.*;
+import edu.stanford.protege.gateway.maintenance.ProjectMaintenanceState;
+import edu.stanford.protege.gateway.maintenance.ProjectUnderMaintenanceException;
+import edu.stanford.protege.webprotege.common.ProjectId;
 import edu.stanford.protege.webprotege.ipc.util.CorrelationMDCUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,9 +31,11 @@ import java.util.UUID;
 public class ProjectsController {
 
     private final OwlEntityService owlEntityService;
+    private final ProjectMaintenanceState projectMaintenanceState;
 
-    public ProjectsController(OwlEntityService owlEntityService) {
+    public ProjectsController(OwlEntityService owlEntityService, ProjectMaintenanceState projectMaintenanceState) {
         this.owlEntityService = owlEntityService;
+        this.projectMaintenanceState = projectMaintenanceState;
     }
 
 
@@ -48,7 +54,7 @@ public class ProjectsController {
     @Operation(summary = "Reading an entity", operationId = "2_getEntity")
     public ResponseEntity<OWLEntityDto> getEntity(@PathVariable @javax.annotation.Nonnull String projectId, @RequestParam String entityIRI) {
         CorrelationMDCUtil.setCorrelationId(UUID.randomUUID().toString());
-
+        checkMaintenanceState(ProjectId.valueOf(projectId));
         OWLEntityDto dto = owlEntityService.getEntityInfo(entityIRI, projectId);
         return getOwlEntityDtoResponseEntity(dto);
     }
@@ -59,6 +65,7 @@ public class ProjectsController {
                                                      @PathVariable @Nonnull String projectId,
                                                      @RequestBody @Valid OWLEntityDto owlEntityDto) {
         CorrelationMDCUtil.setCorrelationId(UUID.randomUUID().toString());
+        checkMaintenanceState(ProjectId.valueOf(projectId));
 
         OWLEntityDto response = owlEntityService.updateEntity(owlEntityDto, projectId, ifMatch);
         return getOwlEntityDtoResponseEntity(response);
@@ -71,6 +78,7 @@ public class ProjectsController {
                                                      String projectId,
                                                      @RequestBody CreateEntityDto createEntityDto) {
         CorrelationMDCUtil.setCorrelationId(UUID.randomUUID().toString());
+        checkMaintenanceState(ProjectId.valueOf(projectId));
 
         var newCreatedIri = owlEntityService.createClassEntity(projectId, createEntityDto);
         OWLEntityDto result = owlEntityService.getEntityInfo(newCreatedIri, projectId);
@@ -82,6 +90,7 @@ public class ProjectsController {
     @Operation(summary = "Get children for an entity", operationId = "5_getEntityChildren")
     public ResponseEntity<EntityChildren> getEntityChildren(@PathVariable String projectId, @RequestParam String entityIRI) {
         CorrelationMDCUtil.setCorrelationId(UUID.randomUUID().toString());
+        checkMaintenanceState(ProjectId.valueOf(projectId));
 
         List<String> children = owlEntityService.getEntityChildren(entityIRI, projectId);
 
@@ -94,6 +103,7 @@ public class ProjectsController {
     @Operation(summary = "Comments for an entity", operationId = "6_getEntityComments")
     public ResponseEntity<EntityComments> getEntityComments(@PathVariable String projectId, @RequestParam String entityIRI) {
         CorrelationMDCUtil.setCorrelationId(UUID.randomUUID().toString());
+        checkMaintenanceState(ProjectId.valueOf(projectId));
 
         EntityComments entityComments = owlEntityService.getEntityComments(entityIRI, projectId);
 
@@ -112,5 +122,11 @@ public class ProjectsController {
                 .headers(httpHeaders)
                 .eTag(etag)
                 .body(dto);
+    }
+
+    private void checkMaintenanceState(ProjectId projectId) {
+        if(this.projectMaintenanceState.isUnderMaintenance(projectId, SecurityContextHelper.getExecutionContext())) {
+            throw new ProjectUnderMaintenanceException(projectId.id());
+        }
     }
 }

@@ -13,6 +13,7 @@ import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotege.ipc.*;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nonnull;
@@ -45,7 +46,7 @@ public class OwlEntityService {
     public OwlEntityService(EntityLinearizationService entityLinearizationService,
                             EntityPostCoordinationService entityPostCoordinationService,
                             EntityHistoryService entityHistoryService,
-                            @Nonnull EventDispatcher eventDispatcher,
+                            @Lazy @Nonnull EventDispatcher eventDispatcher,
                             OntologyService ontologyService,
                             ValidatorService validatorService) {
         this.entityLinearizationService = entityLinearizationService;
