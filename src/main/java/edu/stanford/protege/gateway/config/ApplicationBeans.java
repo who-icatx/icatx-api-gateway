@@ -178,4 +178,9 @@ public class ApplicationBeans implements WebMvcConfigurer {
         return new CommandExecutorImpl<>(GetEntityHistorySummaryResponse.class);
     }
 
+    @Bean
+    CommandExecutor<GetFullPostCoordinationConfigurationRequest, GetFullPostCoordinationConfigurationResponse> getFullPostCoordinationConfigurationExecutor() {
+        return new CommandExecutorImpl<>(GetFullPostCoordinationConfigurationResponse.class);
+    }
+
 }

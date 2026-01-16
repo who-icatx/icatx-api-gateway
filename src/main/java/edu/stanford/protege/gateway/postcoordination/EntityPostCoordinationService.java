@@ -21,6 +21,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 
 @Service
@@ -38,6 +41,8 @@ public class EntityPostCoordinationService {
     private final CommandExecutor<GetTablePostCoordinationAxisRequest, GetTablePostCoordinationAxisResponse> tableConfigurationExecutor;
     private final CommandExecutor<GetIcatxEntityTypeRequest, GetIcatxEntityTypeResponse> entityTypesExecutor;
 
+    private final CommandExecutor<GetFullPostCoordinationConfigurationRequest, GetFullPostCoordinationConfigurationResponse> entityConfigurationExecutor;
+
     private final EntityLinearizationService linearizationService;
 
     public EntityPostCoordinationService(CommandExecutor<GetEntityCustomScaleValuesRequest, GetEntityCustomScaleValueResponse> customScaleExecutor,
@@ -45,7 +50,7 @@ public class EntityPostCoordinationService {
                                          CommandExecutor<AddEntityCustomScalesRevisionRequest, AddEntityCustomScalesRevisionResponse> updateCustomScalesExecutor,
                                          CommandExecutor<AddEntitySpecificationRevisionRequest, AddEntitySpecificationRevisionResponse> updateSpecificationExecutor,
                                          CommandExecutor<GetTablePostCoordinationAxisRequest, GetTablePostCoordinationAxisResponse> tableConfigurationExecutor,
-                                         CommandExecutor<GetIcatxEntityTypeRequest, GetIcatxEntityTypeResponse> entityTypesExecutor,
+                                         CommandExecutor<GetIcatxEntityTypeRequest, GetIcatxEntityTypeResponse> entityTypesExecutor, CommandExecutor<GetFullPostCoordinationConfigurationRequest, GetFullPostCoordinationConfigurationResponse> entityConfigurationExecutor,
                                          EntityLinearizationService linearizationService) {
         this.customScaleExecutor = customScaleExecutor;
         this.specificationExecutor = specificationExecutor;
@@ -53,6 +58,7 @@ public class EntityPostCoordinationService {
         this.updateSpecificationExecutor = updateSpecificationExecutor;
         this.tableConfigurationExecutor = tableConfigurationExecutor;
         this.entityTypesExecutor = entityTypesExecutor;
+        this.entityConfigurationExecutor = entityConfigurationExecutor;
         this.linearizationService = linearizationService;
     }
 
@@ -74,6 +80,7 @@ public class EntityPostCoordinationService {
                     }
                 });
     }
+
 
 
     public void updateEntityPostCoordination(EntityPostCoordinationWrapperDto postcoordination, ProjectId projectId, String entityIri, ChangeRequestId changeRequestId) {
@@ -112,5 +119,7 @@ public class EntityPostCoordinationService {
                 );
     }
 
-
+    public List<CompletePostCoordinationAxisConfiguration> getAllPostCoordinationAxisConfigs() throws ExecutionException, InterruptedException, TimeoutException {
+        return entityConfigurationExecutor.execute(new GetFullPostCoordinationConfigurationRequest(), SecurityContextHelper.getExecutionContext()).get(5, TimeUnit.SECONDS).configuration();
+    }
 }
