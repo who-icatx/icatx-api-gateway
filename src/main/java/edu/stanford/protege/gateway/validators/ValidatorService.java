@@ -4,18 +4,25 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import edu.stanford.protege.gateway.EntityIsMissingException;
 import edu.stanford.protege.gateway.SecurityContextHelper;
+import edu.stanford.protege.gateway.ValidationException;
 import edu.stanford.protege.gateway.dto.BaseExclusionTerm;
+import edu.stanford.protege.gateway.dto.BaseIndexTerm;
 import edu.stanford.protege.gateway.dto.CreateEntityDto;
+import edu.stanford.protege.gateway.dto.EntityLanguageTermsDto;
+import edu.stanford.protege.gateway.dto.LanguageTerm;
 import edu.stanford.protege.gateway.dto.OWLEntityDto;
+import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
+import edu.stanford.protege.gateway.linearization.commands.LinearizationDefinition;
 import edu.stanford.protege.gateway.ontology.OntologyService;
 import edu.stanford.protege.gateway.ontology.commands.*;
+import edu.stanford.protege.gateway.postcoordination.CustomScalesMapper;
+import edu.stanford.protege.gateway.postcoordination.SpecificationMapper;
+import edu.stanford.protege.gateway.postcoordination.commands.*;
 import edu.stanford.protege.webprotege.common.*;
 import edu.stanford.protege.webprotege.criteria.EntityTypeIsOneOfCriteria;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
+import edu.stanford.protege.webprotege.ipc.ExecutionContext;
 import edu.stanford.protege.webprotege.search.DeprecatedEntitiesTreatment;
-import edu.stanford.protege.webprotege.search.EntitySearchResult;
-import edu.stanford.protege.webprotege.search.PerformEntitySearchAction;
-import edu.stanford.protege.webprotege.search.PerformEntitySearchResult;
 import org.semanticweb.owlapi.model.EntityType;
 import org.semanticweb.owlapi.model.IRI;
 import org.slf4j.Logger;
@@ -40,14 +47,29 @@ public class ValidatorService {
     private final CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor;
 
     private final CommandExecutor<GetExistingClassesForApiRequest, GetExistingClassesForApiResponse> getEntitySearchExecutor;
+    private final CommandExecutor<ValidateEntityUpdateRequest, ValidateEntityUpdateResponse> validateEntityUpdateExecutor;
+    private final CommandExecutor<GetTablePostCoordinationAxisRequest, GetTablePostCoordinationAxisResponse> tableConfigurationExecutor;
+    private final CommandExecutor<GetIcatxEntityTypeRequest, GetIcatxEntityTypeResponse> entityTypesExecutor;
+    private final CommandExecutor<CheckNonExistentIrisRequest, CheckNonExistentIrisResponse> checkNonExistentIrisExecutor;
+    private final EntityLinearizationService linearizationService;
 
 
     public ValidatorService(CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor,
                             CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor,
-                            CommandExecutor<GetExistingClassesForApiRequest, GetExistingClassesForApiResponse> getEntitySearchExecutor) {
+                            CommandExecutor<GetExistingClassesForApiRequest, GetExistingClassesForApiResponse> getEntitySearchExecutor,
+                            CommandExecutor<ValidateEntityUpdateRequest, ValidateEntityUpdateResponse> validateEntityUpdateExecutor,
+                            CommandExecutor<GetTablePostCoordinationAxisRequest, GetTablePostCoordinationAxisResponse> tableConfigurationExecutor,
+                            CommandExecutor<GetIcatxEntityTypeRequest, GetIcatxEntityTypeResponse> entityTypesExecutor,
+                            CommandExecutor<CheckNonExistentIrisRequest, CheckNonExistentIrisResponse> checkNonExistentIrisExecutor,
+                            EntityLinearizationService linearizationService) {
         this.isExistingProjectExecutor = isExistingProjectExecutor;
         this.filterExistingEntitiesExecutor = filterExistingEntitiesExecutor;
         this.getEntitySearchExecutor = getEntitySearchExecutor;
+        this.validateEntityUpdateExecutor = validateEntityUpdateExecutor;
+        this.tableConfigurationExecutor = tableConfigurationExecutor;
+        this.entityTypesExecutor = entityTypesExecutor;
+        this.checkNonExistentIrisExecutor = checkNonExistentIrisExecutor;
+        this.linearizationService = linearizationService;
     }
 
 
@@ -172,13 +194,199 @@ public class ValidatorService {
         }
     }
 
-    public void validateOWLEntityDto(OWLEntityDto owlEntityDto) {
+    public void validateOWLEntityDto(OWLEntityDto owlEntityDto, String projectId) {
         if (owlEntityDto == null) {
             throw new IllegalArgumentException("OWLEntityDto cannot be null");
         }
         
         if (owlEntityDto.languageTerms() != null && owlEntityDto.languageTerms().baseExclusionTerms() != null) {
             validateBaseExclusionTerms(owlEntityDto.languageTerms().baseExclusionTerms());
+        }
+
+        validateTermIdsExistence(owlEntityDto, projectId);
+        validateParentsExistence(owlEntityDto, projectId);
+
+        if (owlEntityDto.postcoordination() != null) {
+            validatePostcoordination(owlEntityDto, projectId);
+        }
+    }
+
+    private void validateParentsExistence(OWLEntityDto owlEntityDto, String projectId) {
+        if (owlEntityDto.parents() == null || owlEntityDto.parents().isEmpty()) {
+            return;
+        }
+
+        try {
+            Set<IRI> parentIris = owlEntityDto.parents().stream()
+                    .filter(parent -> parent != null && !parent.trim().isEmpty())
+                    .map(IRI::create)
+                    .collect(Collectors.toSet());
+
+            if (parentIris.isEmpty()) {
+                return;
+            }
+
+            Set<IRI> nonExistentIris = checkNonExistentIrisExecutor.execute(
+                    new CheckNonExistentIrisRequest(ProjectId.valueOf(projectId), ImmutableSet.copyOf(parentIris)),
+                    SecurityContextHelper.getExecutionContext()
+            ).get().nonExistentIris();
+
+            if (!nonExistentIris.isEmpty()) {
+                List<String> missingParents = nonExistentIris.stream()
+                        .map(IRI::toString)
+                        .collect(Collectors.toList());
+                throw new IllegalArgumentException("The following parent entities do not exist: " + String.join(", ", missingParents));
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Could not verify if parents are valid!", e);
+            throw new RuntimeException("Error validating parents existence", e);
+        }
+    }
+
+    private void validateTermIdsExistence(OWLEntityDto owlEntityDto, String projectId) {
+        List<String> termIds = collectTermIds(owlEntityDto);
+        
+        if (termIds.isEmpty()) {
+            return;
+        }
+
+        try {
+            Set<IRI> termIdIris = termIds.stream()
+                    .map(IRI::create)
+                    .collect(Collectors.toSet());
+            
+            Set<IRI> nonExistentIris = checkNonExistentIrisExecutor.execute(
+                    new CheckNonExistentIrisRequest(ProjectId.valueOf(projectId), ImmutableSet.copyOf(termIdIris)),
+                    SecurityContextHelper.getExecutionContext()
+            ).get().nonExistentIris();
+
+            if (!nonExistentIris.isEmpty()) {
+                List<String> missingTermIds = nonExistentIris.stream()
+                        .map(IRI::toString)
+                        .collect(Collectors.toList());
+                throw new IllegalArgumentException("The following term IDs do not exist: " + String.join(", ", missingTermIds));
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            LOGGER.error("Could not verify if term IDs are valid!", e);
+            throw new RuntimeException("Error validating term IDs existence", e);
+        }
+    }
+
+    private List<String> collectTermIds(OWLEntityDto owlEntityDto) {
+        List<String> termIds = new ArrayList<>();
+
+        // Colectare din languageTerms
+        if (owlEntityDto.languageTerms() != null) {
+            EntityLanguageTermsDto languageTerms = owlEntityDto.languageTerms();
+            
+            // Title termId
+            if (languageTerms.title() != null && languageTerms.title().termId() != null && !languageTerms.title().termId().trim().isEmpty()) {
+                termIds.add(languageTerms.title().termId());
+            }
+            
+            // Definition termId
+            if (languageTerms.definition() != null && languageTerms.definition().termId() != null && !languageTerms.definition().termId().trim().isEmpty()) {
+                termIds.add(languageTerms.definition().termId());
+            }
+            
+            // LongDefinition termId
+            if (languageTerms.longDefinition() != null && languageTerms.longDefinition().termId() != null && !languageTerms.longDefinition().termId().trim().isEmpty()) {
+                termIds.add(languageTerms.longDefinition().termId());
+            }
+            
+            // FullySpecifiedName termId
+            if (languageTerms.fullySpecifiedName() != null && languageTerms.fullySpecifiedName().termId() != null && !languageTerms.fullySpecifiedName().termId().trim().isEmpty()) {
+                termIds.add(languageTerms.fullySpecifiedName().termId());
+            }
+            
+            // BaseIndexTerms termIds
+            if (languageTerms.baseIndexTerms() != null) {
+                languageTerms.baseIndexTerms().stream()
+                        .filter(term -> term != null && term.termId() != null && !term.termId().trim().isEmpty())
+                        .forEach(term -> termIds.add(term.termId()));
+            }
+            
+            // BaseExclusionTerms termIds și foundationReferences
+            if (languageTerms.baseExclusionTerms() != null) {
+                languageTerms.baseExclusionTerms().stream()
+                        .filter(term -> term != null)
+                        .forEach(term -> {
+                            if (term.termId() != null && !term.termId().trim().isEmpty()) {
+                                termIds.add(term.termId());
+                            }
+                            if (term.foundationReference() != null && !term.foundationReference().trim().isEmpty()) {
+                                termIds.add(term.foundationReference());
+                            }
+                        });
+            }
+        }
+
+        // Colectare din diagnosticCriteria
+        if (owlEntityDto.diagnosticCriteria() != null && owlEntityDto.diagnosticCriteria().termId() != null && !owlEntityDto.diagnosticCriteria().termId().trim().isEmpty()) {
+            termIds.add(owlEntityDto.diagnosticCriteria().termId());
+        }
+
+        // Colectare din relatedImpairments
+        if (owlEntityDto.relatedImpairments() != null) {
+            owlEntityDto.relatedImpairments().stream()
+                    .filter(term -> term != null && term.termId() != null && !term.termId().trim().isEmpty())
+                    .forEach(term -> termIds.add(term.termId()));
+        }
+
+        return termIds;
+    }
+
+    private void validatePostcoordination(OWLEntityDto owlEntityDto, String projectId) {
+        try {
+            ExecutionContext executionContext = SecurityContextHelper.getExecutionContext();
+            ProjectId projectIdObj = ProjectId.valueOf(projectId);
+            String entityIri = owlEntityDto.entityIRI();
+
+            // Mapare custom scales values
+            WhoficCustomScalesValues customScalesValues = CustomScalesMapper.mapFromDtoList(
+                    entityIri,
+                    owlEntityDto.postcoordination().scaleCustomizations()
+            );
+
+            // Obținere table configuration
+            TableConfiguration tableConfiguration = tableConfigurationExecutor.execute(
+                    new GetTablePostCoordinationAxisRequest(IRI.create(entityIri), projectIdObj),
+                    executionContext
+            ).get().tableConfiguration();
+
+            // Obținere entity types
+            List<String> entityTypes = entityTypesExecutor.execute(
+                    GetIcatxEntityTypeRequest.create(IRI.create(entityIri), projectIdObj),
+                    executionContext
+            ).get().icatxEntityTypes();
+
+            // Obținere definitions
+            List<LinearizationDefinition> definitions = linearizationService.getDefinitionList(executionContext);
+
+            // Mapare specification
+            WhoficEntityPostCoordinationSpecification specification = SpecificationMapper.mapFromDtoList(
+                    entityIri,
+                    entityTypes.isEmpty() ? "ICD" : entityTypes.get(0),
+                    owlEntityDto.postcoordination().postcoordinationSpecifications(),
+                    definitions,
+                    tableConfiguration
+            );
+
+            // Validare
+            ValidateEntityUpdateResponse validationResponse = validateEntityUpdateExecutor.execute(
+                    new ValidateEntityUpdateRequest(projectIdObj, customScalesValues, specification),
+                    executionContext
+            ).get();
+
+            if (validationResponse.getErrorMessages() != null && !validationResponse.getErrorMessages().isEmpty()) {
+                String errorMessage = String.join("; ", validationResponse.getErrorMessages());
+                throw new ValidationException(errorMessage);
+            }
+        } catch (ValidationException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("Error validating postcoordination for entity " + owlEntityDto.entityIRI(), e);
+            throw new RuntimeException("Error validating postcoordination for entity " + owlEntityDto.entityIRI(), e);
         }
     }
 

@@ -183,4 +183,14 @@ public class ApplicationBeans implements WebMvcConfigurer {
         return new CommandExecutorImpl<>(GetFullPostCoordinationConfigurationResponse.class);
     }
 
+    @Bean
+    CommandExecutor<ValidateEntityUpdateRequest, ValidateEntityUpdateResponse> executorForValidateEntityUpdate() {
+        return new CommandExecutorImpl<>(ValidateEntityUpdateResponse.class);
+    }
+
+    @Bean
+    CommandExecutor<CheckNonExistentIrisRequest, CheckNonExistentIrisResponse> executorForCheckNonExistentIris() {
+        return new CommandExecutorImpl<>(CheckNonExistentIrisResponse.class);
+    }
+
 }

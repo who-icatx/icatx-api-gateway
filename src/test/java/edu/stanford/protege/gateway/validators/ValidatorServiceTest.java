@@ -2,7 +2,9 @@ package edu.stanford.protege.gateway.validators;
 
 import edu.stanford.protege.gateway.EntityIsMissingException;
 import edu.stanford.protege.gateway.dto.CreateEntityDto;
+import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.ontology.commands.*;
+import edu.stanford.protege.gateway.postcoordination.commands.*;
 import edu.stanford.protege.webprotege.common.Page;
 import edu.stanford.protege.webprotege.ipc.CommandExecutor;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,13 +30,27 @@ class ValidatorServiceTest {
     private CommandExecutor<FilterExistingEntitiesRequest, FilterExistingEntitiesResponse> filterExistingEntitiesExecutor;
     @Mock
     private CommandExecutor<GetExistingClassesForApiRequest, GetExistingClassesForApiResponse> getEntitySearchExecutor;
-
+    @Mock
+    CommandExecutor<ValidateEntityUpdateRequest, ValidateEntityUpdateResponse> validateEntityUpdateExecutor;
+    @Mock
+    CommandExecutor<GetTablePostCoordinationAxisRequest, GetTablePostCoordinationAxisResponse> tableConfigurationExecutor;
+    @Mock
+    CommandExecutor<GetIcatxEntityTypeRequest, GetIcatxEntityTypeResponse> entityTypesExecutor;
+    @Mock
+    CommandExecutor<CheckNonExistentIrisRequest, CheckNonExistentIrisResponse> checkNonExistentIrisExecutor;
+    @Mock
+    EntityLinearizationService linearizationService;
     private ValidatorService validatorService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        validatorService = new ValidatorService(isExistingProjectExecutor, filterExistingEntitiesExecutor, getEntitySearchExecutor);
+        validatorService = new ValidatorService(isExistingProjectExecutor, filterExistingEntitiesExecutor, getEntitySearchExecutor,
+                validateEntityUpdateExecutor,
+                tableConfigurationExecutor,
+                entityTypesExecutor,
+                checkNonExistentIrisExecutor,
+                linearizationService);
         when(getEntitySearchExecutor.execute(any(),any())).thenReturn(CompletableFuture.supplyAsync(() -> new GetExistingClassesForApiResponse(Page.emptyPage())));
     }
 

@@ -201,7 +201,7 @@ public class OwlEntityService {
         callerVersionMatchesLatestVersion(owlEntityDto, existingProjectId, callerHash);
         entityIsNotItsOwnParent(owlEntityDto);
         linearizationParentsAreOnlyDirectParents(owlEntityDto, existingProjectId);
-        validatorService.validateOWLEntityDto(owlEntityDto);
+        validatorService.validateOWLEntityDto(owlEntityDto, existingProjectId);
     }
 
     private void callerVersionMatchesLatestVersion(OWLEntityDto owlEntityDto, String existingProjectId, String callerHash) {
