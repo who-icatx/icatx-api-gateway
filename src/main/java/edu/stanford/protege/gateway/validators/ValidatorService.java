@@ -6,10 +6,9 @@ import edu.stanford.protege.gateway.EntityIsMissingException;
 import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.ValidationException;
 import edu.stanford.protege.gateway.dto.BaseExclusionTerm;
-import edu.stanford.protege.gateway.dto.BaseIndexTerm;
 import edu.stanford.protege.gateway.dto.CreateEntityDto;
 import edu.stanford.protege.gateway.dto.EntityLanguageTermsDto;
-import edu.stanford.protege.gateway.dto.LanguageTerm;
+import edu.stanford.protege.gateway.dto.LogicalConditions;
 import edu.stanford.protege.gateway.dto.OWLEntityDto;
 import edu.stanford.protege.gateway.linearization.EntityLinearizationService;
 import edu.stanford.protege.gateway.linearization.commands.LinearizationDefinition;
@@ -52,6 +51,7 @@ public class ValidatorService {
     private final CommandExecutor<GetIcatxEntityTypeRequest, GetIcatxEntityTypeResponse> entityTypesExecutor;
     private final CommandExecutor<CheckNonExistentIrisRequest, CheckNonExistentIrisResponse> checkNonExistentIrisExecutor;
     private final EntityLinearizationService linearizationService;
+    private final CommandExecutor<ValidateLogicalDefinitionFromApiRequest, ValidateLogicalDefinitionFromApiResponse> validateLogicalDefinitionsExecutor;
 
 
     public ValidatorService(CommandExecutor<GetIsExistingProjectRequest, GetIsExistingProjectResponse> isExistingProjectExecutor,
@@ -61,6 +61,7 @@ public class ValidatorService {
                             CommandExecutor<GetTablePostCoordinationAxisRequest, GetTablePostCoordinationAxisResponse> tableConfigurationExecutor,
                             CommandExecutor<GetIcatxEntityTypeRequest, GetIcatxEntityTypeResponse> entityTypesExecutor,
                             CommandExecutor<CheckNonExistentIrisRequest, CheckNonExistentIrisResponse> checkNonExistentIrisExecutor,
+                            CommandExecutor<ValidateLogicalDefinitionFromApiRequest, ValidateLogicalDefinitionFromApiResponse> validateLogicalDefinitionsExecutor,
                             EntityLinearizationService linearizationService) {
         this.isExistingProjectExecutor = isExistingProjectExecutor;
         this.filterExistingEntitiesExecutor = filterExistingEntitiesExecutor;
@@ -70,6 +71,7 @@ public class ValidatorService {
         this.entityTypesExecutor = entityTypesExecutor;
         this.checkNonExistentIrisExecutor = checkNonExistentIrisExecutor;
         this.linearizationService = linearizationService;
+        this.validateLogicalDefinitionsExecutor = validateLogicalDefinitionsExecutor;
     }
 
 
@@ -90,7 +92,7 @@ public class ValidatorService {
                     PageRequest.requestFirstPage(), EntityTypeIsOneOfCriteria.get(ImmutableSet.of(EntityType.CLASS)),
 
                             DeprecatedEntitiesTreatment.INCLUDE_DEPRECATED_ENTITIES),
-                    SecurityContextHelper.getExecutionContext()).get(5, TimeUnit.SECONDS).existingClassesList();
+                    SecurityContextHelper.getExecutionContext()).get(15, TimeUnit.SECONDS).existingClassesList();
 
             if(resultPage.getPageElements().stream().anyMatch(element -> element.browserText().equals(entityName))){
                 throw new IllegalArgumentException("An entity with the same name already exists. Please choose a different name");
@@ -209,6 +211,10 @@ public class ValidatorService {
         if (owlEntityDto.postcoordination() != null) {
             validatePostcoordination(owlEntityDto, projectId);
         }
+        if (owlEntityDto.logicalConditions() != null && owlEntityDto.logicalConditions().jsonRepresentation() != null) {
+            LogicalConditions logicalConditions = owlEntityDto.logicalConditions().jsonRepresentation();
+            validateLogicalDefinitions(projectId, owlEntityDto.entityIRI(), logicalConditions);
+        }
     }
 
     private void validateParentsExistence(OWLEntityDto owlEntityDto, String projectId) {
@@ -245,7 +251,7 @@ public class ValidatorService {
 
     private void validateTermIdsExistence(OWLEntityDto owlEntityDto, String projectId) {
         List<String> termIds = collectTermIds(owlEntityDto);
-        
+
         if (termIds.isEmpty()) {
             return;
         }
@@ -254,7 +260,7 @@ public class ValidatorService {
             Set<IRI> termIdIris = termIds.stream()
                     .map(IRI::create)
                     .collect(Collectors.toSet());
-            
+
             Set<IRI> nonExistentIris = checkNonExistentIrisExecutor.execute(
                     new CheckNonExistentIrisRequest(ProjectId.valueOf(projectId), ImmutableSet.copyOf(termIdIris)),
                     SecurityContextHelper.getExecutionContext()
@@ -278,34 +284,41 @@ public class ValidatorService {
         // Colectare din languageTerms
         if (owlEntityDto.languageTerms() != null) {
             EntityLanguageTermsDto languageTerms = owlEntityDto.languageTerms();
-            
+
             // Title termId
             if (languageTerms.title() != null && languageTerms.title().termId() != null && !languageTerms.title().termId().trim().isEmpty()) {
                 termIds.add(languageTerms.title().termId());
             }
-            
+
             // Definition termId
             if (languageTerms.definition() != null && languageTerms.definition().termId() != null && !languageTerms.definition().termId().trim().isEmpty()) {
                 termIds.add(languageTerms.definition().termId());
             }
-            
+
             // LongDefinition termId
             if (languageTerms.longDefinition() != null && languageTerms.longDefinition().termId() != null && !languageTerms.longDefinition().termId().trim().isEmpty()) {
                 termIds.add(languageTerms.longDefinition().termId());
             }
-            
+
             // FullySpecifiedName termId
             if (languageTerms.fullySpecifiedName() != null && languageTerms.fullySpecifiedName().termId() != null && !languageTerms.fullySpecifiedName().termId().trim().isEmpty()) {
                 termIds.add(languageTerms.fullySpecifiedName().termId());
             }
-            
-            // BaseIndexTerms termIds
+
+            // BaseIndexTerms termIds and indexTypes
             if (languageTerms.baseIndexTerms() != null) {
                 languageTerms.baseIndexTerms().stream()
-                        .filter(term -> term != null && term.termId() != null && !term.termId().trim().isEmpty())
-                        .forEach(term -> termIds.add(term.termId()));
+                        .filter(Objects::nonNull)
+                        .forEach(term -> {
+                            if (term.termId() != null && !term.termId().trim().isEmpty()) {
+                                termIds.add(term.termId());
+                            }
+                            if (term.indexType() != null && !term.indexType().trim().isEmpty()) {
+                                termIds.add(term.indexType());
+                            }
+                        });
             }
-            
+
             // BaseExclusionTerms termIds și foundationReferences
             if (languageTerms.baseExclusionTerms() != null) {
                 languageTerms.baseExclusionTerms().stream()
@@ -389,7 +402,61 @@ public class ValidatorService {
             throw new RuntimeException("Error validating postcoordination for entity " + owlEntityDto.entityIRI(), e);
         }
     }
+    public void validateLogicalDefinitions(String projectId, String entityIri, LogicalConditions logicalConditions) {
+        if (logicalConditions == null) {
+            throw new IllegalArgumentException("Logical conditions cannot be null");
+        }
 
+        // Map EntityLogicalDefinition to LogicalDefinition
+        List<ValidateLogicalDefinitionFromApiRequest.LogicalDefinition> logicalDefinitions =
+                logicalConditions.logicalDefinitions() != null ?
+                        logicalConditions.logicalDefinitions().stream()
+                                .map(ld -> new ValidateLogicalDefinitionFromApiRequest.LogicalDefinition(
+                                        ld.logicalDefinitionSuperclass(),
+                                        ld.relationships() != null ?
+                                                ld.relationships().stream()
+                                                        .map(rel -> new ValidateLogicalDefinitionFromApiRequest.Relationship(
+                                                                rel.axis(),
+                                                                rel.filler()
+                                                        ))
+                                                        .toList() :
+                                                List.of()
+                                ))
+                                .toList() :
+                        List.of();
+
+        // Map LogicalConditionRelationship to Relationship
+        List<ValidateLogicalDefinitionFromApiRequest.Relationship> necessaryConditions =
+                logicalConditions.necessaryConditions() != null ?
+                        logicalConditions.necessaryConditions().stream()
+                                .map(rel -> new ValidateLogicalDefinitionFromApiRequest.Relationship(
+                                        rel.axis(),
+                                        rel.filler()
+                                ))
+                                .toList() :
+                        List.of();
+
+        try {
+            ValidateLogicalDefinitionFromApiRequest request = new ValidateLogicalDefinitionFromApiRequest(
+                    ProjectId.valueOf(projectId),
+                    entityIri,
+                    logicalDefinitions,
+                    necessaryConditions
+            );
+
+            ValidateLogicalDefinitionFromApiResponse response = validateLogicalDefinitionsExecutor.execute(request, SecurityContextHelper.getExecutionContext())
+                    .get(15, TimeUnit.SECONDS);
+
+            if (response != null && response.messages() != null && !response.messages().isEmpty()) {
+                String errorMessage = String.join("; ", response.messages());
+                LOGGER.error("Logical definitions validation failed for entity: " + entityIri + ". Errors: " + errorMessage);
+                throw new IllegalArgumentException("Logical definitions validation failed: " + errorMessage);
+            }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            LOGGER.error("Error validating logical definitions for entity: " + entityIri, e);
+            throw new RuntimeException("Error validating logical definitions: " + e.getMessage(), e);
+        }
+    }
     public static boolean hasEscapeCharacters(String input) {
         for (int i = 0; i < input.length() - 1; i++) {
             if (input.charAt(i) == '\\') {

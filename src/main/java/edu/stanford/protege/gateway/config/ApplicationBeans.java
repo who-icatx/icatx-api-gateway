@@ -193,4 +193,9 @@ public class ApplicationBeans implements WebMvcConfigurer {
         return new CommandExecutorImpl<>(CheckNonExistentIrisResponse.class);
     }
 
+    @Bean
+    CommandExecutor<ValidateLogicalDefinitionFromApiRequest, ValidateLogicalDefinitionFromApiResponse> validateLogicalDefinitionsExecutor() {
+        return new CommandExecutorImpl<>(ValidateLogicalDefinitionFromApiResponse.class);
+    }
+
 }

@@ -120,6 +120,6 @@ public class EntityPostCoordinationService {
     }
 
     public List<CompletePostCoordinationAxisConfiguration> getAllPostCoordinationAxisConfigs() throws ExecutionException, InterruptedException, TimeoutException {
-        return entityConfigurationExecutor.execute(new GetFullPostCoordinationConfigurationRequest(), SecurityContextHelper.getExecutionContext()).get(5, TimeUnit.SECONDS).configuration();
+        return entityConfigurationExecutor.execute(new GetFullPostCoordinationConfigurationRequest(), SecurityContextHelper.getExecutionContext()).get(15, TimeUnit.SECONDS).configuration();
     }
 }
