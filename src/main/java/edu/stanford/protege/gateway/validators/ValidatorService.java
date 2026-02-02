@@ -281,7 +281,7 @@ public class ValidatorService {
     private List<String> collectTermIds(OWLEntityDto owlEntityDto) {
         List<String> termIds = new ArrayList<>();
 
-        // Colectare din languageTerms
+        // Collection from languageTerms
         if (owlEntityDto.languageTerms() != null) {
             EntityLanguageTermsDto languageTerms = owlEntityDto.languageTerms();
 
@@ -319,7 +319,7 @@ public class ValidatorService {
                         });
             }
 
-            // BaseExclusionTerms termIds și foundationReferences
+            // BaseExclusionTerms termIds and foundationReferences
             if (languageTerms.baseExclusionTerms() != null) {
                 languageTerms.baseExclusionTerms().stream()
                         .filter(term -> term != null)
@@ -334,12 +334,12 @@ public class ValidatorService {
             }
         }
 
-        // Colectare din diagnosticCriteria
+        // Collection from diagnosticCriteria
         if (owlEntityDto.diagnosticCriteria() != null && owlEntityDto.diagnosticCriteria().termId() != null && !owlEntityDto.diagnosticCriteria().termId().trim().isEmpty()) {
             termIds.add(owlEntityDto.diagnosticCriteria().termId());
         }
 
-        // Colectare din relatedImpairments
+        // Collection from relatedImpairments
         if (owlEntityDto.relatedImpairments() != null) {
             owlEntityDto.relatedImpairments().stream()
                     .filter(term -> term != null && term.termId() != null && !term.termId().trim().isEmpty())
@@ -355,28 +355,28 @@ public class ValidatorService {
             ProjectId projectIdObj = ProjectId.valueOf(projectId);
             String entityIri = owlEntityDto.entityIRI();
 
-            // Mapare custom scales values
+            // Mapping custom scales values
             WhoficCustomScalesValues customScalesValues = CustomScalesMapper.mapFromDtoList(
                     entityIri,
                     owlEntityDto.postcoordination().scaleCustomizations()
             );
 
-            // Obținere table configuration
+            // Getting table configuration
             TableConfiguration tableConfiguration = tableConfigurationExecutor.execute(
                     new GetTablePostCoordinationAxisRequest(IRI.create(entityIri), projectIdObj),
                     executionContext
             ).get().tableConfiguration();
 
-            // Obținere entity types
+            // Getting entity types
             List<String> entityTypes = entityTypesExecutor.execute(
                     GetIcatxEntityTypeRequest.create(IRI.create(entityIri), projectIdObj),
                     executionContext
             ).get().icatxEntityTypes();
 
-            // Obținere definitions
+            // Getting definitions
             List<LinearizationDefinition> definitions = linearizationService.getDefinitionList(executionContext);
 
-            // Mapare specification
+            // Mapping specification
             WhoficEntityPostCoordinationSpecification specification = SpecificationMapper.mapFromDtoList(
                     entityIri,
                     entityTypes.isEmpty() ? "ICD" : entityTypes.get(0),
@@ -385,7 +385,7 @@ public class ValidatorService {
                     tableConfiguration
             );
 
-            // Validare
+            // Validation
             ValidateEntityUpdateResponse validationResponse = validateEntityUpdateExecutor.execute(
                     new ValidateEntityUpdateRequest(projectIdObj, customScalesValues, specification),
                     executionContext
