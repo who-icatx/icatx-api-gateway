@@ -305,6 +305,10 @@ public class ValidatorService {
                 termIds.add(languageTerms.fullySpecifiedName().termId());
             }
 
+            if(owlEntityDto.languageTerms().subclassBaseInclusions() != null && !owlEntityDto.languageTerms().subclassBaseInclusions().isEmpty()) {
+                termIds.addAll(owlEntityDto.languageTerms().subclassBaseInclusions());
+            }
+
             // BaseIndexTerms termIds and indexTypes
             if (languageTerms.baseIndexTerms() != null) {
                 languageTerms.baseIndexTerms().stream()
