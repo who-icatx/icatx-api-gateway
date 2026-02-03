@@ -1,6 +1,8 @@
 server:
   port: 7779
   servlet.context-path: /icatx/api/
+  # Activează suportul pentru X-Forwarded-* headers când aplicația rulează în spatele unui proxy
+  forward-headers-strategy: framework
 
 icatx:
   formId: 013d9d4a-9dac-4d2f-aa52-2a40fad73b77
@@ -9,6 +11,10 @@ springdoc:
   swagger-ui:
     operations-sorter: alpha
     tags-sorter: alpha
+    # Pentru producție cu HTTPS, setează URL-ul complet:
+    server-url: https://icd.who.int/icatx/api
+    # Dacă nu este setat, protocolul se determină automat din request-ul curent
+    # și din header-ul X-Forwarded-Proto (când rulează în spatele unui proxy)
 
 spring:
   application:
