@@ -698,10 +698,6 @@
   ],
   "variable": [
     {
-      "key": "ICAT_APP_SECRET",
-      "value": "9960645c-9894-4d25-84d7-4af58838944b"
-    },
-    {
       "key": "ETAG",
       "value": "",
       "type": "default"
