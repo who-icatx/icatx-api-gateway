@@ -167,7 +167,11 @@ public class OwlEntityService {
 
     public EntityComments getEntityComments(String entityIri, String projectId) {
         try {
-            return ontologyService.getEntityDiscussionThreads(entityIri, projectId).get();
+            EntityComments entityComments = ontologyService.getEntityDiscussionThreads(entityIri, projectId).get();
+            if (entityComments.commentThreads() == null || entityComments.commentThreads().isEmpty()) {
+                validatorService.validateEntityExists(projectId, entityIri);
+            }
+            return entityComments;
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Error fetching data for entity discussion threads for entity" + entityIri, e);
             throw new RuntimeException(e);

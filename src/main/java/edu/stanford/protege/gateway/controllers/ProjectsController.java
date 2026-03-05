@@ -2,6 +2,7 @@ package edu.stanford.protege.gateway.controllers;
 
 
 import com.google.common.hash.Hashing;
+import edu.stanford.protege.gateway.EntityIsMissingException;
 import edu.stanford.protege.gateway.OwlEntityService;
 import edu.stanford.protege.gateway.SecurityContextHelper;
 import edu.stanford.protege.gateway.dto.*;
@@ -22,6 +23,7 @@ import javax.annotation.Nonnull;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -101,14 +103,16 @@ public class ProjectsController {
 
     @GetMapping(value = "/{projectId}/entities/comments")
     @Operation(summary = "Comments for an entity", operationId = "6_getEntityComments")
-    public ResponseEntity<EntityComments> getEntityComments(@PathVariable String projectId, @RequestParam String entityIRI) {
+    public ResponseEntity<?> getEntityComments(@PathVariable String projectId, @RequestParam String entityIRI) {
         CorrelationMDCUtil.setCorrelationId(UUID.randomUUID().toString());
         checkMaintenanceState(ProjectId.valueOf(projectId));
 
-        EntityComments entityComments = owlEntityService.getEntityComments(entityIRI, projectId);
-
-        return ResponseEntity.ok()
-                .body(entityComments);
+        try {
+            EntityComments entityComments = owlEntityService.getEntityComments(entityIRI, projectId);
+            return ResponseEntity.ok().body(entityComments);
+        } catch (EntityIsMissingException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
     }
 
     private static ResponseEntity<OWLEntityDto> getOwlEntityDtoResponseEntity(OWLEntityDto dto) {
